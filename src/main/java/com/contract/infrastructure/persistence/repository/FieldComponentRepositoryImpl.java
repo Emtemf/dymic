@@ -59,4 +59,9 @@ public class FieldComponentRepositoryImpl implements FieldComponentRepository {
         FieldComponentEntity entity = converter.toEntity(component);
         mapper.updateById(entity);
     }
+
+    @Override
+    public void deleteById(Long id) {
+        mapper.deleteById(id);
+    }
 }

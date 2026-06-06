@@ -5,9 +5,11 @@ import com.contract.application.template.dto.FieldDefCreateDTO;
 import com.contract.application.template.dto.FieldDefCreateResult;
 import com.contract.application.template.dto.FieldDefUpdateDTO;
 import com.contract.application.template.dto.FieldComponentDTO;
+import com.contract.application.template.dto.FieldComponentUpdateDTO;
 import com.contract.application.template.convert.FieldDefConverter;
 import com.contract.common.exception.BizException;
 import com.contract.common.util.ChineseToPinyin;
+import com.contract.common.util.JsonbUtils;
 import com.contract.domain.template.FieldDef;
 import com.contract.domain.template.LayoutNode;
 import com.contract.domain.template.repository.FieldDefRepository;
@@ -17,7 +19,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 字段定义应用服务
@@ -64,9 +68,39 @@ public class FieldDefService {
         repository.save(fieldDef);
 
         // 3. 同时创建字段组件绑定
-        FieldComponentDTO fieldComponent = fieldComponentService.create(
-            templateId, versionId, fieldDef.getId(), dto.getLayoutNodeId(), dto
+        FieldComponentDTO fieldComponent = fieldComponentService.createFromFieldDef(
+            templateId, versionId, fieldDef.getId(), dto.getLayoutNodeId(),
+            dto.getComponentType(), dto.getDisplayName(), dto.getPlaceholder(), dto.getSortNo()
         );
+
+        // 处理数据来源配置(针对 SELECT 类型)
+        if ("SELECT".equals(dto.getComponentType())) {
+            FieldComponentUpdateDTO updateDTO = new FieldComponentUpdateDTO();
+            Map<String, Object> props = new HashMap<>();
+
+            if ("STATIC".equals(dto.getDataSourceType()) && dto.getStaticOptions() != null) {
+                props.put("options", dto.getStaticOptions());
+                updateDTO.setComponentProps(JsonbUtils.toJson(props));
+            } else if ("PROVIDER".equals(dto.getDataSourceType()) && dto.getDataProviderId() != null) {
+                props.put("dataProviderId", dto.getDataProviderId());
+                updateDTO.setComponentProps(JsonbUtils.toJson(props));
+            }
+
+            if (dto.getRequired() != null && dto.getRequired()) {
+                updateDTO.setRequiredRule("{\"required\": true}");
+            }
+
+            if (updateDTO.getComponentProps() != null || updateDTO.getRequiredRule() != null) {
+                fieldComponent = fieldComponentService.update(fieldComponent.getId(), updateDTO);
+            }
+        }
+
+        // 处理必填规则(非SELECT类型)
+        if (dto.getRequired() != null && dto.getRequired() && !"SELECT".equals(dto.getComponentType())) {
+            FieldComponentUpdateDTO updateDTO = new FieldComponentUpdateDTO();
+            updateDTO.setRequiredRule("{\"required\": true}");
+            fieldComponent = fieldComponentService.update(fieldComponent.getId(), updateDTO);
+        }
 
         // 4. 返回结果
         FieldDefDTO fieldDefDTO = converter.toDTO(fieldDef);

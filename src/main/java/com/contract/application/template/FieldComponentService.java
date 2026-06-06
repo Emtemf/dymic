@@ -1,110 +1,198 @@
 package com.contract.application.template;
 
 import com.contract.application.template.dto.FieldComponentDTO;
-import com.contract.application.template.dto.FieldDefCreateDTO;
+import com.contract.application.template.dto.FieldComponentCreateRequest;
 import com.contract.application.template.dto.FieldComponentUpdateDTO;
 import com.contract.application.template.convert.FieldComponentConverter;
-import com.contract.common.util.JsonbUtils;
+import com.contract.common.exception.BizException;
 import com.contract.domain.template.FieldComponent;
+import com.contract.domain.template.FieldDef;
+import com.contract.domain.template.LayoutNode;
 import com.contract.domain.template.repository.FieldComponentRepository;
-import com.contract.infrastructure.id.SnowflakeIdGenerator;
+import com.contract.domain.template.repository.FieldDefRepository;
+import com.contract.domain.template.repository.LayoutNodeRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 /**
  * 字段组件绑定应用服务
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FieldComponentService {
     private final FieldComponentRepository repository;
     private final FieldComponentConverter converter;
-    private final SnowflakeIdGenerator idGenerator;
+    private final LayoutNodeRepository layoutNodeRepository;
+    private final FieldDefRepository fieldDefRepository;
 
     /**
-     * 创建字段组件绑定(由 FieldDefService 调用)
+     * 创建字段组件绑定（独立创建，验证布局节点和字段定义）
+     *
+     * @param templateId 模板ID
+     * @param versionId  版本ID
+     * @param request    创建请求
+     * @return 创建的字段组件绑定DTO
      */
-    public FieldComponentDTO create(
+    @Transactional
+    public FieldComponentDTO create(Long templateId, Long versionId, FieldComponentCreateRequest request) {
+        // 验证组件类型有效性
+        if (!FieldComponent.isValidComponentType(request.getComponentType())) {
+            throw new BizException("不支持的组件类型: " + request.getComponentType());
+        }
+
+        // 验证布局节点存在
+        LayoutNode node = layoutNodeRepository.findById(request.getLayoutNodeId());
+        if (node == null) {
+            throw new BizException("布局节点不存在: " + request.getLayoutNodeId());
+        }
+
+        // 验证字段定义存在
+        FieldDef fieldDef = fieldDefRepository.findById(request.getFieldDefId());
+        if (fieldDef == null) {
+            throw new BizException("字段定义不存在: " + request.getFieldDefId());
+        }
+
+        // 创建字段组件绑定
+        FieldComponent component = converter.toDomain(request);
+        component.setTemplateId(templateId);
+        component.setTemplateVersionId(versionId);
+        component.setCreatedAt(LocalDateTime.now());
+        component.setUpdatedAt(LocalDateTime.now());
+
+        // 默认labelName使用fieldNameCn
+        if (component.getLabelName() == null) {
+            component.setLabelName(fieldDef.getFieldNameCn());
+        }
+
+        // 默认sortNo为0
+        if (component.getSortNo() == null) {
+            component.setSortNo(0);
+        }
+
+        FieldComponent saved = repository.save(component);
+        log.info("创建字段组件绑定成功: id={}, templateId={}, versionId={}, componentType={}",
+            saved.getId(), templateId, versionId, saved.getComponentType());
+
+        return converter.toDTO(saved);
+    }
+
+    /**
+     * 创建字段组件绑定(由 FieldDefService 调用，不验证布局节点和字段定义)
+     *
+     * @param templateId    模板ID
+     * @param versionId     版本ID
+     * @param fieldDefId    字段定义ID
+     * @param layoutNodeId  布局节点ID
+     * @param componentType 组件类型
+     * @param labelName     显示名称
+     * @param placeholder   输入提示
+     * @param sortNo        排序号
+     * @return 创建的字段组件绑定DTO
+     */
+    @Transactional
+    public FieldComponentDTO createFromFieldDef(
         Long templateId,
         Long versionId,
         Long fieldDefId,
         Long layoutNodeId,
-        FieldDefCreateDTO dto
+        String componentType,
+        String labelName,
+        String placeholder,
+        Integer sortNo
     ) {
         FieldComponent component = new FieldComponent();
-        component.setId(idGenerator.nextId());
         component.setTemplateId(templateId);
         component.setTemplateVersionId(versionId);
         component.setFieldDefId(fieldDefId);
         component.setLayoutNodeId(layoutNodeId);
-        component.setComponentType(dto.getComponentType());
-        component.setLabelName(dto.getDisplayName());
-        component.setPlaceholder(dto.getPlaceholder());
-        component.setSortNo(dto.getSortNo());
+        component.setComponentType(componentType);
+        component.setLabelName(labelName);
+        component.setPlaceholder(placeholder);
+        component.setSortNo(sortNo != null ? sortNo : 0);
         component.setCreatedAt(LocalDateTime.now());
         component.setUpdatedAt(LocalDateTime.now());
 
-        // 处理数据来源配置(针对 SELECT 类型)
-        if ("SELECT".equals(dto.getComponentType())) {
-            Map<String, Object> props = new HashMap<>();
-
-            if ("STATIC".equals(dto.getDataSourceType())) {
-                // 静态选项
-                props.put("options", dto.getStaticOptions());
-                component.setComponentProps(JsonbUtils.toJson(props));
-            } else if ("PROVIDER".equals(dto.getDataSourceType())) {
-                // 数据提供方
-                component.setDataProviderId(dto.getDataProviderId());
-                props.put("dataProviderId", dto.getDataProviderId());
-                component.setComponentProps(JsonbUtils.toJson(props));
-            }
-        }
-
-        // 处理必填规则
-        if (dto.getRequired() != null && dto.getRequired()) {
-            Map<String, Object> requiredRule = new HashMap<>();
-            requiredRule.put("required", true);
-            component.setRequiredRule(JsonbUtils.toJson(requiredRule));
-        }
-
-        repository.save(component);
-        return converter.toDTO(component);
+        FieldComponent saved = repository.save(component);
+        return converter.toDTO(saved);
     }
 
-    @Transactional
-    public FieldComponentDTO update(Long id, FieldComponentUpdateDTO dto) {
-        FieldComponent component = repository.findById(id);
-        if (component == null) {
-            throw new RuntimeException("字段组件绑定不存在：" + id);
-        }
-
-        if (dto.getLabelName() != null) {
-            component.setLabelName(dto.getLabelName());
-        }
-        if (dto.getPlaceholder() != null) {
-            component.setPlaceholder(dto.getPlaceholder());
-        }
-        if (dto.getComponentProps() != null) {
-            component.setComponentProps(JsonbUtils.toJson(dto.getComponentProps()));
-        }
-        if (dto.getRequiredRule() != null) {
-            component.setRequiredRule(JsonbUtils.toJson(dto.getRequiredRule()));
-        }
-
-        component.setUpdatedAt(LocalDateTime.now());
-        repository.update(component);
-        return converter.toDTO(component);
-    }
-
+    /**
+     * 根据ID查询字段组件绑定
+     *
+     * @param id 字段组件绑定ID
+     * @return 字段组件绑定DTO
+     */
     public FieldComponentDTO getById(Long id) {
         FieldComponent component = repository.findById(id);
         if (component == null) {
-            throw new RuntimeException("字段组件绑定不存在：" + id);
+            throw new BizException("字段组件绑定不存在：" + id);
         }
         return converter.toDTO(component);
+    }
+
+    /**
+     * 根据版本ID查询字段组件绑定列表
+     *
+     * @param versionId 版本ID
+     * @return 字段组件绑定列表
+     */
+    public List<FieldComponentDTO> listByVersionId(Long versionId) {
+        List<FieldComponent> components = repository.findByVersionId(versionId);
+        return converter.toDTOList(components);
+    }
+
+    /**
+     * 根据布局节点ID查询字段组件绑定列表
+     *
+     * @param layoutNodeId 布局节点ID
+     * @return 字段组件绑定列表
+     */
+    public List<FieldComponentDTO> listByLayoutNodeId(Long layoutNodeId) {
+        List<FieldComponent> components = repository.findByLayoutNodeId(layoutNodeId);
+        return converter.toDTOList(components);
+    }
+
+    /**
+     * 更新字段组件绑定
+     *
+     * @param id      字段组件绑定ID
+     * @param request 更新请求
+     * @return 更新后的字段组件绑定DTO
+     */
+    @Transactional
+    public FieldComponentDTO update(Long id, FieldComponentUpdateDTO request) {
+        FieldComponent component = repository.findById(id);
+        if (component == null) {
+            throw new BizException("字段组件绑定不存在：" + id);
+        }
+
+        converter.updateFromDTO(request, component);
+        component.setUpdatedAt(LocalDateTime.now());
+
+        repository.update(component);
+        log.info("更新字段组件绑定成功: id={}", id);
+
+        return converter.toDTO(component);
+    }
+
+    /**
+     * 删除字段组件绑定
+     *
+     * @param id 字段组件绑定ID
+     */
+    @Transactional
+    public void delete(Long id) {
+        FieldComponent component = repository.findById(id);
+        if (component == null) {
+            throw new BizException("字段组件绑定不存在：" + id);
+        }
+
+        repository.deleteById(id);
+        log.info("删除字段组件绑定成功: id={}", id);
     }
 }
