@@ -68,4 +68,22 @@ public class DataProviderRepositoryImpl implements DataProviderRepository {
         List<DataProviderEntity> entities = mapper.selectBatchIds(ids);
         return converter.toDomainList(entities);
     }
+
+    @Override
+    public List<DataProvider> findByType(String providerType) {
+        LambdaQueryWrapper<DataProviderEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(DataProviderEntity::getProviderType, providerType)
+               .orderByDesc(DataProviderEntity::getCreatedAt);
+        List<DataProviderEntity> entities = mapper.selectList(wrapper);
+        return converter.toDomainList(entities);
+    }
+
+    @Override
+    public DataProvider findByDictType(String dictType) {
+        LambdaQueryWrapper<DataProviderEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(DataProviderEntity::getProviderType, "DICT")
+               .likeRight(DataProviderEntity::getConfigJson, "{\"dictType\":\"" + dictType + "\"");
+        DataProviderEntity entity = mapper.selectOne(wrapper);
+        return entity != null ? converter.toDomain(entity) : null;
+    }
 }

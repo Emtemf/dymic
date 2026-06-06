@@ -3,6 +3,8 @@ package com.contract.application.template;
 import com.contract.application.template.dto.FieldComponentDTO;
 import com.contract.application.template.dto.FieldComponentCreateRequest;
 import com.contract.application.template.dto.FieldComponentUpdateDTO;
+import com.contract.application.template.dto.DataProviderCreateRequest;
+import com.contract.application.template.dto.DataProviderDTO;
 import com.contract.application.template.convert.FieldComponentConverter;
 import com.contract.common.exception.BizException;
 import com.contract.domain.template.FieldComponent;
@@ -16,7 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 字段组件绑定应用服务
@@ -29,9 +33,22 @@ public class FieldComponentService {
     private final FieldComponentConverter converter;
     private final LayoutNodeRepository layoutNodeRepository;
     private final FieldDefRepository fieldDefRepository;
+    private final DataProviderService dataProviderService;
 
     /**
-     * 创建字段组件绑定（独立创建，验证布局节点和字段定义）
+     * 需要数据源的组件类型
+     */
+    private static final Set<String> DATA_SOURCE_COMPONENT_TYPES = Set.of(
+        "SELECT",      // 下拉选择框
+        "RADIO",       // 单选框
+        "CHECKBOX",    // 复选框
+        "TREE",        // 树形选择器
+        "CASCADE",     // 级联选择器
+        "MULTI_SELECT" // 多选下拉框
+    );
+
+    /**
+     * 创建字段组件绑定（支持业务友好的数据源自动创建）
      *
      * @param templateId 模板ID
      * @param versionId  版本ID
@@ -74,11 +91,62 @@ public class FieldComponentService {
             component.setSortNo(0);
         }
 
+        // 处理数据源绑定（业务友好的自动创建逻辑）
+        if (needsDataProvider(request.getComponentType())) {
+            Long dataProviderId = handleDataProvider(request);
+            component.setDataProviderId(dataProviderId);
+        }
+
         FieldComponent saved = repository.save(component);
-        log.info("创建字段组件绑定成功: id={}, templateId={}, versionId={}, componentType={}",
-            saved.getId(), templateId, versionId, saved.getComponentType());
+        log.info("创建字段组件绑定成功: id={}, templateId={}, versionId={}, componentType={}, dataProviderId={}",
+            saved.getId(), templateId, versionId, saved.getComponentType(), saved.getDataProviderId());
 
         return converter.toDTO(saved);
+    }
+
+    /**
+     * 判断组件是否需要数据源
+     *
+     * @param componentType 组件类型
+     * @return 是否需要数据源
+     */
+    private boolean needsDataProvider(String componentType) {
+        return DATA_SOURCE_COMPONENT_TYPES.contains(componentType.toUpperCase());
+    }
+
+    /**
+     * 处理数据源绑定（核心逻辑）
+     *
+     * 根据业务选择的数据源类型自动创建或查找DataProvider：
+     * - STATIC: 业务自定义选项 → 自动创建临时DataProvider
+     * - DICT: 字典数据 → 查询或创建字典DataProvider
+     * - HTTP/PLATFORM/INTERNAL: IT已配置 → 使用已存在的DataProvider
+     *
+     * @param request 字段组件创建请求
+     * @return DataProvider ID
+     */
+    private Long handleDataProvider(FieldComponentCreateRequest request) {
+        String dataSourceType = request.getDataSourceType();
+
+        // 如果没有指定数据源类型，返回null（不绑定数据源）
+        if (dataSourceType == null || dataSourceType.isEmpty()) {
+            log.warn("组件类型 {} 需要数据源，但未指定dataSourceType", request.getComponentType());
+            return null;
+        }
+
+        // 构建DataProviderCreateRequest
+        DataProviderCreateRequest dpRequest = DataProviderCreateRequest.builder()
+            .dataSourceType(dataSourceType)
+            .displayName(request.getLabelName() + "-数据源")
+            .staticOptionsJson(request.getStaticOptionsJson())
+            .dictType(request.getDictType())
+            .dataProviderId(request.getDataProviderId())
+            .build();
+
+        // 调用DataProviderService处理
+        DataProviderDTO providerDTO = dataProviderService.createFromBusinessRequest(dpRequest);
+
+        return providerDTO.getId();
     }
 
     /**

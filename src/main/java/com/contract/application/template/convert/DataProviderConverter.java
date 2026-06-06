@@ -17,7 +17,7 @@ import java.util.List;
  */
 @Mapper(componentModel = "spring")
 public interface DataProviderConverter {
-    @Mapping(target = "configJson", ignore = true)
+    // configJson是String类型，直接映射（Entity中存储为JSON）
     DataProviderDTO toDTO(DataProvider domain);
 
     @Mapping(target = "id", ignore = true)
@@ -28,7 +28,8 @@ public interface DataProviderConverter {
     @Mapping(target = "createdName", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "updatedName", ignore = true)
-    @Mapping(target = "configJson", ignore = true)
+    @Mapping(target = "isDeleted", ignore = true)
+    @Mapping(target = "isTemporary", constant = "0")  // 默认非临时
     DataProvider toDomain(DataProviderCreateDTO dto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -42,9 +43,9 @@ public interface DataProviderConverter {
     @Mapping(target = "createdName", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "updatedName", ignore = true)
-    @Mapping(target = "configJson", ignore = true)
+    @Mapping(target = "isDeleted", ignore = true)
+    @Mapping(target = "isTemporary", ignore = true)
     void updateDomainFromDTO(DataProviderUpdateDTO dto, @MappingTarget DataProvider domain);
 
-    @Mapping(target = "configJson", ignore = true)
     List<DataProviderDTO> toDTOList(List<DataProvider> domains);
 }

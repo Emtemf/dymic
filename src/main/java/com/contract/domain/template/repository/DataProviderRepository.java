@@ -14,4 +14,20 @@ public interface DataProviderRepository {
     void update(DataProvider provider);
     List<DataProvider> findAll();
     List<DataProvider> findByIds(List<Long> ids);
+
+    /**
+     * 按类型查询DataProvider列表
+     *
+     * @param providerType 类型：STATIC/DICT/HTTP/PLATFORM/INTERNAL
+     * @return 该类型的DataProvider列表
+     */
+    List<DataProvider> findByType(String providerType);
+
+    /**
+     * 查询或创建字典DataProvider
+     *
+     * @param dictType 字典类型编码
+     * @return 字典DataProvider
+     */
+    DataProvider findByDictType(String dictType);
 }

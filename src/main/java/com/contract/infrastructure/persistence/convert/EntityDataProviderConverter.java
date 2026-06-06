@@ -15,6 +15,7 @@ import java.util.List;
  */
 @Mapper(componentModel = "spring")
 public interface EntityDataProviderConverter {
+    // 直接映射所有字段，包括isTemporary
     DataProvider toDomain(DataProviderEntity entity);
     DataProviderEntity toEntity(DataProvider domain);
     List<DataProvider> toDomainList(List<DataProviderEntity> entities);
@@ -22,5 +23,6 @@ public interface EntityDataProviderConverter {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "isDeleted", ignore = true)
     void updateEntityFromDomain(DataProvider domain, @MappingTarget DataProviderEntity entity);
 }

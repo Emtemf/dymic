@@ -9,9 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -26,10 +24,7 @@ class DataProviderServiceTest {
         dto.setProviderCode("SUPPLIER_LIST");
         dto.setProviderName("供应商列表");
         dto.setProviderType("HTTP");
-
-        Map<String, Object> config = new HashMap<>();
-        config.put("url", "http://api.example.com/suppliers");
-        dto.setConfigJson(config);
+        dto.setConfigJson("{\"url\": \"http://api.example.com/suppliers\"}");
 
         DataProviderDTO result = service.create(dto);
 
@@ -44,14 +39,14 @@ class DataProviderServiceTest {
         dto1.setProviderCode("DUPLICATE_TEST");
         dto1.setProviderName("测试1");
         dto1.setProviderType("STATIC");
-        dto1.setConfigJson(new HashMap<>());
+        dto1.setConfigJson("{\"options\":[]}");
         service.create(dto1);
 
         DataProviderCreateDTO dto2 = new DataProviderCreateDTO();
         dto2.setProviderCode("DUPLICATE_TEST");
         dto2.setProviderName("测试2");
         dto2.setProviderType("STATIC");
-        dto2.setConfigJson(new HashMap<>());
+        dto2.setConfigJson("{\"options\":[]}");
 
         assertThrows(BizException.class, () -> service.create(dto2));
     }
@@ -62,7 +57,7 @@ class DataProviderServiceTest {
         dto.setProviderCode("GET_TEST");
         dto.setProviderName("查询测试");
         dto.setProviderType("STATIC");
-        dto.setConfigJson(new HashMap<>());
+        dto.setConfigJson("{\"test\":true}");
 
         DataProviderDTO created = service.create(dto);
         DataProviderDTO result = service.getById(created.getId());
@@ -76,7 +71,7 @@ class DataProviderServiceTest {
         dto.setProviderCode("UPDATE_TEST");
         dto.setProviderName("更新测试");
         dto.setProviderType("STATIC");
-        dto.setConfigJson(new HashMap<>());
+        dto.setConfigJson("{\"test\":true}");
 
         DataProviderDTO created = service.create(dto);
 
@@ -93,7 +88,7 @@ class DataProviderServiceTest {
         dto.setProviderCode("LIST_TEST");
         dto.setProviderName("列表测试");
         dto.setProviderType("STATIC");
-        dto.setConfigJson(new HashMap<>());
+        dto.setConfigJson("{\"test\":true}");
         service.create(dto);
 
         List<DataProviderDTO> result = service.list();
@@ -111,5 +106,21 @@ class DataProviderServiceTest {
         updateDto.setProviderName("更新后名称");
 
         assertThrows(BizException.class, () -> service.update(999999L, updateDto));
+    }
+
+    @Test
+    void testListByType() {
+        // Create a STATIC type provider
+        DataProviderCreateDTO dto = new DataProviderCreateDTO();
+        dto.setProviderCode("STATIC_TYPE_TEST");
+        dto.setProviderName("静态类型测试");
+        dto.setProviderType("STATIC");
+        dto.setConfigJson("{\"options\":[]}");
+        service.create(dto);
+
+        // Query by type
+        List<DataProviderDTO> result = service.listByType("STATIC");
+        assertTrue(result.size() > 0);
+        result.forEach(p -> assertEquals("STATIC", p.getProviderType()));
     }
 }

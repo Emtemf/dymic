@@ -38,7 +38,35 @@ public class FieldComponentCreateRequest {
 
     private String componentProps;  // JSON格式组件自定义属性
 
-    private Long dataProviderId;    // 数据源绑定（下拉框等）
+    // ============ 数据源绑定字段（业务友好） ============
+
+    /**
+     * 数据源类型（业务选择）：STATIC/DICT/HTTP/PLATFORM/INTERNAL
+     * 业务人员看到的选项：
+     * - 静态选项 → STATIC
+     * - 字典数据 → DICT
+     * - HTTP接口 → HTTP（IT配置）
+     * - 平台接口 → PLATFORM（IT配置）
+     * - 内部查询 → INTERNAL（IT配置）
+     */
+    private String dataSourceType;
+
+    /**
+     * 静态选项JSON（仅STATIC类型使用）
+     * 格式：[{"value":"北京","label":"北京"},{"value":"上海","label":"上海"}]
+     */
+    private String staticOptionsJson;
+
+    /**
+     * 字典类型编码（仅DICT类型使用）
+     * 如：CITY、STATUS、GENDER
+     */
+    private String dictType;
+
+    /**
+     * 已配置的数据提供方ID（HTTP/PLATFORM/INTERNAL类型使用，IT配置）
+     */
+    private Long dataProviderId;
 
     private Integer sortNo;         // 可选，默认0
 }

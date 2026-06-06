@@ -27,6 +27,8 @@ public class DataProviderEntity {
 
     private Integer cacheTtlSeconds;
 
+    private Integer isTemporary;       // 是否临时数据源（0/1）
+
     private String status;
 
     @TableField(fill = FieldFill.INSERT)

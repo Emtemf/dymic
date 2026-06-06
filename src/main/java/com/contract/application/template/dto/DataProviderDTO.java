@@ -21,5 +21,6 @@ public class DataProviderDTO {
     private String configJson;
     private Integer cacheEnabled;
     private Integer cacheTtlSeconds;
+    private Integer isTemporary;       // 是否临时数据源（0/1）
     private String status;
 }
