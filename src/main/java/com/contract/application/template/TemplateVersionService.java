@@ -1,16 +1,12 @@
 package com.contract.application.template;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.contract.adapter.persistence.entity.TemplateVersionEntity;
-import com.contract.adapter.persistence.mapper.TemplateVersionMapper;
 import com.contract.common.exception.BizException;
 import com.contract.domain.template.TemplateVersion;
+import com.contract.domain.template.repository.TemplateVersionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 /**
  * 模板版本服务层
@@ -21,7 +17,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class TemplateVersionService {
 
-    private final TemplateVersionMapper versionMapper;
+    private final TemplateVersionRepository versionRepository;
     private final TemplateService templateService;
 
     /**
@@ -40,27 +36,13 @@ public class TemplateVersionService {
         templateService.getById(templateId);
 
         // 检查版本号是否已存在
-        LambdaQueryWrapper<TemplateVersionEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(TemplateVersionEntity::getTemplateId, templateId)
-               .eq(TemplateVersionEntity::getVersionNo, versionNo);
-        if (versionMapper.selectCount(wrapper) > 0) {
+        if (versionRepository.existsByTemplateIdAndVersionNo(templateId, versionNo)) {
             throw new BizException("版本号已存在：" + versionNo);
         }
 
         // 使用领域模型创建草稿版本
         TemplateVersion version = TemplateVersion.createDraft(templateId, versionNo, versionName);
-
-        // 转换为实体并保存
-        TemplateVersionEntity entity = new TemplateVersionEntity();
-        entity.setTemplateId(version.getTemplateId());
-        entity.setVersionNo(version.getVersionNo());
-        entity.setVersionName(version.getVersionName());
-        entity.setVersionStatus(version.getVersionStatus());
-        entity.setCreatedAt(LocalDateTime.now());
-        entity.setUpdatedAt(LocalDateTime.now());
-
-        versionMapper.insert(entity);
-        version.setId(entity.getId());
+        version = versionRepository.save(version);
 
         log.info("Draft version created successfully: {}", version.getId());
         return version;
@@ -73,11 +55,11 @@ public class TemplateVersionService {
      * @return 版本对象
      */
     public TemplateVersion getById(Long id) {
-        TemplateVersionEntity entity = versionMapper.selectById(id);
-        if (entity == null) {
+        TemplateVersion version = versionRepository.findById(id);
+        if (version == null) {
             throw new BizException("版本不存在：" + id);
         }
-        return toDomain(entity);
+        return version;
     }
 
     /**
@@ -91,25 +73,19 @@ public class TemplateVersionService {
     public void publish(Long versionId, Long publishBy) {
         log.info("Publishing version: {}, by user: {}", versionId, publishBy);
 
-        TemplateVersionEntity entity = versionMapper.selectById(versionId);
-        if (entity == null) {
+        TemplateVersion version = versionRepository.findById(versionId);
+        if (version == null) {
             throw new BizException("版本不存在：" + versionId);
         }
 
-        // 检查是否为草稿状态
-        if (!"DRAFT".equals(entity.getVersionStatus())) {
-            throw new BizException("只有草稿状态才能发布");
-        }
+        // 使用领域模型发布版本（会校验状态）
+        version.publish(publishBy);
 
-        // 更新版本状态为已发布
-        entity.setVersionStatus("PUBLISHED");
-        entity.setPublishTime(LocalDateTime.now());
-        entity.setPublishBy(publishBy);
-        entity.setUpdatedAt(LocalDateTime.now());
-        versionMapper.updateById(entity);
+        // 更新版本
+        versionRepository.update(version);
 
         // 更新模板的当前版本ID
-        templateService.updateCurrentVersion(entity.getTemplateId(), versionId);
+        templateService.updateCurrentVersion(version.getTemplateId(), versionId);
 
         log.info("Version published successfully: {}", versionId);
     }
@@ -121,36 +97,6 @@ public class TemplateVersionService {
      * @return 当前发布版本，如果没有则返回null
      */
     public TemplateVersion findCurrentVersion(Long templateId) {
-        TemplateVersionEntity entity = versionMapper.findCurrentVersion(templateId);
-        if (entity == null) {
-            return null;
-        }
-        return toDomain(entity);
-    }
-
-    /**
-     * 实体转领域模型
-     *
-     * @param entity 实体对象
-     * @return 领域模型对象
-     */
-    private TemplateVersion toDomain(TemplateVersionEntity entity) {
-        TemplateVersion version = new TemplateVersion();
-        version.setId(entity.getId());
-        version.setTemplateId(entity.getTemplateId());
-        version.setVersionNo(entity.getVersionNo());
-        version.setVersionName(entity.getVersionName());
-        version.setVersionStatus(entity.getVersionStatus());
-        version.setPublishTime(entity.getPublishTime());
-        version.setPublishBy(entity.getPublishBy());
-        version.setSchemaHash(entity.getSchemaHash());
-        version.setRemark(entity.getRemark());
-        version.setCreatedBy(entity.getCreatedBy());
-        version.setCreatedName(entity.getCreatedName());
-        version.setCreatedAt(entity.getCreatedAt());
-        version.setUpdatedBy(entity.getUpdatedBy());
-        version.setUpdatedName(entity.getUpdatedName());
-        version.setUpdatedAt(entity.getUpdatedAt());
-        return version;
+        return versionRepository.findCurrentVersion(templateId);
     }
 }
