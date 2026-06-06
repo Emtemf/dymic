@@ -7,7 +7,7 @@
 -- =====================================================
 
 -- 模板主表
-CREATE TABLE t_ui_template (
+CREATE TABLE IF NOT EXISTS t_ui_template (
     id BIGINT PRIMARY KEY,
     template_code VARCHAR(100) NOT NULL,
     template_name VARCHAR(200) NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE t_ui_template (
 COMMENT ON TABLE t_ui_template IS '模板主表';
 
 -- 模板版本表
-CREATE TABLE t_ui_template_version (
+CREATE TABLE IF NOT EXISTS t_ui_template_version (
     id BIGINT PRIMARY KEY,
     template_id BIGINT NOT NULL,
     version_no INTEGER NOT NULL,
@@ -48,12 +48,12 @@ CREATE TABLE t_ui_template_version (
     CONSTRAINT uk_ui_template_version UNIQUE (template_id, version_no)
 );
 
-CREATE INDEX idx_ui_template_version_status ON t_ui_template_version (template_id, version_status);
+CREATE INDEX IF NOT EXISTS idx_ui_template_version_status ON t_ui_template_version (template_id, version_status);
 
 COMMENT ON TABLE t_ui_template_version IS '模板版本表';
 
 -- 布局节点树
-CREATE TABLE t_ui_layout_node (
+CREATE TABLE IF NOT EXISTS t_ui_layout_node (
     id BIGINT PRIMARY KEY,
     template_id BIGINT NOT NULL,
     template_version_id BIGINT NOT NULL,
@@ -83,13 +83,13 @@ CREATE TABLE t_ui_layout_node (
     CONSTRAINT uk_ui_layout_node_code UNIQUE (template_version_id, node_code)
 );
 
-CREATE INDEX idx_ui_layout_parent ON t_ui_layout_node (template_version_id, parent_id, sort_no);
-CREATE INDEX idx_ui_layout_bind ON t_ui_layout_node (bind_type, bind_ref_id);
+CREATE INDEX IF NOT EXISTS idx_ui_layout_parent ON t_ui_layout_node (template_version_id, parent_id, sort_no);
+CREATE INDEX IF NOT EXISTS idx_ui_layout_bind ON t_ui_layout_node (bind_type, bind_ref_id);
 
 COMMENT ON TABLE t_ui_layout_node IS '布局节点树';
 
 -- 字段定义表
-CREATE TABLE t_ui_field_def (
+CREATE TABLE IF NOT EXISTS t_ui_field_def (
     id BIGINT PRIMARY KEY,
     template_id BIGINT NOT NULL,
     template_version_id BIGINT NOT NULL,
@@ -113,13 +113,13 @@ CREATE TABLE t_ui_field_def (
     CONSTRAINT uk_ui_field_path UNIQUE (template_version_id, field_path)
 );
 
-CREATE INDEX idx_ui_field_version ON t_ui_field_def (template_version_id);
-CREATE INDEX idx_ui_field_detail ON t_ui_field_def (detail_table_id);
+CREATE INDEX IF NOT EXISTS idx_ui_field_version ON t_ui_field_def (template_version_id);
+CREATE INDEX IF NOT EXISTS idx_ui_field_detail ON t_ui_field_def (detail_table_id);
 
 COMMENT ON TABLE t_ui_field_def IS '字段定义表';
 
 -- 字段组件绑定表
-CREATE TABLE t_ui_field_component (
+CREATE TABLE IF NOT EXISTS t_ui_field_component (
     id BIGINT PRIMARY KEY,
     template_id BIGINT NOT NULL,
     template_version_id BIGINT NOT NULL,
@@ -140,13 +140,13 @@ CREATE TABLE t_ui_field_component (
     CONSTRAINT uk_ui_field_component UNIQUE (template_version_id, layout_node_id, field_def_id)
 );
 
-CREATE INDEX idx_ui_field_component_node ON t_ui_field_component (layout_node_id);
-CREATE INDEX idx_ui_field_component_field ON t_ui_field_component (field_def_id);
+CREATE INDEX IF NOT EXISTS idx_ui_field_component_node ON t_ui_field_component (layout_node_id);
+CREATE INDEX IF NOT EXISTS idx_ui_field_component_field ON t_ui_field_component (field_def_id);
 
 COMMENT ON TABLE t_ui_field_component IS '字段组件绑定表';
 
 -- 数据提供方配置（简化版，合并了 t_ui_data_option）
-CREATE TABLE t_ui_data_provider (
+CREATE TABLE IF NOT EXISTS t_ui_data_provider (
     id BIGINT PRIMARY KEY,
     provider_code VARCHAR(100) NOT NULL,
     provider_name VARCHAR(200) NOT NULL,
@@ -172,7 +172,7 @@ COMMENT ON TABLE t_ui_data_provider IS '数据提供方配置';
 -- =====================================================
 
 -- 合同主表
-CREATE TABLE t_contract (
+CREATE TABLE IF NOT EXISTS t_contract (
     id BIGINT PRIMARY KEY,
     contract_no VARCHAR(100),
     contract_name VARCHAR(300),
@@ -193,14 +193,14 @@ CREATE TABLE t_contract (
     is_deleted SMALLINT NOT NULL DEFAULT 0
 );
 
-CREATE INDEX idx_contract_template ON t_contract (template_id, template_version_id);
-CREATE INDEX idx_contract_no ON t_contract (contract_no);
-CREATE INDEX idx_contract_source ON t_contract (source_system_code, source_biz_id);
+CREATE INDEX IF NOT EXISTS idx_contract_template ON t_contract (template_id, template_version_id);
+CREATE INDEX IF NOT EXISTS idx_contract_no ON t_contract (contract_no);
+CREATE INDEX IF NOT EXISTS idx_contract_source ON t_contract (source_system_code, source_biz_id);
 
 COMMENT ON TABLE t_contract IS '合同主表';
 
 -- 合同快照
-CREATE TABLE t_contract_data_snapshot (
+CREATE TABLE IF NOT EXISTS t_contract_data_snapshot (
     id BIGINT PRIMARY KEY,
     contract_id BIGINT NOT NULL,
     snapshot_no INTEGER NOT NULL,
@@ -216,12 +216,12 @@ CREATE TABLE t_contract_data_snapshot (
     CONSTRAINT uk_contract_snapshot_no UNIQUE (contract_id, snapshot_no)
 );
 
-CREATE INDEX idx_contract_snapshot_contract ON t_contract_data_snapshot (contract_id, snapshot_no DESC);
+CREATE INDEX IF NOT EXISTS idx_contract_snapshot_contract ON t_contract_data_snapshot (contract_id, snapshot_no DESC);
 
 COMMENT ON TABLE t_contract_data_snapshot IS '合同完整JSON快照';
 
 -- 字段值索引
-CREATE TABLE t_contract_field_value (
+CREATE TABLE IF NOT EXISTS t_contract_field_value (
     id BIGINT PRIMARY KEY,
     contract_id BIGINT NOT NULL,
     snapshot_id BIGINT NOT NULL,
@@ -239,14 +239,14 @@ CREATE TABLE t_contract_field_value (
 );
 
 -- Note: H2 does not support indexes on CLOB columns, so idx_contract_field_text is removed
-CREATE INDEX idx_contract_field_number ON t_contract_field_value (field_path, value_number);
-CREATE INDEX idx_contract_field_date ON t_contract_field_value (field_path, value_date);
-CREATE INDEX idx_contract_field_contract ON t_contract_field_value (contract_id, snapshot_id);
+CREATE INDEX IF NOT EXISTS idx_contract_field_number ON t_contract_field_value (field_path, value_number);
+CREATE INDEX IF NOT EXISTS idx_contract_field_date ON t_contract_field_value (field_path, value_date);
+CREATE INDEX IF NOT EXISTS idx_contract_field_contract ON t_contract_field_value (contract_id, snapshot_id);
 
 COMMENT ON TABLE t_contract_field_value IS '合同字段值索引表';
 
 -- 明细行当前投影
-CREATE TABLE t_contract_detail_row (
+CREATE TABLE IF NOT EXISTS t_contract_detail_row (
     id BIGINT PRIMARY KEY,
     contract_id BIGINT NOT NULL,
     snapshot_id BIGINT NOT NULL,
@@ -263,12 +263,12 @@ CREATE TABLE t_contract_detail_row (
     CONSTRAINT uk_contract_detail_row_uid UNIQUE (contract_id, detail_code, row_uid)
 );
 
-CREATE INDEX idx_contract_detail_row ON t_contract_detail_row (contract_id, detail_code, row_no);
+CREATE INDEX IF NOT EXISTS idx_contract_detail_row ON t_contract_detail_row (contract_id, detail_code, row_no);
 
 COMMENT ON TABLE t_contract_detail_row IS '合同明细行当前投影';
 
 -- 明细字段索引
-CREATE TABLE t_contract_detail_field_value (
+CREATE TABLE IF NOT EXISTS t_contract_detail_field_value (
     id BIGINT PRIMARY KEY,
     contract_id BIGINT NOT NULL,
     detail_row_id BIGINT NOT NULL,
@@ -288,13 +288,13 @@ CREATE TABLE t_contract_detail_field_value (
 );
 
 -- Note: H2 does not support indexes on CLOB columns, so idx_detail_field_text is removed
-CREATE INDEX idx_detail_field_number ON t_contract_detail_field_value (detail_code, field_path, value_number);
-CREATE INDEX idx_detail_field_contract ON t_contract_detail_field_value (contract_id, detail_code);
+CREATE INDEX IF NOT EXISTS idx_detail_field_number ON t_contract_detail_field_value (detail_code, field_path, value_number);
+CREATE INDEX IF NOT EXISTS idx_detail_field_contract ON t_contract_detail_field_value (contract_id, detail_code);
 
 COMMENT ON TABLE t_contract_detail_field_value IS '明细字段索引表';
 
 -- 当前查询宽表
-CREATE TABLE t_contract_search_index (
+CREATE TABLE IF NOT EXISTS t_contract_search_index (
     contract_id BIGINT PRIMARY KEY,
     contract_no VARCHAR(100),
     contract_name VARCHAR(300),
@@ -312,14 +312,14 @@ CREATE TABLE t_contract_search_index (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_contract_search_supplier ON t_contract_search_index (supplier_name);
-CREATE INDEX idx_contract_search_status ON t_contract_search_index (contract_status);
-CREATE INDEX idx_contract_search_date ON t_contract_search_index (sign_date);
+CREATE INDEX IF NOT EXISTS idx_contract_search_supplier ON t_contract_search_index (supplier_name);
+CREATE INDEX IF NOT EXISTS idx_contract_search_status ON t_contract_search_index (contract_status);
+CREATE INDEX IF NOT EXISTS idx_contract_search_date ON t_contract_search_index (sign_date);
 
 COMMENT ON TABLE t_contract_search_index IS '当前合同查询宽表';
 
 -- 附件表
-CREATE TABLE t_contract_attachment (
+CREATE TABLE IF NOT EXISTS t_contract_attachment (
     id BIGINT PRIMARY KEY,
     contract_id BIGINT NOT NULL,
     snapshot_id BIGINT,
@@ -334,7 +334,7 @@ CREATE TABLE t_contract_attachment (
     is_deleted SMALLINT NOT NULL DEFAULT 0
 );
 
-CREATE INDEX idx_contract_attachment ON t_contract_attachment (contract_id, biz_path);
+CREATE INDEX IF NOT EXISTS idx_contract_attachment ON t_contract_attachment (contract_id, biz_path);
 
 COMMENT ON TABLE t_contract_attachment IS '合同附件表';
 
@@ -343,7 +343,7 @@ COMMENT ON TABLE t_contract_attachment IS '合同附件表';
 -- =====================================================
 
 -- 查询配置
-CREATE TABLE t_ui_query_config (
+CREATE TABLE IF NOT EXISTS t_ui_query_config (
     id BIGINT PRIMARY KEY,
     template_id BIGINT NOT NULL,
     template_version_id BIGINT NOT NULL,
@@ -362,13 +362,13 @@ CREATE TABLE t_ui_query_config (
     CONSTRAINT uk_ui_query_code UNIQUE (template_version_id, query_code)
 );
 
-CREATE INDEX idx_ui_query_version ON t_ui_query_config (template_version_id);
-CREATE INDEX idx_ui_query_provider ON t_ui_query_config (data_provider_id);
+CREATE INDEX IF NOT EXISTS idx_ui_query_version ON t_ui_query_config (template_version_id);
+CREATE INDEX IF NOT EXISTS idx_ui_query_provider ON t_ui_query_config (data_provider_id);
 
 COMMENT ON TABLE t_ui_query_config IS '查询配置表';
 
 -- 查询参数绑定
-CREATE TABLE t_ui_query_param (
+CREATE TABLE IF NOT EXISTS t_ui_query_param (
     id BIGINT PRIMARY KEY,
     query_config_id BIGINT NOT NULL,
     param_name VARCHAR(100) NOT NULL,
@@ -388,7 +388,7 @@ CREATE TABLE t_ui_query_param (
 COMMENT ON TABLE t_ui_query_param IS '查询参数绑定表';
 
 -- 查询回填规则
-CREATE TABLE t_ui_query_fill_rule (
+CREATE TABLE IF NOT EXISTS t_ui_query_fill_rule (
     id BIGINT PRIMARY KEY,
     query_config_id BIGINT NOT NULL,
     source_field VARCHAR(300) NOT NULL,
@@ -402,12 +402,12 @@ CREATE TABLE t_ui_query_fill_rule (
     is_deleted SMALLINT NOT NULL DEFAULT 0
 );
 
-CREATE INDEX idx_ui_query_fill_rule ON t_ui_query_fill_rule (query_config_id, sort_no);
+CREATE INDEX IF NOT EXISTS idx_ui_query_fill_rule ON t_ui_query_fill_rule (query_config_id, sort_no);
 
 COMMENT ON TABLE t_ui_query_fill_rule IS '查询结果回填规则配置';
 
 -- 明细表配置
-CREATE TABLE t_ui_detail_table (
+CREATE TABLE IF NOT EXISTS t_ui_detail_table (
     id BIGINT PRIMARY KEY,
     template_id BIGINT NOT NULL,
     template_version_id BIGINT NOT NULL,
@@ -431,7 +431,7 @@ CREATE TABLE t_ui_detail_table (
 COMMENT ON TABLE t_ui_detail_table IS '明细表配置';
 
 -- 动作配置
-CREATE TABLE t_ui_action_config (
+CREATE TABLE IF NOT EXISTS t_ui_action_config (
     id BIGINT PRIMARY KEY,
     template_id BIGINT NOT NULL,
     template_version_id BIGINT NOT NULL,
@@ -459,7 +459,7 @@ COMMENT ON TABLE t_ui_action_config IS '动作配置表';
 -- =====================================================
 
 -- 外部系统表
-CREATE TABLE t_ext_system (
+CREATE TABLE IF NOT EXISTS t_ext_system (
     id BIGINT PRIMARY KEY,
     system_code VARCHAR(100) NOT NULL,
     system_name VARCHAR(200) NOT NULL,
@@ -475,7 +475,7 @@ CREATE TABLE t_ext_system (
 COMMENT ON TABLE t_ext_system IS '外部系统登记表';
 
 -- 外部消息入库
-CREATE TABLE t_ext_message_inbox (
+CREATE TABLE IF NOT EXISTS t_ext_message_inbox (
     id BIGINT PRIMARY KEY,
     ext_system_id BIGINT NOT NULL,
     external_msg_id VARCHAR(200) NOT NULL,
@@ -492,12 +492,12 @@ CREATE TABLE t_ext_message_inbox (
     CONSTRAINT uk_ext_message UNIQUE (ext_system_id, external_msg_id)
 );
 
-CREATE INDEX idx_ext_message_status ON t_ext_message_inbox (process_status, received_at);
+CREATE INDEX IF NOT EXISTS idx_ext_message_status ON t_ext_message_inbox (process_status, received_at);
 
 COMMENT ON TABLE t_ext_message_inbox IS '外部消息幂等入库表';
 
 -- 外部映射主表
-CREATE TABLE t_ext_data_mapping (
+CREATE TABLE IF NOT EXISTS t_ext_data_mapping (
     id BIGINT PRIMARY KEY,
     ext_system_id BIGINT NOT NULL,
     mapping_code VARCHAR(100) NOT NULL,
@@ -515,7 +515,7 @@ CREATE TABLE t_ext_data_mapping (
 COMMENT ON TABLE t_ext_data_mapping IS '外部数据映射主表';
 
 -- 外部字段映射
-CREATE TABLE t_ext_data_mapping_field (
+CREATE TABLE IF NOT EXISTS t_ext_data_mapping_field (
     id BIGINT PRIMARY KEY,
     mapping_id BIGINT NOT NULL,
     source_path VARCHAR(500) NOT NULL,
@@ -530,12 +530,12 @@ CREATE TABLE t_ext_data_mapping_field (
     is_deleted SMALLINT NOT NULL DEFAULT 0
 );
 
-CREATE INDEX idx_ext_mapping_field ON t_ext_data_mapping_field (mapping_id, sort_no);
+CREATE INDEX IF NOT EXISTS idx_ext_mapping_field ON t_ext_data_mapping_field (mapping_id, sort_no);
 
 COMMENT ON TABLE t_ext_data_mapping_field IS '外部字段映射表';
 
 -- 外部对比记录
-CREATE TABLE t_ext_compare_record (
+CREATE TABLE IF NOT EXISTS t_ext_compare_record (
     id BIGINT PRIMARY KEY,
     message_id BIGINT NOT NULL,
     contract_id BIGINT,
@@ -552,7 +552,7 @@ CREATE TABLE t_ext_compare_record (
 COMMENT ON TABLE t_ext_compare_record IS '外部数据对比记录';
 
 -- 外部对比明细
-CREATE TABLE t_ext_compare_item (
+CREATE TABLE IF NOT EXISTS t_ext_compare_item (
     id BIGINT PRIMARY KEY,
     compare_record_id BIGINT NOT NULL,
     field_path VARCHAR(500) NOT NULL,
@@ -566,6 +566,6 @@ CREATE TABLE t_ext_compare_item (
     is_deleted SMALLINT NOT NULL DEFAULT 0
 );
 
-CREATE INDEX idx_ext_compare_item ON t_ext_compare_item (compare_record_id, field_path);
+CREATE INDEX IF NOT EXISTS idx_ext_compare_item ON t_ext_compare_item (compare_record_id, field_path);
 
 COMMENT ON TABLE t_ext_compare_item IS '外部数据对比明细';
