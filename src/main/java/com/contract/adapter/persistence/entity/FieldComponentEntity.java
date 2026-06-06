@@ -20,16 +20,16 @@ public class FieldComponentEntity {
     private String placeholder;
 
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private Object requiredRule;
+    private String requiredRule;
 
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private Object readonlyRule;
+    private String readonlyRule;
 
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private Object visibleRule;
+    private String visibleRule;
 
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private Object componentProps;
+    private String componentProps;
 
     private Long dataProviderId;
     private Integer sortNo;

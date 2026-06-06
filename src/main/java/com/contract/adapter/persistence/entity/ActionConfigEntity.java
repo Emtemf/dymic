@@ -25,13 +25,13 @@ public class ActionConfigEntity {
     private String confirmText;
 
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private Object beforeRule;
+    private String beforeRule;
 
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private Object afterRule;
+    private String afterRule;
 
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private Object propsJson;
+    private String propsJson;
 
     private Integer sortNo;
 

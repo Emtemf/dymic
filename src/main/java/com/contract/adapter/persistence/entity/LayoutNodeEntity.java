@@ -34,13 +34,13 @@ public class LayoutNodeEntity {
     private Long bindRefId;
 
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private Object visibleRule;
+    private String visibleRule;
 
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private Object readonlyRule;
+    private String readonlyRule;
 
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private Object propsJson;
+    private String propsJson;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;

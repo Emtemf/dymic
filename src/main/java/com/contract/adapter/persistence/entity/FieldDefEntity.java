@@ -27,10 +27,10 @@ public class FieldDefEntity {
     private String defaultValue;
 
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private Object validateRule;
+    private String validateRule;
 
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private Object propsJson;
+    private String propsJson;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;

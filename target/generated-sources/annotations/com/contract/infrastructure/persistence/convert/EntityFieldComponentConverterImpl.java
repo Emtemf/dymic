@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-06T20:31:49+0800",
+    date = "2026-06-06T20:35:32+0800",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.11 (Ubuntu)"
 )
 @Component
@@ -32,14 +32,13 @@ public class EntityFieldComponentConverterImpl implements EntityFieldComponentCo
         fieldComponent.setLabelName( entity.getLabelName() );
         fieldComponent.setPlaceholder( entity.getPlaceholder() );
         fieldComponent.setSortNo( entity.getSortNo() );
+        fieldComponent.setComponentProps( entity.getComponentProps() );
         fieldComponent.setDataProviderId( entity.getDataProviderId() );
+        fieldComponent.setRequiredRule( entity.getRequiredRule() );
+        fieldComponent.setVisibleRule( entity.getVisibleRule() );
+        fieldComponent.setReadonlyRule( entity.getReadonlyRule() );
         fieldComponent.setCreatedAt( entity.getCreatedAt() );
         fieldComponent.setUpdatedAt( entity.getUpdatedAt() );
-
-        fieldComponent.setComponentProps( mapToJson(domain.getComponentProps()) );
-        fieldComponent.setRequiredRule( mapToJson(domain.getRequiredRule()) );
-        fieldComponent.setVisibleRule( mapToJson(domain.getVisibleRule()) );
-        fieldComponent.setReadonlyRule( mapToJson(domain.getReadonlyRule()) );
 
         return fieldComponent;
     }
@@ -60,15 +59,14 @@ public class EntityFieldComponentConverterImpl implements EntityFieldComponentCo
         fieldComponentEntity.setComponentType( domain.getComponentType() );
         fieldComponentEntity.setLabelName( domain.getLabelName() );
         fieldComponentEntity.setPlaceholder( domain.getPlaceholder() );
+        fieldComponentEntity.setRequiredRule( domain.getRequiredRule() );
+        fieldComponentEntity.setReadonlyRule( domain.getReadonlyRule() );
+        fieldComponentEntity.setVisibleRule( domain.getVisibleRule() );
+        fieldComponentEntity.setComponentProps( domain.getComponentProps() );
         fieldComponentEntity.setDataProviderId( domain.getDataProviderId() );
         fieldComponentEntity.setSortNo( domain.getSortNo() );
         fieldComponentEntity.setCreatedAt( domain.getCreatedAt() );
         fieldComponentEntity.setUpdatedAt( domain.getUpdatedAt() );
-
-        fieldComponentEntity.setComponentProps( jsonToMap(entity.getComponentProps()) );
-        fieldComponentEntity.setRequiredRule( jsonToMap(entity.getRequiredRule()) );
-        fieldComponentEntity.setVisibleRule( jsonToMap(entity.getVisibleRule()) );
-        fieldComponentEntity.setReadonlyRule( jsonToMap(entity.getReadonlyRule()) );
 
         return fieldComponentEntity;
     }
@@ -115,16 +113,16 @@ public class EntityFieldComponentConverterImpl implements EntityFieldComponentCo
             entity.setPlaceholder( domain.getPlaceholder() );
         }
         if ( domain.getRequiredRule() != null ) {
-            entity.setRequiredRule( jsonToMap( domain.getRequiredRule() ) );
+            entity.setRequiredRule( domain.getRequiredRule() );
         }
         if ( domain.getReadonlyRule() != null ) {
-            entity.setReadonlyRule( jsonToMap( domain.getReadonlyRule() ) );
+            entity.setReadonlyRule( domain.getReadonlyRule() );
         }
         if ( domain.getVisibleRule() != null ) {
-            entity.setVisibleRule( jsonToMap( domain.getVisibleRule() ) );
+            entity.setVisibleRule( domain.getVisibleRule() );
         }
         if ( domain.getComponentProps() != null ) {
-            entity.setComponentProps( jsonToMap( domain.getComponentProps() ) );
+            entity.setComponentProps( domain.getComponentProps() );
         }
         if ( domain.getDataProviderId() != null ) {
             entity.setDataProviderId( domain.getDataProviderId() );

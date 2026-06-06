@@ -40,9 +40,9 @@ public class LayoutNode {
     private Long bindRefId;
 
     // 规则配置
-    private Object visibleRule;
-    private Object readonlyRule;
-    private Object propsJson;
+    private String visibleRule;
+    private String readonlyRule;
+    private String propsJson;
 
     // 审计字段
     private LocalDateTime createdAt;
