@@ -75,13 +75,17 @@ public class PinyinUtils {
     }
 
     /**
-     * 生成节点编码（首字母缩写格式）
+     * 生成节点编码（驼峰格式，完整拼音）
+     *
+     * 示例：
+     * - "基本信息" → "jiBenXinXi"
+     * - "合同名称" → "heTongMingCheng"
      *
      * @param nodeName 节点名称（中文）
-     * @return nodeCode（拼音首字母缩写）
+     * @return nodeCode（拼音驼峰格式）
      */
     public static String generateNodeCode(String nodeName) {
-        return toPinyinAbbreviation(nodeName);
+        return toPinyinCamelCase(nodeName);
     }
 
     /**
@@ -99,13 +103,17 @@ public class PinyinUtils {
     }
 
     /**
-     * 生成字段编码（首字母缩写格式）
+     * 生成字段编码（驼峰格式，完整拼音）
+     *
+     * 示例：
+     * - "合同名称" → "heTongMingCheng"
+     * - "合同金额" → "heTongJinE"
      *
      * @param fieldName 字段名称（中文）
-     * @return fieldCode（拼音首字母缩写）
+     * @return fieldCode（拼音驼峰格式）
      */
     public static String generateFieldCode(String fieldName) {
-        return toPinyinAbbreviation(fieldName);
+        return toPinyinCamelCase(fieldName);
     }
 
     /**
@@ -123,12 +131,16 @@ public class PinyinUtils {
     }
 
     /**
-     * 生成动作编码（首字母缩写格式）
+     * 生成动作编码（驼峰格式，完整拼音）
+     *
+     * 示例：
+     * - "保存" → "baoCun"
+     * - "查询" → "chaXun"
      *
      * @param actionName 动作名称（中文）
-     * @return actionCode（拼音首字母缩写）
+     * @return actionCode（拼音驼峰格式）
      */
     public static String generateActionCode(String actionName) {
-        return toPinyinAbbreviation(actionName);
+        return toPinyinCamelCase(actionName);
     }
 }

@@ -37,42 +37,42 @@ class PinyinUtilsTest {
 
     @Test
     void testGenerateNodeCode() {
-        // 测试节点编码生成（使用首字母缩写）
-        assertEquals("jbxx", PinyinUtils.generateNodeCode("基本信息"));
-        assertEquals("httk", PinyinUtils.generateNodeCode("合同条款"));
+        // 测试节点编码生成（使用驼峰格式，完整拼音）
+        assertEquals("jibenxinxi", PinyinUtils.generateNodeCode("基本信息"));
+        assertEquals("hetongtiaokuan", PinyinUtils.generateNodeCode("合同条款"));
     }
 
     @Test
     void testGenerateNodePath() {
-        // 测试节点路径生成
-        assertEquals("jbxx", PinyinUtils.generateNodePath(null, "jbxx"));
-        assertEquals("jbxx", PinyinUtils.generateNodePath("", "jbxx"));
-        assertEquals("root.jbxx", PinyinUtils.generateNodePath("root", "jbxx"));
-        assertEquals("root.jbxx.htmc",
-            PinyinUtils.generateNodePath("root.jbxx", "htmc"));
+        // 测试节点路径生成（使用驼峰格式编码）
+        assertEquals("jibenxinxi", PinyinUtils.generateNodePath(null, "jibenxinxi"));
+        assertEquals("jibenxinxi", PinyinUtils.generateNodePath("", "jibenxinxi"));
+        assertEquals("root.jibenxinxi", PinyinUtils.generateNodePath("root", "jibenxinxi"));
+        assertEquals("root.jibenxinxi.hetongmingcheng",
+            PinyinUtils.generateNodePath("root.jibenxinxi", "hetongmingcheng"));
     }
 
     @Test
     void testGenerateFieldCode() {
-        // 测试字段编码生成（使用首字母缩写）
-        assertEquals("htmc", PinyinUtils.generateFieldCode("合同名称"));
-        assertEquals("htje", PinyinUtils.generateFieldCode("合同金额"));
+        // 测试字段编码生成（使用驼峰格式，完整拼音）
+        assertEquals("hetongmingcheng", PinyinUtils.generateFieldCode("合同名称"));
+        assertEquals("hetongjine", PinyinUtils.generateFieldCode("合同金额"));
     }
 
     @Test
     void testGenerateFieldPath() {
-        // 测试字段路径生成
-        assertEquals("htmc", PinyinUtils.generateFieldPath(null, "htmc"));
-        assertEquals("jbxx.htmc",
-            PinyinUtils.generateFieldPath("jbxx", "htmc"));
-        assertEquals("root.jbxx.htmc",
-            PinyinUtils.generateFieldPath("root.jbxx", "htmc"));
+        // 测试字段路径生成（使用驼峰格式编码）
+        assertEquals("hetongmingcheng", PinyinUtils.generateFieldPath(null, "hetongmingcheng"));
+        assertEquals("jibenxinxi.hetongmingcheng",
+            PinyinUtils.generateFieldPath("jibenxinxi", "hetongmingcheng"));
+        assertEquals("root.jibenxinxi.hetongmingcheng",
+            PinyinUtils.generateFieldPath("root.jibenxinxi", "hetongmingcheng"));
     }
 
     @Test
     void testGenerateActionCode() {
-        // 测试动作编码生成（使用首字母缩写）
-        assertEquals("bc", PinyinUtils.generateActionCode("保存"));
-        assertEquals("cx", PinyinUtils.generateActionCode("查询"));
+        // 测试动作编码生成（使用驼峰格式，完整拼音）
+        assertEquals("baocun", PinyinUtils.generateActionCode("保存"));
+        assertEquals("chaxun", PinyinUtils.generateActionCode("查询"));
     }
 }
