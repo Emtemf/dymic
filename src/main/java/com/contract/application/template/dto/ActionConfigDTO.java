@@ -20,8 +20,8 @@ public class ActionConfigDTO {
     private Long bindQueryId;
     private Integer confirmRequired;
     private String confirmText;
-    private Map<String, Object> beforeRule;
-    private Map<String, Object> afterRule;
-    private Map<String, Object> propsJson;
+    private String beforeRule;
+    private String afterRule;
+    private String propsJson;
     private Integer sortNo;
 }

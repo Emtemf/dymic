@@ -10,6 +10,6 @@ import java.util.Map;
 public class FieldComponentUpdateDTO {
     private String labelName;
     private String placeholder;
-    private Map<String, Object> componentProps;
-    private Map<String, Object> requiredRule;
+    private String componentProps;
+    private String requiredRule;
 }

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-06T20:35:32+0800",
+    date = "2026-06-06T23:27:54+0800",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.11 (Ubuntu)"
 )
 @Component
@@ -45,10 +45,9 @@ public class LayoutNodeConverterImpl implements LayoutNodeConverter {
         layoutNodeDTO.rowSpan( domain.getRowSpan() );
         layoutNodeDTO.bindType( domain.getBindType() );
         layoutNodeDTO.bindRefId( domain.getBindRefId() );
-
-        layoutNodeDTO.visibleRule( mapObjectToMap(domain.getVisibleRule()) );
-        layoutNodeDTO.readonlyRule( mapObjectToMap(domain.getReadonlyRule()) );
-        layoutNodeDTO.propsJson( mapObjectToMap(domain.getPropsJson()) );
+        layoutNodeDTO.visibleRule( domain.getVisibleRule() );
+        layoutNodeDTO.readonlyRule( domain.getReadonlyRule() );
+        layoutNodeDTO.propsJson( domain.getPropsJson() );
 
         return layoutNodeDTO.build();
     }
@@ -89,7 +88,6 @@ public class LayoutNodeConverterImpl implements LayoutNodeConverter {
         layoutNode.rowSpan( dto.getRowSpan() );
         layoutNode.bindType( dto.getBindType() );
         layoutNode.bindRefId( dto.getBindRefId() );
-
         layoutNode.visibleRule( dto.getVisibleRule() );
         layoutNode.readonlyRule( dto.getReadonlyRule() );
         layoutNode.propsJson( dto.getPropsJson() );
@@ -133,9 +131,14 @@ public class LayoutNodeConverterImpl implements LayoutNodeConverter {
         if ( dto.getRowSpan() != null ) {
             domain.setRowSpan( dto.getRowSpan() );
         }
-
-        domain.setVisibleRule( dto.getVisibleRule() );
-        domain.setReadonlyRule( dto.getReadonlyRule() );
-        domain.setPropsJson( dto.getPropsJson() );
+        if ( dto.getVisibleRule() != null ) {
+            domain.setVisibleRule( dto.getVisibleRule() );
+        }
+        if ( dto.getReadonlyRule() != null ) {
+            domain.setReadonlyRule( dto.getReadonlyRule() );
+        }
+        if ( dto.getPropsJson() != null ) {
+            domain.setPropsJson( dto.getPropsJson() );
+        }
     }
 }

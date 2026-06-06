@@ -17,9 +17,9 @@ public class FieldComponentDTO {
     private String labelName;
     private String placeholder;
     private Integer sortNo;
-    private Map<String, Object> componentProps;
+    private String componentProps;     // JSONB as String
     private Long dataProviderId;
-    private Map<String, Object> requiredRule;
-    private Map<String, Object> visibleRule;
-    private Map<String, Object> readonlyRule;
+    private String requiredRule;       // JSONB as String
+    private String visibleRule;        // JSONB as String
+    private String readonlyRule;       // JSONB as String
 }

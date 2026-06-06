@@ -42,14 +42,6 @@ public class FieldDefRepositoryImpl implements FieldDefRepository {
     }
 
     @Override
-    public List<FieldDef> findByLayoutNodeId(Long layoutNodeId) {
-        LambdaQueryWrapper<FieldDefEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(FieldDefEntity::getLayoutNodeId, layoutNodeId);
-        List<FieldDefEntity> entities = mapper.selectList(wrapper);
-        return converter.toDomainList(entities);
-    }
-
-    @Override
     public void update(FieldDef fieldDef) {
         FieldDefEntity entity = converter.toEntity(fieldDef);
         mapper.updateById(entity);
@@ -59,6 +51,13 @@ public class FieldDefRepositoryImpl implements FieldDefRepository {
     public boolean existsByFieldCode(String fieldCode) {
         LambdaQueryWrapper<FieldDefEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(FieldDefEntity::getFieldCode, fieldCode);
+        return mapper.selectCount(wrapper) > 0;
+    }
+
+    @Override
+    public boolean existsByFieldPath(String fieldPath) {
+        LambdaQueryWrapper<FieldDefEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(FieldDefEntity::getFieldPath, fieldPath);
         return mapper.selectCount(wrapper) > 0;
     }
 }

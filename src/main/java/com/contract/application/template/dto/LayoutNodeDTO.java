@@ -41,9 +41,9 @@ public class LayoutNodeDTO {
     private Long bindRefId;
 
     // 规则配置
-    private Map<String, Object> visibleRule;
-    private Map<String, Object> readonlyRule;
-    private Map<String, Object> propsJson;
+    private String visibleRule;
+    private String readonlyRule;
+    private String propsJson;
 
     // 子节点列表（用于树形结构）
     private List<LayoutNodeDTO> children;

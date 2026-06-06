@@ -22,7 +22,7 @@ public class LayoutNodeUpdateDTO {
     private Integer rowSpan;
 
     // 规则配置
-    private Map<String, Object> visibleRule;
-    private Map<String, Object> readonlyRule;
-    private Map<String, Object> propsJson;
+    private String visibleRule;
+    private String readonlyRule;
+    private String propsJson;
 }

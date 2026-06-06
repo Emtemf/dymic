@@ -48,7 +48,6 @@ public class FieldDefService {
         fieldDef.setId(idGenerator.nextId());
         fieldDef.setTemplateId(templateId);
         fieldDef.setTemplateVersionId(versionId);
-        fieldDef.setLayoutNodeId(dto.getLayoutNodeId());
 
         // 自动生成 fieldCode 和 fieldPath
         fieldDef.setFieldCode(generateFieldCode(dto.getDisplayName()));

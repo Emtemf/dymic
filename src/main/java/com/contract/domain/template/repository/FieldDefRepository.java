@@ -10,7 +10,7 @@ public interface FieldDefRepository {
     FieldDef save(FieldDef fieldDef);
     FieldDef findById(Long id);
     List<FieldDef> findByVersionId(Long versionId);
-    List<FieldDef> findByLayoutNodeId(Long layoutNodeId);
     void update(FieldDef fieldDef);
     boolean existsByFieldCode(String fieldCode);
+    boolean existsByFieldPath(String fieldPath);
 }

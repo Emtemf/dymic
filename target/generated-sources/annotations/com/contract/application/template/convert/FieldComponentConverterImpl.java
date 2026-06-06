@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-06T20:35:32+0800",
+    date = "2026-06-06T23:27:54+0800",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.11 (Ubuntu)"
 )
 @Component
@@ -32,12 +32,11 @@ public class FieldComponentConverterImpl implements FieldComponentConverter {
         fieldComponentDTO.setLabelName( domain.getLabelName() );
         fieldComponentDTO.setPlaceholder( domain.getPlaceholder() );
         fieldComponentDTO.setSortNo( domain.getSortNo() );
+        fieldComponentDTO.setComponentProps( domain.getComponentProps() );
         fieldComponentDTO.setDataProviderId( domain.getDataProviderId() );
-
-        fieldComponentDTO.setComponentProps( mapToJson(domain.getComponentProps()) );
-        fieldComponentDTO.setRequiredRule( mapToJson(domain.getRequiredRule()) );
-        fieldComponentDTO.setVisibleRule( mapToJson(domain.getVisibleRule()) );
-        fieldComponentDTO.setReadonlyRule( mapToJson(domain.getReadonlyRule()) );
+        fieldComponentDTO.setRequiredRule( domain.getRequiredRule() );
+        fieldComponentDTO.setVisibleRule( domain.getVisibleRule() );
+        fieldComponentDTO.setReadonlyRule( domain.getReadonlyRule() );
 
         return fieldComponentDTO;
     }
@@ -59,12 +58,11 @@ public class FieldComponentConverterImpl implements FieldComponentConverter {
         fieldComponent.setLabelName( dto.getLabelName() );
         fieldComponent.setPlaceholder( dto.getPlaceholder() );
         fieldComponent.setSortNo( dto.getSortNo() );
+        fieldComponent.setComponentProps( dto.getComponentProps() );
         fieldComponent.setDataProviderId( dto.getDataProviderId() );
-
-        fieldComponent.setComponentProps( jsonToMap(dto.getComponentProps()) );
-        fieldComponent.setRequiredRule( jsonToMap(dto.getRequiredRule()) );
-        fieldComponent.setVisibleRule( jsonToMap(dto.getVisibleRule()) );
-        fieldComponent.setReadonlyRule( jsonToMap(dto.getReadonlyRule()) );
+        fieldComponent.setRequiredRule( dto.getRequiredRule() );
+        fieldComponent.setVisibleRule( dto.getVisibleRule() );
+        fieldComponent.setReadonlyRule( dto.getReadonlyRule() );
 
         return fieldComponent;
     }
@@ -102,14 +100,21 @@ public class FieldComponentConverterImpl implements FieldComponentConverter {
         if ( dto.getSortNo() != null ) {
             domain.setSortNo( dto.getSortNo() );
         }
+        if ( dto.getComponentProps() != null ) {
+            domain.setComponentProps( dto.getComponentProps() );
+        }
         if ( dto.getDataProviderId() != null ) {
             domain.setDataProviderId( dto.getDataProviderId() );
         }
-
-        domain.setComponentProps( jsonToMap(dto.getComponentProps()) );
-        domain.setRequiredRule( jsonToMap(dto.getRequiredRule()) );
-        domain.setVisibleRule( jsonToMap(dto.getVisibleRule()) );
-        domain.setReadonlyRule( jsonToMap(dto.getReadonlyRule()) );
+        if ( dto.getRequiredRule() != null ) {
+            domain.setRequiredRule( dto.getRequiredRule() );
+        }
+        if ( dto.getVisibleRule() != null ) {
+            domain.setVisibleRule( dto.getVisibleRule() );
+        }
+        if ( dto.getReadonlyRule() != null ) {
+            domain.setReadonlyRule( dto.getReadonlyRule() );
+        }
     }
 
     @Override

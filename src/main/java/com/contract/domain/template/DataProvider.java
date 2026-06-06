@@ -18,7 +18,7 @@ public class DataProvider {
     private String providerCode;
     private String providerName;
     private String providerType;
-    private Object configJson;
+    private String configJson;
     private Integer cacheEnabled;
     private Integer cacheTtlSeconds;
     private String status;

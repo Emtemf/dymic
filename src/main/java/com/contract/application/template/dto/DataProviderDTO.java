@@ -18,7 +18,7 @@ public class DataProviderDTO {
     private String providerCode;
     private String providerName;
     private String providerType;
-    private Map<String, Object> configJson;
+    private String configJson;
     private Integer cacheEnabled;
     private Integer cacheTtlSeconds;
     private String status;

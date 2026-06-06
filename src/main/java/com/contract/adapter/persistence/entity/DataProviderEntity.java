@@ -16,7 +16,7 @@ public class DataProviderEntity {
     private String providerType;
 
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private Object configJson;
+    private String configJson;
 
     private Integer cacheEnabled;
     private Integer cacheTtlSeconds;

@@ -9,7 +9,7 @@ import java.util.Map;
 @Data
 public class DataProviderUpdateDTO {
     private String providerName;
-    private Map<String, Object> configJson;
+    private String configJson;
     private Integer cacheEnabled;
     private Integer cacheTtlSeconds;
 }

@@ -11,7 +11,6 @@ public class FieldDef {
     private Long id;
     private Long templateId;
     private Long templateVersionId;
-    private Long layoutNodeId;
     private String fieldCode;         // 自动生成: contractName
     private String fieldPath;         // 自动生成: basicInfo.contractName
     private String fieldNameCn;       // 业务名称: 合同名称
