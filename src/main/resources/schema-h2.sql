@@ -238,7 +238,7 @@ CREATE TABLE t_contract_field_value (
     is_deleted SMALLINT NOT NULL DEFAULT 0
 );
 
-CREATE INDEX idx_contract_field_text ON t_contract_field_value (field_path, value_text);
+-- Note: H2 does not support indexes on CLOB columns, so idx_contract_field_text is removed
 CREATE INDEX idx_contract_field_number ON t_contract_field_value (field_path, value_number);
 CREATE INDEX idx_contract_field_date ON t_contract_field_value (field_path, value_date);
 CREATE INDEX idx_contract_field_contract ON t_contract_field_value (contract_id, snapshot_id);
@@ -287,7 +287,7 @@ CREATE TABLE t_contract_detail_field_value (
     is_deleted SMALLINT NOT NULL DEFAULT 0
 );
 
-CREATE INDEX idx_detail_field_text ON t_contract_detail_field_value (detail_code, field_path, value_text);
+-- Note: H2 does not support indexes on CLOB columns, so idx_detail_field_text is removed
 CREATE INDEX idx_detail_field_number ON t_contract_detail_field_value (detail_code, field_path, value_number);
 CREATE INDEX idx_detail_field_contract ON t_contract_detail_field_value (contract_id, detail_code);
 

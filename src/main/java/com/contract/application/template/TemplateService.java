@@ -83,6 +83,23 @@ public class TemplateService {
         templateMapper.updateById(entity);
     }
 
+    /**
+     * 更新模板的当前版本ID
+     *
+     * @param templateId 模板ID
+     * @param versionId 版本ID
+     */
+    @Transactional
+    public void updateCurrentVersion(Long templateId, Long versionId) {
+        TemplateEntity entity = templateMapper.selectById(templateId);
+        if (entity == null) {
+            throw new BizException("模板不存在：" + templateId);
+        }
+        entity.setCurrentVersionId(versionId);
+        entity.setUpdatedAt(LocalDateTime.now());
+        templateMapper.updateById(entity);
+    }
+
     private Template toDomain(TemplateEntity entity) {
         Template template = new Template();
         template.setId(entity.getId());
