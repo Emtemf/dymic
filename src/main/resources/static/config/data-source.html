@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据源配置管理</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .toolbar {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toolbar-left {
+            display: flex;
+            gap: 10px;
+        }
+
+        .toolbar-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .data-source-list {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .list-header {
+            padding: 20px;
+            border-bottom: 1px solid #e1e4e8;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            font-weight: 600;
+            color: #586069;
+        }
+
+        .list-item {
+            padding: 20px;
+            border-bottom: 1px solid #e1e4e8;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item:hover {
+            background: #f6f8fa;
+        }
+
+        .source-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .source-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f6f8fa;
+            font-size: 18px;
+        }
+
+        .source-name {
+            font-weight: 600;
+            color: #24292e;
+        }
+
+        .source-desc {
+            font-size: 12px;
+            color: #586069;
+            margin-top: 4px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .type-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            background: #e1e4e8;
+            color: #586069;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 4px;
+            background: transparent;
+            color: #586069;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .btn-icon:hover {
+            background: #f6f8fa;
+            color: #24292e;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 600px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e1e4e8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #24292e;
+        }
+
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            font-size: 24px;
+            color: #586069;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: #24292e;
+        }
+
+        .modal-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #e1e4e8;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #24292e;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .type-selector {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .type-option {
+            padding: 15px;
+            border: 2px solid #e1e4e8;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .type-option:hover {
+            border-color: #667eea;
+        }
+
+        .type-option.selected {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .type-option i {
+            font-size: 24px;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .type-option span {
+            font-size: 12px;
+            color: #586069;
+        }
+
+        .test-result {
+            padding: 15px;
+            background: #f6f8fa;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .test-result.success {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+        }
+
+        .test-result.error {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <h1><i class="fas fa-database"></i> 数据源配置管理</h1>
+            <p>配置和管理模板可用的数据源，支持静态数据、字典、HTTP接口等多种类型</p>
+        </div>
+
+        <!-- 工具栏 -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <input type="text" placeholder="搜索数据源..." style="padding: 8px 12px; border: 1px solid #d1d5da; border-radius: 6px; width: 300px;">
+                <select style="padding: 8px 12px; border: 1px solid #d1d5da; border-radius: 6px;">
+                    <option value="">全部类型</option>
+                    <option value="static">静态数据</option>
+                    <option value="dict">字典</option>
+                    <option value="http">HTTP接口</option>
+                    <option value="platform">平台服务</option>
+                    <option value="internal">内部服务</option>
+                </select>
+            </div>
+            <div class="toolbar-right">
+                <button class="btn btn-primary" onclick="showCreateModal()">
+                    <i class="fas fa-plus"></i> 新建数据源
+                </button>
+                <button class="btn btn-secondary" onclick="refreshList()">
+                    <i class="fas fa-refresh"></i> 刷新
+                </button>
+            </div>
+        </div>
+
+        <!-- 数据源列表 -->
+        <div class="data-source-list">
+            <div class="list-header">
+                <div>数据源信息</div>
+                <div>类型</div>
+                <div>状态</div>
+                <div>更新时间</div>
+                <div>操作</div>
+            </div>
+
+            <div id="dataSourceListContent">
+                <!-- 动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 创建/编辑数据源弹窗 -->
+    <div class="modal" id="dataSourceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-database"></i> <span id="modalTitle">新建数据源</span></h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- 基本信息 -->
+                <div class="form-group">
+                    <label>数据源名称</label>
+                    <input type="text" id="dsName" placeholder="请输入数据源名称">
+                </div>
+
+                <div class="form-group">
+                    <label>数据源编码</label>
+                    <input type="text" id="dsCode" placeholder="请输入数据源编码">
+                </div>
+
+                <div class="form-group">
+                    <label>描述</label>
+                    <textarea id="dsDescription" rows="2" placeholder="请输入描述信息"></textarea>
+                </div>
+
+                <!-- 类型选择 -->
+                <label style="font-weight: 600; color: #24292e; margin-bottom: 8px;">数据源类型</label>
+                <div class="type-selector" id="typeSelector">
+                    <div class="type-option" data-type="static" onclick="selectType('static')">
+                        <i class="fas fa-code"></i>
+                        <span>静态数据</span>
+                    </div>
+                    <div class="type-option" data-type="dict" onclick="selectType('dict')">
+                        <i class="fas fa-book"></i>
+                        <span>字典数据</span>
+                    </div>
+                    <div class="type-option" data-type="http" onclick="selectType('http')">
+                        <i class="fas fa-globe"></i>
+                        <span>HTTP接口</span>
+                    </div>
+                    <div class="type-option" data-type="platform" onclick="selectType('platform')">
+                        <i class="fas fa-server"></i>
+                        <span>平台服务</span>
+                    </div>
+                    <div class="type-option" data-type="internal" onclick="selectType('internal')">
+                        <i class="fas fa-cogs"></i>
+                        <span>内部服务</span>
+                    </div>
+                </div>
+
+                <!-- 配置区域 -->
+                <div id="configSection"></div>
+
+                <!-- 测试结果 -->
+                <div id="testResult" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="testDataSource()">
+                    <i class="fas fa-play"></i> 测试连接
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveDataSource()">
+                    <i class="fas fa-save"></i> 保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 数据源列表数据
+        let dataSources = [];
+
+        // 当前选中的类型
+        let selectedType = '';
+
+        // 当前编辑的数据源ID
+        let editingId = null;
+
+        // 初始化
+        function init() {
+            loadDataSourceList();
+        }
+
+        // 加载数据源列表
+        function loadDataSourceList() {
+            // 模拟数据
+            dataSources = [
+                {
+                    id: 'ds_001',
+                    name: '合同类型字典',
+                    code: 'contract_type',
+                    description: '合同类型字典数据',
+                    type: 'dict',
+                    status: 'active',
+                    updateTime: '2024-01-15 10:30:00',
+                    config: { dictType: 'CONTRACT_TYPE' }
+                },
+                {
+                    id: 'ds_002',
+                    name: '供应商列表',
+                    code: 'supplier_list',
+                    description: '供应商查询接口',
+                    type: 'http',
+                    status: 'active',
+                    updateTime: '2024-01-14 15:20:00',
+                    config: {
+                        url: '/api/suppliers/list',
+                        method: 'POST',
+                        mapping: { valueField: 'id', labelField: 'name' }
+                    }
+                },
+                {
+                    id: 'ds_003',
+                    name: '付款方式',
+                    code: 'payment_method',
+                    description: '付款方式静态数据',
+                    type: 'static',
+                    status: 'active',
+                    updateTime: '2024-01-13 09:10:00',
+                    config: {
+                        data: [
+                            { value: 'bank_transfer', label: '银行转账' },
+                            { value: 'cash', label: '现金支付' },
+                            { value: 'check', label: '支票' }
+                        ]
+                    }
+                }
+            ];
+
+            renderDataSourceList();
+        }
+
+        // 渲染数据源列表
+        function renderDataSourceList() {
+            const container = document.getElementById('dataSourceListContent');
+
+            if (dataSources.length === 0) {
+                container.innerHTML = `
+                    <div class="list-item" style="text-align: center; color: #b4b4b4;">
+                        <div style="grid-column: 1 / -1;">
+                            <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 10px;"></i>
+                            <p>暂无数据源，请点击"新建数据源"按钮创建</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            dataSources.forEach(ds => {
+                const icon = getTypeIcon(ds.type);
+                const typeLabel = getTypeLabel(ds.type);
+
+                html += `
+                    <div class="list-item">
+                        <div class="source-info">
+                            <div class="source-icon">
+                                <i class="fas ${icon}"></i>
+                            </div>
+                            <div>
+                                <div class="source-name">${ds.name}</div>
+                                <div class="source-desc">${ds.description || '无描述'}</div>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="type-badge">${typeLabel}</span>
+                        </div>
+                        <div>
+                            <span class="status-badge ${ds.status === 'active' ? 'status-active' : 'status-inactive'}">
+                                ${ds.status === 'active' ? '已启用' : '已禁用'}
+                            </span>
+                        </div>
+                        <div>${ds.updateTime}</div>
+                        <div class="actions">
+                            <button class="btn-icon" onclick="editDataSource('${ds.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon" onclick="testDataSourceById('${ds.id}')">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button class="btn-icon" onclick="toggleStatus('${ds.id}')">
+                                <i class="fas fa-${ds.status === 'active' ? 'pause' : 'play'}"></i>
+                            </button>
+                            <button class="btn-icon" onclick="deleteDataSource('${ds.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // 获取类型图标
+        function getTypeIcon(type) {
+            const icons = {
+                static: 'fa-code',
+                dict: 'fa-book',
+                http: 'fa-globe',
+                platform: 'fa-server',
+                internal: 'fa-cogs'
+            };
+            return icons[type] || 'fa-database';
+        }
+
+        // 获取类型标签
+        function getTypeLabel(type) {
+            const labels = {
+                static: '静态数据',
+                dict: '字典',
+                http: 'HTTP接口',
+                platform: '平台服务',
+                internal: '内部服务'
+            };
+            return labels[type] || '未知';
+        }
+
+        // 显示创建弹窗
+        function showCreateModal() {
+            editingId = null;
+            document.getElementById('modalTitle').textContent = '新建数据源';
+            document.getElementById('dsName').value = '';
+            document.getElementById('dsCode').value = '';
+            document.getElementById('dsDescription').value = '';
+            selectedType = '';
+            document.querySelectorAll('.type-option').forEach(opt => opt.classList.remove('selected'));
+            document.getElementById('configSection').innerHTML = '';
+            document.getElementById('testResult').style.display = 'none';
+            document.getElementById('dataSourceModal').classList.add('active');
+        }
+
+        // 选择类型
+        function selectType(type) {
+            selectedType = type;
+            document.querySelectorAll('.type-option').forEach(opt => {
+                opt.classList.remove('selected');
+                if (opt.dataset.type === type) {
+                    opt.classList.add('selected');
+                }
+            });
+
+            renderConfigSection(type);
+        }
+
+        // 渲染配置区域
+        function renderConfigSection(type) {
+            const container = document.getElementById('configSection');
+            let html = '';
+
+            switch (type) {
+                case 'static':
+                    html = `
+                        <div class="form-group">
+                            <label>静态数据(JSON数组)</label>
+                            <textarea id="dsStaticData" rows="6" placeholder='[
+    {"value": "1", "label": "选项1"},
+    {"value": "2", "label": "选项2"}
+]'></textarea>
+                        </div>
+                    `;
+                    break;
+                case 'dict':
+                    html = `
+                        <div class="form-group">
+                            <label>字典类型编码</label>
+                            <input type="text" id="dsDictType" placeholder="如: CONTRACT_TYPE">
+                        </div>
+                    `;
+                    break;
+                case 'http':
+                    html = `
+                        <div class="form-group">
+                            <label>接口URL</label>
+                            <input type="text" id="dsHttpUrl" placeholder="如: /api/suppliers/list">
+                        </div>
+                        <div class="form-group">
+                            <label>请求方法</label>
+                            <select id="dsHttpMethod">
+                                <option value="GET">GET</option>
+                                <option value="POST">POST</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>数据映射(JSON)</label>
+                            <textarea id="dsHttpMapping" rows="3" placeholder='{
+    "valueField": "id",
+    "labelField": "name"
+}'></textarea>
+                        </div>
+                    `;
+                    break;
+                case 'platform':
+                    html = `
+                        <div class="form-group">
+                            <label>服务名称</label>
+                            <input type="text" id="dsPlatformService" placeholder="如: supplier-service">
+                        </div>
+                        <div class="form-group">
+                            <label>接口名称</label>
+                            <input type="text" id="dsPlatformInterface" placeholder="如: querySupplierList">
+                        </div>
+                    `;
+                    break;
+                case 'internal':
+                    html = `
+                        <div class="form-group">
+                            <label>内部服务ID</label>
+                            <input type="text" id="dsInternalId" placeholder="如: internal_001">
+                        </div>
+                    `;
+                    break;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // 编辑数据源
+        function editDataSource(id) {
+            const ds = dataSources.find(d => d.id === id);
+            if (!ds) return;
+
+            editingId = id;
+            document.getElementById('modalTitle').textContent = '编辑数据源';
+            document.getElementById('dsName').value = ds.name;
+            document.getElementById('dsCode').value = ds.code;
+            document.getElementById('dsDescription').value = ds.description || '';
+
+            selectType(ds.type);
+
+            setTimeout(() => {
+                switch (ds.type) {
+                    case 'static':
+                        document.getElementById('dsStaticData').value = JSON.stringify(ds.config.data, null, 2);
+                        break;
+                    case 'dict':
+                        document.getElementById('dsDictType').value = ds.config.dictType;
+                        break;
+                    case 'http':
+                        document.getElementById('dsHttpUrl').value = ds.config.url;
+                        document.getElementById('dsHttpMethod').value = ds.config.method;
+                        document.getElementById('dsHttpMapping').value = JSON.stringify(ds.config.mapping, null, 2);
+                        break;
+                    case 'platform':
+                        document.getElementById('dsPlatformService').value = ds.config.service;
+                        document.getElementById('dsPlatformInterface').value = ds.config.interface;
+                        break;
+                    case 'internal':
+                        document.getElementById('dsInternalId').value = ds.config.internalId;
+                        break;
+                }
+            }, 100);
+
+            document.getElementById('dataSourceModal').classList.add('active');
+        }
+
+        // 测试数据源
+        function testDataSource() {
+            if (!selectedType) {
+                alert('请先选择数据源类型');
+                return;
+            }
+
+            // 模拟测试
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'test-result success';
+            resultDiv.innerHTML = `
+                <strong><i class="fas fa-check-circle"></i> 测试成功</strong>
+                <p style="margin-top: 8px;">数据源连接正常，返回数据如下：</p>
+                <pre style="margin-top: 8px; padding: 10px; background: white; border-radius: 4px;">
+[
+    {"value": "test_1", "label": "测试数据1"},
+    {"value": "test_2", "label": "测试数据2"}
+]
+                </pre>
+            `;
+        }
+
+        // 测试数据源（列表中）
+        function testDataSourceById(id) {
+            alert(`测试数据源: ${id} - 连接成功`);
+        }
+
+        // 保存数据源
+        function saveDataSource() {
+            const name = document.getElementById('dsName').value;
+            const code = document.getElementById('dsCode').value;
+
+            if (!name || !code || !selectedType) {
+                alert('请填写必要信息');
+                return;
+            }
+
+            const ds = {
+                id: editingId || 'ds_' + Date.now(),
+                name: name,
+                code: code,
+                description: document.getElementById('dsDescription').value,
+                type: selectedType,
+                status: 'active',
+                updateTime: new Date().toLocaleString('zh-CN'),
+                config: {}
+            };
+
+            // 收集配置
+            switch (selectedType) {
+                case 'static':
+                    ds.config.data = JSON.parse(document.getElementById('dsStaticData').value);
+                    break;
+                case 'dict':
+                    ds.config.dictType = document.getElementById('dsDictType').value;
+                    break;
+                case 'http':
+                    ds.config.url = document.getElementById('dsHttpUrl').value;
+                    ds.config.method = document.getElementById('dsHttpMethod').value;
+                    ds.config.mapping = JSON.parse(document.getElementById('dsHttpMapping').value);
+                    break;
+                case 'platform':
+                    ds.config.service = document.getElementById('dsPlatformService').value;
+                    ds.config.interface = document.getElementById('dsPlatformInterface').value;
+                    break;
+                case 'internal':
+                    ds.config.internalId = document.getElementById('dsInternalId').value;
+                    break;
+            }
+
+            // 更新或添加
+            if (editingId) {
+                const index = dataSources.findIndex(d => d.id === editingId);
+                dataSources[index] = ds;
+            } else {
+                dataSources.push(ds);
+            }
+
+            renderDataSourceList();
+            closeModal();
+
+            alert('数据源保存成功');
+        }
+
+        // 切换状态
+        function toggleStatus(id) {
+            const ds = dataSources.find(d => d.id === id);
+            if (ds) {
+                ds.status = ds.status === 'active' ? 'inactive' : 'active';
+                ds.updateTime = new Date().toLocaleString('zh-CN');
+                renderDataSourceList();
+            }
+        }
+
+        // 删除数据源
+        function deleteDataSource(id) {
+            if (confirm('确定删除此数据源吗？')) {
+                dataSources = dataSources.filter(d => d.id !== id);
+                renderDataSourceList();
+            }
+        }
+
+        // 刷新列表
+        function refreshList() {
+            loadDataSourceList();
+            alert('列表已刷新');
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('dataSourceModal').classList.remove('active');
+        }
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>

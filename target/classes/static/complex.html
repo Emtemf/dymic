@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>复杂界面 - 合同模板 Demo</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Additional styles for complex layout */
+    .detail-table-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .detail-row-number {
+      width: 40px;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: var(--font-size-sm);
+    }
+
+    .tab-container {
+      background-color: var(--bg-primary);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tab-header {
+      padding: var(--spacing-md) var(--spacing-lg) 0;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .tab-body {
+      padding: var(--spacing-lg);
+    }
+
+    .file-upload-area {
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-xl);
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .file-upload-area:hover {
+      border-color: var(--primary-color);
+      background-color: var(--bg-secondary);
+    }
+
+    .file-upload-area.dragover {
+      border-color: var(--primary-color);
+      background-color: #e8f0fe;
+    }
+
+    .attachment-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-sm) var(--spacing-md);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .attachment-info {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .attachment-icon {
+      font-size: 24px;
+    }
+
+    .risk-item {
+      padding: var(--spacing-md);
+      border-left: 4px solid var(--warning-color);
+      background-color: #fef7e0;
+      border-radius: var(--radius-sm);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .risk-item.high {
+      border-left-color: var(--error-color);
+      background-color: #fce8e6;
+    }
+
+    .risk-item.medium {
+      border-left-color: var(--warning-color);
+      background-color: #fef7e0;
+    }
+
+    .risk-item.low {
+      border-left-color: var(--success-color);
+      background-color: #e6f4ea;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav flex justify-between items-center">
+    <a href="index.html" class="nav-brand">合同模板系统</a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="nav-link">首页</a></li>
+      <li><a href="simple.html" class="nav-link">简单界面</a></li>
+      <li><a href="complex.html" class="nav-link active">复杂界面</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <!-- Page Header -->
+    <div class="card">
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 style="font-size: 24px; margin-bottom: 8px;">采购合同 - 复杂界面</h1>
+          <p style="color: var(--text-secondary); font-size: 14px;">
+            栅格布局 + Tab 容器 + 明细表 + 弹窗编辑
+          </p>
+        </div>
+        <div>
+          <span id="contractStatus" class="badge badge-warning">草稿</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-16-8">
+      <!-- Left Column -->
+      <div>
+        <!-- Basic Information Card -->
+        <div class="card">
+          <div class="card-header">基本信息</div>
+          <div class="card-body">
+            <div id="formAlert" class="alert hidden"></div>
+
+            <form id="contractForm">
+              <!-- Contract Number and Name -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="contractNumber">合同编号 *</label>
+                  <input
+                    type="text"
+                    id="contractNumber"
+                    class="form-input"
+                    placeholder="PO-2024-001"
+                    required
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="contractName">合同名称 *</label>
+                  <input
+                    type="text"
+                    id="contractName"
+                    class="form-input"
+                    placeholder="办公用品采购合同"
+                    required
+                  >
+                </div>
+              </div>
+
+              <!-- Contract Type and Supplier -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="contractType">合同类型 *</label>
+                  <select id="contractType" class="form-select" required>
+                    <option value="">请选择</option>
+                    <option value="采购合同">采购合同</option>
+                    <option value="销售合同">销售合同</option>
+                    <option value="服务合同">服务合同</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="supplierName">供应商 *</label>
+                  <div class="flex gap-sm">
+                    <input
+                      type="text"
+                      id="supplierName"
+                      class="form-input"
+                      placeholder="请选择供应商"
+                      readonly
+                      required
+                    >
+                    <button
+                      type="button"
+                      id="selectSupplierBtn"
+                      class="btn btn-secondary"
+                    >
+                      查询
+                    </button>
+                  </div>
+                  <input type="hidden" id="supplierId">
+                </div>
+              </div>
+
+              <!-- Currency and Amount -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="currency">币种</label>
+                  <select id="currency" class="form-select">
+                    <option value="CNY">人民币 (CNY)</option>
+                    <option value="USD">美元 (USD)</option>
+                    <option value="EUR">欧元 (EUR)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="totalAmount">合同金额</label>
+                  <input
+                    type="text"
+                    id="totalAmount"
+                    class="form-input"
+                    readonly
+                    placeholder="根据明细自动计算"
+                  >
+                </div>
+              </div>
+
+              <!-- Dates -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="signingDate">签订日期</label>
+                  <input
+                    type="date"
+                    id="signingDate"
+                    class="form-input"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="effectiveDate">生效日期</label>
+                  <input
+                    type="date"
+                    id="effectiveDate"
+                    class="form-input"
+                  >
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Goods Details Card -->
+        <div class="card">
+          <div class="card-header">
+            <div class="flex justify-between items-center">
+              <span>商品明细</span>
+              <button type="button" id="addDetailBtn" class="btn btn-sm btn-primary">
+                + 添加明细
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 40px;">#</th>
+                    <th>商品编码</th>
+                    <th>商品名称</th>
+                    <th>规格型号</th>
+                    <th>单位</th>
+                    <th style="text-align: right;">数量</th>
+                    <th style="text-align: right;">单价</th>
+                    <th style="text-align: right;">金额</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="detailTableBody">
+                  <tr>
+                    <td colspan="9" style="text-align: center; color: var(--text-secondary);">
+                      暂无商品明细，请点击"添加明细"按钮
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div>
+        <!-- Tab Container -->
+        <div class="tab-container">
+          <div class="tab-header">
+            <div class="tabs" style="border-bottom: none;">
+              <ul class="tab-list">
+                <li class="tab-item active" data-tab="attachments">附件</li>
+                <li class="tab-item" data-tab="risks">风险提示</li>
+              </ul>
+            </div>
+          </div>
+          <div class="tab-body">
+            <!-- Attachments Tab -->
+            <div id="attachments-tab" class="tab-content active">
+              <div id="fileUploadArea" class="file-upload-area">
+                <div style="font-size: 48px; margin-bottom: 16px;">📁</div>
+                <p style="color: var(--text-secondary); margin-bottom: 8px;">
+                  点击或拖拽文件到此处上传
+                </p>
+                <p style="color: var(--text-disabled); font-size: 12px;">
+                  支持的格式: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (最大 10MB)
+                </p>
+                <input type="file" id="fileInput" style="display: none;" multiple>
+              </div>
+
+              <div id="attachmentsList" class="mt-md">
+                <!-- Attachments will be listed here -->
+              </div>
+            </div>
+
+            <!-- Risks Tab -->
+            <div id="risks-tab" class="tab-content">
+              <div id="risksList">
+                <div class="risk-item medium">
+                  <h4 style="font-size: 14px; margin-bottom: 4px;">合同金额较大</h4>
+                  <p style="font-size: 12px; color: var(--text-secondary);">
+                    合同金额超过 10 万元，建议增加审批层级。
+                  </p>
+                </div>
+
+                <div class="risk-item high">
+                  <h4 style="font-size: 14px; margin-bottom: 4px;">供应商信用风险</h4>
+                  <p style="font-size: 12px; color: var(--text-secondary);">
+                    该供应商近半年有延迟交货记录，建议添加违约条款。
+                  </p>
+                </div>
+
+                <div class="risk-item low">
+                  <h4 style="font-size: 14px; margin-bottom: 4px;">付款条件宽松</h4>
+                  <p style="font-size: 12px; color: var(--text-secondary);">
+                    付款周期较长，可能影响现金流，请确认。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="card">
+      <div class="flex justify-between">
+        <div class="flex gap-sm">
+          <button type="button" id="saveBtn" class="btn btn-primary">
+            保存合同
+          </button>
+          <button type="button" id="submitBtn" class="btn btn-secondary">
+            提交审批
+          </button>
+        </div>
+        <button type="button" id="resetBtn" class="btn btn-secondary">
+          重置表单
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supplier Query Modal -->
+  <div id="supplierModal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">供应商查询</h3>
+        <button class="modal-close" id="closeSupplierModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <div class="flex gap-sm">
+            <input
+              type="text"
+              id="supplierSearchInput"
+              class="form-input"
+              placeholder="输入供应商名称或编码搜索..."
+            >
+            <button type="button" id="searchSupplierBtn" class="btn btn-primary">
+              查询
+            </button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>供应商编码</th>
+                <th>供应商名称</th>
+                <th>联系人</th>
+                <th>电话</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="supplierTableBody">
+              <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-secondary);">
+                  请输入关键词查询
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelSupplierBtn">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Edit Modal -->
+  <div id="detailModal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="detailModalTitle">编辑商品明细</h3>
+        <button class="modal-close" id="closeDetailModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="detailForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="productCode">商品编码 *</label>
+              <input
+                type="text"
+                id="productCode"
+                class="form-input"
+                placeholder="PROD-001"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="productName">商品名称 *</label>
+              <input
+                type="text"
+                id="productName"
+                class="form-input"
+                placeholder="请输入商品名称"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="specification">规格型号</label>
+              <input
+                type="text"
+                id="specification"
+                class="form-input"
+                placeholder="请输入规格型号"
+              >
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="unit">单位 *</label>
+              <select id="unit" class="form-select" required>
+                <option value="">请选择</option>
+                <option value="个">个</option>
+                <option value="件">件</option>
+                <option value="台">台</option>
+                <option value="套">套</option>
+                <option value="箱">箱</option>
+                <option value="千克">千克</option>
+                <option value="米">米</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="quantity">数量 *</label>
+              <input
+                type="number"
+                id="quantity"
+                class="form-input"
+                placeholder="请输入数量"
+                min="1"
+                step="1"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="unitPrice">单价 *</label>
+              <input
+                type="number"
+                id="unitPrice"
+                class="form-input"
+                placeholder="请输入单价"
+                min="0"
+                step="0.01"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">金额</label>
+            <input
+              type="text"
+              id="detailAmount"
+              class="form-input"
+              readonly
+              placeholder="0.00"
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="detailRemark">备注</label>
+            <textarea
+              id="detailRemark"
+              class="form-textarea"
+              placeholder="请输入备注信息"
+              rows="3"
+            ></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelDetailBtn">取消</button>
+        <button class="btn btn-primary" id="saveDetailBtn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="spinner"></div>
+    <div class="loading-text">处理中...</div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/contract-api.js"></script>
+  <script>
+    // State Management
+    let details = [];
+    let editingDetailIndex = -1;
+    let attachments = [];
+
+    // DOM Elements
+    const formAlert = document.getElementById('formAlert');
+    const selectSupplierBtn = document.getElementById('selectSupplierBtn');
+    const supplierModal = document.getElementById('supplierModal');
+    const closeSupplierModal = document.getElementById('closeSupplierModal');
+    const cancelSupplierBtn = document.getElementById('cancelSupplierBtn');
+    const supplierSearchInput = document.getElementById('supplierSearchInput');
+    const searchSupplierBtn = document.getElementById('searchSupplierBtn');
+    const supplierTableBody = document.getElementById('supplierTableBody');
+    const detailModal = document.getElementById('detailModal');
+    const closeDetailModal = document.getElementById('closeDetailModal');
+    const cancelDetailBtn = document.getElementById('cancelDetailBtn');
+    const addDetailBtn = document.getElementById('addDetailBtn');
+    const saveDetailBtn = document.getElementById('saveDetailBtn');
+    const detailForm = document.getElementById('detailForm');
+    const detailTableBody = document.getElementById('detailTableBody');
+    const totalAmount = document.getElementById('totalAmount');
+    const saveBtn = document.getElementById('saveBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const attachmentsList = document.getElementById('attachmentsList');
+
+    // Tab Switching
+    document.querySelectorAll('.tab-item').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        const tabId = e.target.getAttribute('data-tab');
+
+        // Update active tab
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+
+        // Update tab content
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(`${tabId}-tab`).classList.add('active');
+      });
+    });
+
+    // Utility Functions
+    function showLoading() {
+      loadingOverlay.classList.remove('hidden');
+    }
+
+    function hideLoading() {
+      loadingOverlay.classList.add('hidden');
+    }
+
+    function showAlert(message, type = 'info') {
+      formAlert.className = `alert alert-${type}`;
+      formAlert.textContent = message;
+      formAlert.classList.remove('hidden');
+
+      setTimeout(() => {
+        formAlert.classList.add('hidden');
+      }, 5000);
+    }
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('zh-CN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(amount);
+    }
+
+    // Supplier Modal Functions
+    function openSupplierModal() {
+      supplierModal.classList.add('active');
+      supplierSearchInput.focus();
+    }
+
+    function closeSupplierModalFn() {
+      supplierModal.classList.remove('active');
+      supplierSearchInput.value = '';
+      supplierTableBody.innerHTML = `
+        <tr>
+          <td colspan="5" style="text-align: center; color: var(--text-secondary);">
+            请输入关键词查询
+          </td>
+        </tr>
+      `;
+    }
+
+    // Mock Supplier Search
+    async function searchSuppliers(keyword) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const mockSuppliers = [
+        { id: 'SUP001', code: 'SUP-001', name: '北京科技有限公司', contact: '张三', phone: '13800138001' },
+        { id: 'SUP002', code: 'SUP-002', name: '上海贸易公司', contact: '李四', phone: '13900139002' },
+        { id: 'SUP003', code: 'SUP-003', name: '广州制造企业', contact: '王五', phone: '13700137003' },
+        { id: 'SUP004', code: 'SUP-004', name: '深圳电子商务公司', contact: '赵六', phone: '13600136004' },
+        { id: 'SUP005', code: 'SUP-005', name: '杭州网络科技公司', contact: '孙七', phone: '13500135005' }
+      ];
+
+      return mockSuppliers.filter(s =>
+        s.name.includes(keyword) || s.code.includes(keyword) || s.contact.includes(keyword)
+      );
+    }
+
+    // Supplier Search Handler
+    searchSupplierBtn.addEventListener('click', async () => {
+      const keyword = supplierSearchInput.value.trim();
+
+      if (!keyword) {
+        supplierTableBody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; color: var(--text-secondary);">
+              请输入关键词查询
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      showLoading();
+
+      try {
+        const suppliers = await searchSuppliers(keyword);
+        hideLoading();
+
+        if (suppliers.length === 0) {
+          supplierTableBody.innerHTML = `
+            <tr>
+              <td colspan="5" style="text-align: center; color: var(--text-secondary);">
+                未找到匹配的供应商
+              </td>
+            </tr>
+          `;
+        } else {
+          supplierTableBody.innerHTML = suppliers.map(supplier => `
+            <tr>
+              <td>${supplier.code}</td>
+              <td>${supplier.name}</td>
+              <td>${supplier.contact}</td>
+              <td>${supplier.phone}</td>
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-primary"
+                  onclick="selectSupplier('${supplier.id}', '${supplier.name}')"
+                >
+                  选择
+                </button>
+              </td>
+            </tr>
+          `).join('');
+        }
+      } catch (error) {
+        hideLoading();
+        supplierTableBody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; color: var(--error-color);">
+              查询失败: ${error.message}
+            </td>
+          </tr>
+        `;
+      }
+    });
+
+    // Select Supplier Function
+    window.selectSupplier = function(id, name) {
+      document.getElementById('supplierId').value = id;
+      document.getElementById('supplierName').value = name;
+      closeSupplierModalFn();
+    };
+
+    // Supplier Modal Event Handlers
+    selectSupplierBtn.addEventListener('click', openSupplierModal);
+    closeSupplierModal.addEventListener('click', closeSupplierModalFn);
+    cancelSupplierBtn.addEventListener('click', closeSupplierModalFn);
+
+    supplierModal.addEventListener('click', (e) => {
+      if (e.target === supplierModal) {
+        closeSupplierModalFn();
+      }
+    });
+
+    // Detail Modal Functions
+    function openDetailModal(index = -1) {
+      editingDetailIndex = index;
+
+      if (index >= 0 && details[index]) {
+        // Edit mode
+        document.getElementById('detailModalTitle').textContent = '编辑商品明细';
+        const detail = details[index];
+        document.getElementById('productCode').value = detail.productCode;
+        document.getElementById('productName').value = detail.productName;
+        document.getElementById('specification').value = detail.specification || '';
+        document.getElementById('unit').value = detail.unit;
+        document.getElementById('quantity').value = detail.quantity;
+        document.getElementById('unitPrice').value = detail.unitPrice;
+        document.getElementById('detailRemark').value = detail.remark || '';
+        calculateDetailAmount();
+      } else {
+        // Add mode
+        document.getElementById('detailModalTitle').textContent = '添加商品明细';
+        detailForm.reset();
+        document.getElementById('detailAmount').value = '0.00';
+      }
+
+      detailModal.classList.add('active');
+      document.getElementById('productCode').focus();
+    }
+
+    function closeDetailModalFn() {
+      detailModal.classList.remove('active');
+      editingDetailIndex = -1;
+      detailForm.reset();
+    }
+
+    function calculateDetailAmount() {
+      const quantity = parseFloat(document.getElementById('quantity').value) || 0;
+      const unitPrice = parseFloat(document.getElementById('unitPrice').value) || 0;
+      const amount = quantity * unitPrice;
+      document.getElementById('detailAmount').value = formatCurrency(amount);
+    }
+
+    // Calculate amount on input change
+    document.getElementById('quantity').addEventListener('input', calculateDetailAmount);
+    document.getElementById('unitPrice').addEventListener('input', calculateDetailAmount);
+
+    // Detail Modal Event Handlers
+    addDetailBtn.addEventListener('click', () => openDetailModal(-1));
+    closeDetailModal.addEventListener('click', closeDetailModalFn);
+    cancelDetailBtn.addEventListener('click', closeDetailModalFn);
+
+    detailModal.addEventListener('click', (e) => {
+      if (e.target === detailModal) {
+        closeDetailModalFn();
+      }
+    });
+
+    // Save Detail Handler
+    saveDetailBtn.addEventListener('click', () => {
+      const productCode = document.getElementById('productCode').value.trim();
+      const productName = document.getElementById('productName').value.trim();
+      const specification = document.getElementById('specification').value.trim();
+      const unit = document.getElementById('unit').value;
+      const quantity = parseFloat(document.getElementById('quantity').value);
+      const unitPrice = parseFloat(document.getElementById('unitPrice').value);
+      const remark = document.getElementById('detailRemark').value.trim();
+
+      if (!productCode || !productName || !unit || !quantity || !unitPrice) {
+        alert('请填写所有必填字段');
+        return;
+      }
+
+      const detail = {
+        productCode,
+        productName,
+        specification,
+        unit,
+        quantity,
+        unitPrice,
+        amount: quantity * unitPrice,
+        remark
+      };
+
+      if (editingDetailIndex >= 0) {
+        details[editingDetailIndex] = detail;
+      } else {
+        details.push(detail);
+      }
+
+      updateDetailTable();
+      calculateTotalAmount();
+      closeDetailModalFn();
+    });
+
+    // Update Detail Table
+    function updateDetailTable() {
+      if (details.length === 0) {
+        detailTableBody.innerHTML = `
+          <tr>
+            <td colspan="9" style="text-align: center; color: var(--text-secondary);">
+              暂无商品明细，请点击"添加明细"按钮
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      detailTableBody.innerHTML = details.map((detail, index) => `
+        <tr>
+          <td class="detail-row-number">${index + 1}</td>
+          <td>${detail.productCode}</td>
+          <td>${detail.productName}</td>
+          <td>${detail.specification || '-'}</td>
+          <td>${detail.unit}</td>
+          <td style="text-align: right;">${detail.quantity}</td>
+          <td style="text-align: right;">${formatCurrency(detail.unitPrice)}</td>
+          <td style="text-align: right;">${formatCurrency(detail.amount)}</td>
+          <td>
+            <div class="detail-table-actions">
+              <button
+                type="button"
+                class="btn btn-sm btn-secondary"
+                onclick="editDetail(${index})"
+              >
+                编辑
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-danger"
+                onclick="deleteDetail(${index})"
+              >
+                删除
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Edit Detail Function
+    window.editDetail = function(index) {
+      openDetailModal(index);
+    };
+
+    // Delete Detail Function
+    window.deleteDetail = function(index) {
+      if (confirm('确定要删除此商品明细吗？')) {
+        details.splice(index, 1);
+        updateDetailTable();
+        calculateTotalAmount();
+      }
+    };
+
+    // Calculate Total Amount
+    function calculateTotalAmount() {
+      const total = details.reduce((sum, detail) => sum + detail.amount, 0);
+      const currency = document.getElementById('currency').value;
+      totalAmount.value = `${currency} ${formatCurrency(total)}`;
+    }
+
+    document.getElementById('currency').addEventListener('change', calculateTotalAmount);
+
+    // File Upload Handlers
+    fileUploadArea.addEventListener('click', () => fileInput.click());
+
+    fileUploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      fileUploadArea.classList.add('dragover');
+    });
+
+    fileUploadArea.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      fileUploadArea.classList.remove('dragover');
+    });
+
+    fileUploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      fileUploadArea.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(e.target.files);
+    });
+
+    function handleFiles(files) {
+      for (const file of files) {
+        if (file.size > 10 * 1024 * 1024) {
+          alert(`文件 ${file.name} 超过 10MB，无法上传`);
+          continue;
+        }
+
+        attachments.push({
+          id: `ATT-${Date.now()}`,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          uploadDate: new Date().toISOString()
+        });
+      }
+
+      updateAttachmentsList();
+      fileInput.value = '';
+    }
+
+    function updateAttachmentsList() {
+      if (attachments.length === 0) {
+        attachmentsList.innerHTML = '';
+        return;
+      }
+
+      attachmentsList.innerHTML = attachments.map(att => `
+        <div class="attachment-item">
+          <div class="attachment-info">
+            <span class="attachment-icon">📄</span>
+            <div>
+              <div style="font-size: 14px;">${att.name}</div>
+              <div style="font-size: 12px; color: var(--text-secondary);">
+                ${formatFileSize(att.size)} | 上传于 ${new Date(att.uploadDate).toLocaleString('zh-CN')}
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="btn btn-sm btn-danger"
+            onclick="deleteAttachment('${att.id}')"
+          >
+            删除
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    window.deleteAttachment = function(id) {
+      if (confirm('确定要删除此附件吗？')) {
+        attachments = attachments.filter(a => a.id !== id);
+        updateAttachmentsList();
+      }
+    };
+
+    // Save Contract Handler
+    saveBtn.addEventListener('click', async () => {
+      const contractNumber = document.getElementById('contractNumber').value.trim();
+      const contractName = document.getElementById('contractName').value.trim();
+      const contractType = document.getElementById('contractType').value;
+      const supplierId = document.getElementById('supplierId').value;
+
+      if (!contractNumber || !contractName || !contractType || !supplierId) {
+        showAlert('请填写所有必填字段', 'warning');
+        return;
+      }
+
+      if (details.length === 0) {
+        showAlert('请至少添加一条商品明细', 'warning');
+        return;
+      }
+
+      showLoading();
+
+      try {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        hideLoading();
+        showAlert('合同保存成功！', 'success');
+      } catch (error) {
+        hideLoading();
+        showAlert(`保存失败: ${error.message}`, 'error');
+      }
+    });
+
+    // Submit Contract Handler
+    submitBtn.addEventListener('click', async () => {
+      const contractNumber = document.getElementById('contractNumber').value.trim();
+
+      if (!contractNumber) {
+        showAlert('请先保存合同', 'warning');
+        return;
+      }
+
+      showLoading();
+
+      try {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        hideLoading();
+        showAlert('合同已提交审批！', 'success');
+        document.getElementById('contractStatus').className = 'badge badge-info';
+        document.getElementById('contractStatus').textContent = '待审批';
+      } catch (error) {
+        hideLoading();
+        showAlert(`提交失败: ${error.message}`, 'error');
+      }
+    });
+
+    // Reset Handler
+    resetBtn.addEventListener('click', () => {
+      if (confirm('确定要重置表单吗？未保存的数据将丢失。')) {
+        document.getElementById('contractForm').reset();
+        details = [];
+        attachments = [];
+        updateDetailTable();
+        updateAttachmentsList();
+        calculateTotalAmount();
+        document.getElementById('contractStatus').className = 'badge badge-warning';
+        document.getElementById('contractStatus').textContent = '草稿';
+      }
+    });
+
+    // Initialize
+    updateDetailTable();
+    calculateTotalAmount();
+  </script>
+</body>
+</html>
