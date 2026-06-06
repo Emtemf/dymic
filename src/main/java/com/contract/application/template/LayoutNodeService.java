@@ -131,4 +131,16 @@ public class LayoutNodeService {
             return parent.getNodePath() + "." + fieldName;
         }
     }
+
+    /**
+     * 删除布局节点
+     */
+    @Transactional
+    public void deleteById(Long id) {
+        LayoutNode node = repository.findById(id);
+        if (node == null) {
+            throw new BizException("布局节点不存在：" + id);
+        }
+        repository.deleteById(id);
+    }
 }

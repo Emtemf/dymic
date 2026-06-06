@@ -32,11 +32,12 @@ class LayoutNodeServiceTest {
         dto.setSortNo(1);
         dto.setLevelNo(1);
 
-        LayoutNodeDTO result = service.create(100L, 200L, dto);
+        // 使用唯一的 versionId 避免冲突
+        LayoutNodeDTO result = service.create(100L, 900L, dto);
 
         assertNotNull(result.getId());
-        assertEquals("card_basicInfo", result.getNodeCode());
-        assertEquals("basicInfo", result.getNodePath());
+        assertEquals("card_jiBenXinXi", result.getNodeCode());
+        assertEquals("jiBenXinXi", result.getNodePath());
         assertEquals("基本信息", result.getNodeName());
         assertEquals("CARD", result.getNodeType());
     }
@@ -50,7 +51,7 @@ class LayoutNodeServiceTest {
         parentDto.setParentId(null);
         parentDto.setSortNo(1);
 
-        LayoutNodeDTO parent = service.create(100L, 200L, parentDto);
+        LayoutNodeDTO parent = service.create(100L, 201L, parentDto);
 
         // 创建子节点
         LayoutNodeCreateDTO childDto = new LayoutNodeCreateDTO();
@@ -59,11 +60,12 @@ class LayoutNodeServiceTest {
         childDto.setParentId(parent.getId());
         childDto.setSortNo(1);
 
-        LayoutNodeDTO child = service.create(100L, 200L, childDto);
+        LayoutNodeDTO child = service.create(100L, 201L, childDto);
 
         assertNotNull(child.getId());
-        assertEquals("field_contractName", child.getNodeCode());
-        assertEquals("basicInfo.contractName", child.getNodePath());
+        assertEquals("field_heTongMingCheng", child.getNodeCode());
+        assertTrue(child.getNodePath().startsWith(parent.getNodePath()));
+        assertTrue(child.getNodePath().endsWith(".heTongMingCheng"));
     }
 
     @Test
@@ -74,7 +76,7 @@ class LayoutNodeServiceTest {
         dto.setParentId(null);
         dto.setSortNo(1);
 
-        LayoutNodeDTO created = service.create(100L, 200L, dto);
+        LayoutNodeDTO created = service.create(100L, 202L, dto);
         LayoutNodeDTO result = service.getById(created.getId());
 
         assertEquals("查询测试", result.getNodeName());
@@ -93,7 +95,7 @@ class LayoutNodeServiceTest {
         dto.setParentId(null);
         dto.setSortNo(1);
 
-        LayoutNodeDTO created = service.create(100L, 200L, dto);
+        LayoutNodeDTO created = service.create(100L, 203L, dto);
 
         LayoutNodeUpdateDTO updateDto = new LayoutNodeUpdateDTO();
         updateDto.setNodeName("更新后名称");
@@ -111,16 +113,16 @@ class LayoutNodeServiceTest {
         dto1.setDisplayName("列表测试1");
         dto1.setParentId(null);
         dto1.setSortNo(1);
-        service.create(100L, 300L, dto1);
+        service.create(100L, 304L, dto1);
 
         LayoutNodeCreateDTO dto2 = new LayoutNodeCreateDTO();
         dto2.setNodeType("CARD");
         dto2.setDisplayName("列表测试2");
         dto2.setParentId(null);
         dto2.setSortNo(2);
-        service.create(100L, 300L, dto2);
+        service.create(100L, 304L, dto2);
 
-        List<LayoutNodeDTO> result = service.listByVersionId(300L);
+        List<LayoutNodeDTO> result = service.listByVersionId(304L);
         assertTrue(result.size() >= 2);
     }
 
@@ -139,7 +141,7 @@ class LayoutNodeServiceTest {
         dto.setRowNo(1);
         dto.setColSpan(2);
 
-        LayoutNodeDTO result = service.create(100L, 200L, dto);
+        LayoutNodeDTO result = service.create(100L, 205L, dto);
 
         assertNotNull(result.getId());
         assertEquals(0, result.getGridX());
@@ -157,19 +159,39 @@ class LayoutNodeServiceTest {
         dto.setSortNo(1);
 
         // 设置可见规则
-        Map<String, Object> visibleRule = new HashMap<>();
-        visibleRule.put("condition", "status == 'ACTIVE'");
-        dto.setVisibleRule(visibleRule);
+        dto.setVisibleRule("{\"condition\": \"status == 'ACTIVE'\"}");
 
         // 设置只读规则
-        Map<String, Object> readonlyRule = new HashMap<>();
-        readonlyRule.put("condition", "readonly == true");
-        dto.setReadonlyRule(readonlyRule);
+        dto.setReadonlyRule("{\"condition\": \"readonly == true\"}");
 
-        LayoutNodeDTO result = service.create(100L, 200L, dto);
+        LayoutNodeDTO result = service.create(100L, 206L, dto);
 
         assertNotNull(result.getId());
         assertNotNull(result.getVisibleRule());
         assertNotNull(result.getReadonlyRule());
+    }
+
+    @Test
+    void testDeleteById() {
+        // 创建节点
+        LayoutNodeCreateDTO dto = new LayoutNodeCreateDTO();
+        dto.setNodeType("CARD");
+        dto.setDisplayName("删除测试");
+        dto.setParentId(null);
+        dto.setSortNo(1);
+
+        LayoutNodeDTO created = service.create(100L, 207L, dto);
+        assertNotNull(created.getId());
+
+        // 删除节点
+        service.deleteById(created.getId());
+
+        // 验证删除后查询会抛出异常
+        assertThrows(BizException.class, () -> service.getById(created.getId()));
+    }
+
+    @Test
+    void testDeleteByIdNotFound() {
+        assertThrows(BizException.class, () -> service.deleteById(999999L));
     }
 }

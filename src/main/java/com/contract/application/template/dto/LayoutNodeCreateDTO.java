@@ -1,6 +1,8 @@
 package com.contract.application.template.dto;
 
 import lombok.Data;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.util.Map;
 
 /**
@@ -9,10 +11,15 @@ import java.util.Map;
 @Data
 public class LayoutNodeCreateDTO {
     private Long parentId;
+
+    @NotBlank(message = "节点类型不能为空")
     private String nodeType;
+
+    @NotBlank(message = "节点名称不能为空")
     private String displayName;
-    private Integer sortNo;
-    private Integer levelNo;
+
+    private Integer sortNo;        // 默认 0
+    private Integer levelNo;       // 默认 1
 
     // Grid 布局属性
     private Integer gridX;

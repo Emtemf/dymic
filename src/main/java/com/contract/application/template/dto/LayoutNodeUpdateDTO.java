@@ -1,6 +1,7 @@
 package com.contract.application.template.dto;
 
 import lombok.Data;
+import jakarta.validation.constraints.NotBlank;
 import java.util.Map;
 
 /**
@@ -8,6 +9,7 @@ import java.util.Map;
  */
 @Data
 public class LayoutNodeUpdateDTO {
+    @NotBlank(message = "节点名称不能为空")
     private String nodeName;
     private Integer sortNo;
 

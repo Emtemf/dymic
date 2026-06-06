@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -47,4 +48,8 @@ public class LayoutNodeDTO {
 
     // 子节点列表（用于树形结构）
     private List<LayoutNodeDTO> children;
+
+    // 审计字段
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

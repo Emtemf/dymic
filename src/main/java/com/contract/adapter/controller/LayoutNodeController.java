@@ -5,6 +5,7 @@ import com.contract.application.template.dto.LayoutNodeDTO;
 import com.contract.application.template.dto.LayoutNodeCreateDTO;
 import com.contract.application.template.dto.LayoutNodeUpdateDTO;
 import com.contract.common.result.Result;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -25,7 +26,7 @@ public class LayoutNodeController {
     public Result<LayoutNodeDTO> create(
         @PathVariable Long templateId,
         @PathVariable Long versionId,
-        @RequestBody LayoutNodeCreateDTO dto
+        @Valid @RequestBody LayoutNodeCreateDTO dto
     ) {
         LayoutNodeDTO result = service.create(templateId, versionId, dto);
         return Result.ok(result);
@@ -55,9 +56,18 @@ public class LayoutNodeController {
     @PutMapping("/{id}")
     public Result<LayoutNodeDTO> update(
         @PathVariable Long id,
-        @RequestBody LayoutNodeUpdateDTO dto
+        @Valid @RequestBody LayoutNodeUpdateDTO dto
     ) {
         LayoutNodeDTO result = service.update(id, dto);
         return Result.ok(result);
+    }
+
+    /**
+     * 删除布局节点
+     */
+    @DeleteMapping("/{id}")
+    public Result<Void> delete(@PathVariable Long id) {
+        service.deleteById(id);
+        return Result.ok();
     }
 }
