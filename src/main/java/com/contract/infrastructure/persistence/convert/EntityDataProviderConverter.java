@@ -3,6 +3,7 @@ package com.contract.infrastructure.persistence.convert;
 import com.contract.adapter.persistence.entity.DataProviderEntity;
 import com.contract.domain.template.DataProvider;
 import org.mapstruct.Mapper;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.BeanMapping;

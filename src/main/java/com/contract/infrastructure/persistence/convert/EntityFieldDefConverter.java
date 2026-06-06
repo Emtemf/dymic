@@ -3,6 +3,7 @@ package com.contract.infrastructure.persistence.convert;
 import com.contract.adapter.persistence.entity.FieldDefEntity;
 import com.contract.domain.template.FieldDef;
 import org.mapstruct.Mapper;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
@@ -19,6 +20,6 @@ public interface EntityFieldDefConverter {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    @NullValuePropertyMappingStrategy(NullValuePropertyMappingStrategy.IGNORE)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDomain(FieldDef domain, @MappingTarget FieldDefEntity entity);
 }

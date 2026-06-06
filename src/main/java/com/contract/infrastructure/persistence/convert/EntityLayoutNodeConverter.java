@@ -3,6 +3,7 @@ package com.contract.infrastructure.persistence.convert;
 import com.contract.adapter.persistence.entity.LayoutNodeEntity;
 import com.contract.domain.template.LayoutNode;
 import org.mapstruct.Mapper;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.BeanMapping;

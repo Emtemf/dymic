@@ -1,0 +1,225 @@
+package com.contract.infrastructure.persistence.convert;
+
+import com.contract.adapter.persistence.entity.FieldDefEntity;
+import com.contract.domain.template.FieldDef;
+import org.mapstruct.Mapper;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import java.util.List;
+/**
+ * FieldDef Entity ↔ Domain 转换器
+ */
+@Mapper(componentModel = "spring")
+public interface EntityFieldDefConverter {
+    FieldDef toDomain(FieldDefEntity entity);
+    FieldDefEntity toEntity(FieldDef domain);
+    List<FieldDef> toDomainList(List<FieldDefEntity> entities);
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEntityFromDomain(FieldDef domain, @MappingTarget FieldDefEntity entity);
+}
+package com.contract.infrastructure.persistence.convert;
+
+import com.contract.adapter.persistence.entity.LayoutNodeEntity;
+import com.contract.domain.template.LayoutNode;
+import org.mapstruct.Mapper;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import java.util.List;
+/**
+ * LayoutNode Entity ↔ Domain 转换器
+ */
+@Mapper(componentModel = "spring")
+public interface EntityLayoutNodeConverter {
+    /**
+     * Entity → Domain
+     */
+    LayoutNode toDomain(LayoutNodeEntity entity);
+     * Domain → Entity
+    LayoutNodeEntity toEntity(LayoutNode domain);
+     * Entity List → Domain List
+    List<LayoutNode> toDomainList(List<LayoutNodeEntity> entities);
+     * 更新 Entity（部分更新）
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEntityFromDomain(LayoutNode domain, @MappingTarget LayoutNodeEntity entity);
+}
+package com.contract.infrastructure.persistence.convert;
+
+import com.contract.adapter.persistence.entity.FieldComponentEntity;
+import com.contract.domain.template.FieldComponent;
+import org.mapstruct.Mapper;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import java.util.List;
+@Mapper(componentModel = "spring")
+public interface EntityFieldComponentConverter {
+    FieldComponent toDomain(FieldComponentEntity entity);
+    FieldComponentEntity toEntity(FieldComponent domain);
+    List<FieldComponent> toDomainList(List<FieldComponentEntity> entities);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    void updateEntityFromDomain(FieldComponent domain, @MappingTarget FieldComponentEntity entity);
+}
+package com.contract.infrastructure.persistence.convert;
+
+import com.contract.adapter.persistence.entity.DataProviderEntity;
+import com.contract.domain.template.DataProvider;
+import org.mapstruct.Mapper;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import java.util.List;
+/**
+ * 数据提供方 Entity <-> Domain 转换器
+ */
+@Mapper(componentModel = "spring")
+public interface EntityDataProviderConverter {
+    DataProvider toDomain(DataProviderEntity entity);
+    DataProviderEntity toEntity(DataProvider domain);
+    List<DataProvider> toDomainList(List<DataProviderEntity> entities);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    void updateEntityFromDomain(DataProvider domain, @MappingTarget DataProviderEntity entity);
+}
+package com.contract.application.template.convert;
+
+import com.contract.application.template.dto.FieldDefDTO;
+import com.contract.domain.template.FieldDef;
+import org.mapstruct.Mapper;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import java.util.List;
+/**
+ * FieldDef Domain ↔ DTO 转换器
+ */
+@Mapper(componentModel = "spring")
+public interface FieldDefConverter {
+    FieldDefDTO toDTO(FieldDef domain);
+    FieldDef toDomain(FieldDefDTO dto);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateDomainFromDTO(FieldDefDTO dto, @MappingTarget FieldDef domain);
+    List<FieldDefDTO> toDTOList(List<FieldDef> domains);
+}
+package com.contract.application.template.convert;
+
+import com.contract.application.template.dto.DataProviderDTO;
+import com.contract.application.template.dto.DataProviderCreateDTO;
+import com.contract.application.template.dto.DataProviderUpdateDTO;
+import com.contract.domain.template.DataProvider;
+import org.mapstruct.Mapper;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import java.util.List;
+/**
+ * 数据提供方 DTO <-> Domain 转换器
+ */
+@Mapper(componentModel = "spring")
+public interface DataProviderConverter {
+    @Mapping(target = "configJson", ignore = true)
+    DataProviderDTO toDTO(DataProvider domain);
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "createdName", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "updatedName", ignore = true)
+    DataProvider toDomain(DataProviderCreateDTO dto);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "providerCode", ignore = true)
+    @Mapping(target = "providerType", ignore = true)
+    void updateDomainFromDTO(DataProviderUpdateDTO dto, @MappingTarget DataProvider domain);
+    List<DataProviderDTO> toDTOList(List<DataProvider> domains);
+}
+package com.contract.application.template.convert;
+
+import com.contract.application.template.dto.FieldComponentDTO;
+import com.contract.domain.template.FieldComponent;
+import org.mapstruct.Mapper;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import java.util.List;
+@Mapper(componentModel = "spring")
+public interface FieldComponentConverter {
+    FieldComponentDTO toDTO(FieldComponent domain);
+    FieldComponent toDomain(FieldComponentDTO dto);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateDomainFromDTO(FieldComponentDTO dto, @MappingTarget FieldComponent domain);
+    List<FieldComponentDTO> toDTOList(List<FieldComponent> domains);
+}
+package com.contract.application.template.convert;
+
+import com.contract.application.template.dto.LayoutNodeDTO;
+import com.contract.application.template.dto.LayoutNodeCreateDTO;
+import com.contract.application.template.dto.LayoutNodeUpdateDTO;
+import com.contract.domain.template.LayoutNode;
+import com.contract.common.util.JsonbUtils;
+import org.mapstruct.Mapper;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import java.util.List;
+import java.util.Map;
+/**
+ * LayoutNode Domain ↔ DTO 转换器
+ */
+@Mapper(componentModel = "spring")
+public interface LayoutNodeConverter {
+    /**
+     * Domain → DTO
+     */
+    @Mapping(target = "visibleRule", expression = "java(mapObjectToMap(domain.getVisibleRule()))")
+    @Mapping(target = "readonlyRule", expression = "java(mapObjectToMap(domain.getReadonlyRule()))")
+    @Mapping(target = "propsJson", expression = "java(mapObjectToMap(domain.getPropsJson()))")
+    LayoutNodeDTO toDTO(LayoutNode domain);
+     * Domain List → DTO List
+    List<LayoutNodeDTO> toDTOList(List<LayoutNode> domains);
+     * CreateDTO → Domain
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "templateId", ignore = true)
+    @Mapping(target = "templateVersionId", ignore = true)
+    @Mapping(target = "nodeCode", ignore = true)
+    @Mapping(target = "nodePath", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "visibleRule", expression = "java(dto.getVisibleRule())")
+    @Mapping(target = "readonlyRule", expression = "java(dto.getReadonlyRule())")
+    @Mapping(target = "propsJson", expression = "java(dto.getPropsJson())")
+    LayoutNode toDomain(LayoutNodeCreateDTO dto);
+     * 更新 Domain（部分更新）
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "parentId", ignore = true)
+    @Mapping(target = "nodeType", ignore = true)
+    void updateDomainFromDTO(LayoutNodeUpdateDTO dto, @MappingTarget LayoutNode domain);
+     * Object → Map 转换（用于 JSONB 字段）
+    default Map<String, Object> mapObjectToMap(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        if (obj instanceof Map) {
+            return (Map<String, Object>) obj;
+        if (obj instanceof String) {
+            return JsonbUtils.fromJson((String) obj, Map.class);
+        return null;
+    }
+}

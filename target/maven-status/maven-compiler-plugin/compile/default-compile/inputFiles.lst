@@ -12,6 +12,8 @@
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/persistence/repository/TemplateVersionRepositoryImpl.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/adapter/persistence/entity/LayoutNodeEntity.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/persistence/mapper/FieldDefMapper.java
+/home/wula/IdeaProjects/dymic/src/main/java/com/contract/domain/template/ActionConfig.java
+/home/wula/IdeaProjects/dymic/src/main/java/com/contract/domain/template/repository/ActionConfigRepository.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/common/util/ChineseToPinyin.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/application/template/TemplateVersionService.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/domain/template/repository/FieldDefRepository.java
@@ -25,6 +27,7 @@
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/domain/template/TemplateVersion.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/common/exception/GlobalExceptionHandler.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/domain/template/repository/DataProviderRepository.java
+/home/wula/IdeaProjects/dymic/src/main/java/com/contract/application/template/dto/ActionConfigDTO.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/common/exception/BizException.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/adapter/controller/LayoutNodeController.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/domain/template/LayoutNode.java

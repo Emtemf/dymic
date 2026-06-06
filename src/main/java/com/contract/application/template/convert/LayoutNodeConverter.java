@@ -6,6 +6,7 @@ import com.contract.application.template.dto.LayoutNodeUpdateDTO;
 import com.contract.domain.template.LayoutNode;
 import com.contract.common.util.JsonbUtils;
 import org.mapstruct.Mapper;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.BeanMapping;
