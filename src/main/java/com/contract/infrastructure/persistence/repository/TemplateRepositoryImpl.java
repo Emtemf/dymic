@@ -1,8 +1,8 @@
 package com.contract.infrastructure.persistence.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.contract.adapter.persistence.entity.TemplateEntity;
-import com.contract.adapter.persistence.mapper.TemplateMapper;
+import com.contract.infrastructure.persistence.entity.TemplateEntity;
+import com.contract.infrastructure.persistence.mapper.TemplateMapper;
 import com.contract.domain.template.Template;
 import com.contract.domain.template.repository.TemplateRepository;
 import lombok.RequiredArgsConstructor;

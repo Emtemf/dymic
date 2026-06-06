@@ -1,7 +1,7 @@
 package com.contract.infrastructure.persistence.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.contract.adapter.persistence.entity.FieldDefEntity;
+import com.contract.infrastructure.persistence.entity.FieldDefEntity;
 import com.contract.domain.template.FieldDef;
 import com.contract.domain.template.repository.FieldDefRepository;
 import com.contract.infrastructure.persistence.convert.EntityFieldDefConverter;

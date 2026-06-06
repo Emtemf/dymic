@@ -1,8 +1,8 @@
 package com.contract.infrastructure.persistence.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.contract.adapter.persistence.entity.DataProviderEntity;
-import com.contract.adapter.persistence.mapper.DataProviderMapper;
+import com.contract.infrastructure.persistence.entity.DataProviderEntity;
+import com.contract.infrastructure.persistence.mapper.DataProviderMapper;
 import com.contract.domain.template.DataProvider;
 import com.contract.domain.template.repository.DataProviderRepository;
 import com.contract.infrastructure.persistence.convert.EntityDataProviderConverter;

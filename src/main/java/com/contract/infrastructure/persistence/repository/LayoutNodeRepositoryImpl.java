@@ -1,8 +1,8 @@
 package com.contract.infrastructure.persistence.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.contract.adapter.persistence.entity.LayoutNodeEntity;
-import com.contract.adapter.persistence.mapper.LayoutNodeMapper;
+import com.contract.infrastructure.persistence.entity.LayoutNodeEntity;
+import com.contract.infrastructure.persistence.mapper.LayoutNodeMapper;
 import com.contract.domain.template.LayoutNode;
 import com.contract.domain.template.repository.LayoutNodeRepository;
 import com.contract.infrastructure.persistence.convert.EntityLayoutNodeConverter;

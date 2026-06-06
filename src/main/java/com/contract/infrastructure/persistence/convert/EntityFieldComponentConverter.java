@@ -1,6 +1,6 @@
 package com.contract.infrastructure.persistence.convert;
 
-import com.contract.adapter.persistence.entity.FieldComponentEntity;
+import com.contract.infrastructure.persistence.entity.FieldComponentEntity;
 import com.contract.domain.template.FieldComponent;
 import org.mapstruct.Mapper;
 import org.mapstruct.BeanMapping;
