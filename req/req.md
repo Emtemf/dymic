@@ -1037,10 +1037,8 @@ CREATE TABLE t_ui_template (
     status VARCHAR(50) NOT NULL DEFAULT 'ENABLED',
     current_version_id BIGINT,
     created_by BIGINT,
-    created_name VARCHAR(100),
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_by BIGINT,
-    updated_name VARCHAR(100),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0,
     CONSTRAINT uk_ui_template_code UNIQUE (template_code)
@@ -1070,10 +1068,8 @@ CREATE TABLE t_ui_template_version (
     schema_hash VARCHAR(128),
     remark VARCHAR(1000),
     created_by BIGINT,
-    created_name VARCHAR(100),
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_by BIGINT,
-    updated_name VARCHAR(100),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0,
     CONSTRAINT uk_ui_template_version UNIQUE (template_id, version_no)
@@ -1271,10 +1267,8 @@ CREATE TABLE t_ui_data_provider (
     status VARCHAR(50) NOT NULL DEFAULT 'ENABLED',
     props_json JSONB,
     created_by BIGINT,
-    created_name VARCHAR(100),
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_by BIGINT,
-    updated_name VARCHAR(100),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0,
     CONSTRAINT uk_ui_data_provider_code UNIQUE (provider_code)
@@ -1446,10 +1440,8 @@ CREATE TABLE t_contract (
     source_system_code VARCHAR(100),
     source_biz_id VARCHAR(200),
     created_by BIGINT,
-    created_name VARCHAR(100),
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_by BIGINT,
-    updated_name VARCHAR(100),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0
 );
@@ -1476,7 +1468,6 @@ CREATE TABLE t_contract_data_snapshot (
     source_message_id BIGINT,
     save_reason VARCHAR(500),
     created_by BIGINT,
-    created_name VARCHAR(100),
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uk_contract_snapshot_no UNIQUE (contract_id, snapshot_no)
 );
