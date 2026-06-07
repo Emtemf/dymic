@@ -38,6 +38,7 @@ public class SchemaSaveDTO {
     @Data
     public static class FieldDefSaveItem {
         private Long id;
+        private Long layoutNodeId;
         private String fieldCode;
         private String fieldPath;
         private String fieldNameCn;
@@ -49,6 +50,8 @@ public class SchemaSaveDTO {
         private String defaultValue;
         private String validateRule;
         private String propsJson;
+        private String placeholder;
+        private Integer sortNo;
     }
 
     @Data
