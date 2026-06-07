@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-07T21:33:07+0800",
+    date = "2026-06-06T23:35:17+0800",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.11 (Ubuntu)"
 )
 @Component
@@ -48,8 +48,6 @@ public class LayoutNodeConverterImpl implements LayoutNodeConverter {
         layoutNodeDTO.visibleRule( domain.getVisibleRule() );
         layoutNodeDTO.readonlyRule( domain.getReadonlyRule() );
         layoutNodeDTO.propsJson( domain.getPropsJson() );
-        layoutNodeDTO.createdAt( domain.getCreatedAt() );
-        layoutNodeDTO.updatedAt( domain.getUpdatedAt() );
 
         return layoutNodeDTO.build();
     }
@@ -77,7 +75,6 @@ public class LayoutNodeConverterImpl implements LayoutNodeConverter {
         LayoutNode.LayoutNodeBuilder layoutNode = LayoutNode.builder();
 
         layoutNode.parentId( dto.getParentId() );
-        layoutNode.nodeName( dto.getNodeName() );
         layoutNode.nodeType( dto.getNodeType() );
         layoutNode.sortNo( dto.getSortNo() );
         layoutNode.levelNo( dto.getLevelNo() );

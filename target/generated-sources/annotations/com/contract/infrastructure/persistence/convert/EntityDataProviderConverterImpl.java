@@ -1,7 +1,7 @@
 package com.contract.infrastructure.persistence.convert;
 
+import com.contract.adapter.persistence.entity.DataProviderEntity;
 import com.contract.domain.template.DataProvider;
-import com.contract.infrastructure.persistence.entity.DataProviderEntity;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-07T21:33:07+0800",
+    date = "2026-06-06T23:35:17+0800",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.11 (Ubuntu)"
 )
 @Component
@@ -30,7 +30,6 @@ public class EntityDataProviderConverterImpl implements EntityDataProviderConver
         dataProvider.configJson( entity.getConfigJson() );
         dataProvider.cacheEnabled( entity.getCacheEnabled() );
         dataProvider.cacheTtlSeconds( entity.getCacheTtlSeconds() );
-        dataProvider.isTemporary( entity.getIsTemporary() );
         dataProvider.status( entity.getStatus() );
         dataProvider.createdBy( entity.getCreatedBy() );
         dataProvider.createdName( entity.getCreatedName() );
@@ -38,7 +37,6 @@ public class EntityDataProviderConverterImpl implements EntityDataProviderConver
         dataProvider.updatedBy( entity.getUpdatedBy() );
         dataProvider.updatedName( entity.getUpdatedName() );
         dataProvider.updatedAt( entity.getUpdatedAt() );
-        dataProvider.isDeleted( entity.getIsDeleted() );
 
         return dataProvider.build();
     }
@@ -58,7 +56,6 @@ public class EntityDataProviderConverterImpl implements EntityDataProviderConver
         dataProviderEntity.setConfigJson( domain.getConfigJson() );
         dataProviderEntity.setCacheEnabled( domain.getCacheEnabled() );
         dataProviderEntity.setCacheTtlSeconds( domain.getCacheTtlSeconds() );
-        dataProviderEntity.setIsTemporary( domain.getIsTemporary() );
         dataProviderEntity.setStatus( domain.getStatus() );
         dataProviderEntity.setCreatedBy( domain.getCreatedBy() );
         dataProviderEntity.setCreatedName( domain.getCreatedName() );
@@ -66,7 +63,6 @@ public class EntityDataProviderConverterImpl implements EntityDataProviderConver
         dataProviderEntity.setUpdatedBy( domain.getUpdatedBy() );
         dataProviderEntity.setUpdatedName( domain.getUpdatedName() );
         dataProviderEntity.setUpdatedAt( domain.getUpdatedAt() );
-        dataProviderEntity.setIsDeleted( domain.getIsDeleted() );
 
         return dataProviderEntity;
     }
@@ -108,9 +104,6 @@ public class EntityDataProviderConverterImpl implements EntityDataProviderConver
         }
         if ( domain.getCacheTtlSeconds() != null ) {
             entity.setCacheTtlSeconds( domain.getCacheTtlSeconds() );
-        }
-        if ( domain.getIsTemporary() != null ) {
-            entity.setIsTemporary( domain.getIsTemporary() );
         }
         if ( domain.getStatus() != null ) {
             entity.setStatus( domain.getStatus() );

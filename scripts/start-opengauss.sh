@@ -1,52 +1,64 @@
 #!/bin/bash
 
-# openGauss Docker 启动脚本
+# openGauss Docker容器启动脚本
 
-CONTAINER_NAME="opengauss-contract"
-IMAGE="enmotech/opengauss:5.0.0"
-PORT="5432"
-PASSWORD="OpenGauss@123"
-DATA_DIR="/data/opengauss"
+# 容器名称
+CONTAINER_NAME="opengauss-dev"
 
-echo "=== 启动 openGauss 容器 ==="
+# 数据库配置
+DB_PORT="5432"
+DB_USER="gaussdb"
+DB_PASSWORD="Gaussdb@123"
+DB_NAME="postgres"
 
-# 检查容器是否已存在
-if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
-    echo "容器 ${CONTAINER_NAME} 已存在"
-    read -p "是否删除并重新创建？(y/n): " confirm
-    if [ "$confirm" = "y" ]; then
-        docker rm -f ${CONTAINER_NAME}
-    else
-        echo "取消操作"
-        exit 1
-    fi
-fi
+# 数据持久化目录
+DATA_DIR="/home/wula/.local/opengauss-data"
+
+echo "======================================"
+echo "启动openGauss Docker容器"
+echo "======================================"
 
 # 创建数据目录
-sudo mkdir -p ${DATA_DIR}
-sudo chown -R $(whoami):$(whoami) ${DATA_DIR}
+mkdir -p "$DATA_DIR"
+
+# 检查是否已有容器
+if docker ps -a | grep -q "$CONTAINER_NAME"; then
+    echo "容器已存在，删除旧容器..."
+    docker rm -f "$CONTAINER_NAME"
+fi
 
 # 启动容器
+echo "启动openGauss容器..."
 docker run -d \
-    --name ${CONTAINER_NAME} \
-    -p ${PORT}:5432 \
-    -e GS_PASSWORD=${PASSWORD} \
-    -v ${DATA_DIR}:/var/lib/opengauss \
-    ${IMAGE}
+    --name "$CONTAINER_NAME" \
+    --privileged=true \
+    -p "$DB_PORT:5432" \
+    -e GS_PASSWORD="$DB_PASSWORD" \
+    -v "$DATA_DIR:/var/lib/opengauss" \
+    opengauss/opengauss:latest
 
-echo "=== 等待 openGauss 启动 ==="
+# 等待容器启动
+echo "等待数据库启动..."
 sleep 10
 
 # 检查容器状态
-if docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
-    echo "✅ openGauss 启动成功"
-    echo "连接信息："
-    echo "  Host: localhost"
-    echo "  Port: ${PORT}"
-    echo "  User: gaussdb"
-    echo "  Password: ${PASSWORD}"
-else
-    echo "❌ openGauss 启动失败"
-    docker logs ${CONTAINER_NAME}
-    exit 1
-fi
+docker ps | grep "$CONTAINER_NAME"
+
+echo ""
+echo "======================================"
+echo "openGauss 启动成功！"
+echo "======================================"
+echo ""
+echo "连接信息："
+echo "  主机: localhost"
+echo "  端口: $DB_PORT"
+echo "  用户: $DB_USER"
+echo "  密码: $DB_PASSWORD"
+echo "  数据库: $DB_NAME"
+echo ""
+echo "连接命令："
+echo "  docker exec -it $CONTAINER_NAME gsql -d $DB_NAME -U $DB_USER -W $DB_PASSWORD"
+echo ""
+echo "JDBC URL："
+echo "  jdbc:postgresql://localhost:$DB_PORT/$DB_NAME"
+echo ""
