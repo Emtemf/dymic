@@ -1,7 +1,7 @@
 package com.contract.infrastructure.persistence.convert;
 
-import com.contract.adapter.persistence.entity.FieldComponentEntity;
 import com.contract.domain.template.FieldComponent;
+import com.contract.infrastructure.persistence.entity.FieldComponentEntity;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-06T23:35:17+0800",
+    date = "2026-06-07T21:33:07+0800",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.11 (Ubuntu)"
 )
 @Component
@@ -21,26 +21,27 @@ public class EntityFieldComponentConverterImpl implements EntityFieldComponentCo
             return null;
         }
 
-        FieldComponent fieldComponent = new FieldComponent();
+        FieldComponent.FieldComponentBuilder fieldComponent = FieldComponent.builder();
 
-        fieldComponent.setId( entity.getId() );
-        fieldComponent.setTemplateId( entity.getTemplateId() );
-        fieldComponent.setTemplateVersionId( entity.getTemplateVersionId() );
-        fieldComponent.setFieldDefId( entity.getFieldDefId() );
-        fieldComponent.setLayoutNodeId( entity.getLayoutNodeId() );
-        fieldComponent.setComponentType( entity.getComponentType() );
-        fieldComponent.setLabelName( entity.getLabelName() );
-        fieldComponent.setPlaceholder( entity.getPlaceholder() );
-        fieldComponent.setSortNo( entity.getSortNo() );
-        fieldComponent.setComponentProps( entity.getComponentProps() );
-        fieldComponent.setDataProviderId( entity.getDataProviderId() );
-        fieldComponent.setRequiredRule( entity.getRequiredRule() );
-        fieldComponent.setVisibleRule( entity.getVisibleRule() );
-        fieldComponent.setReadonlyRule( entity.getReadonlyRule() );
-        fieldComponent.setCreatedAt( entity.getCreatedAt() );
-        fieldComponent.setUpdatedAt( entity.getUpdatedAt() );
+        fieldComponent.id( entity.getId() );
+        fieldComponent.templateId( entity.getTemplateId() );
+        fieldComponent.templateVersionId( entity.getTemplateVersionId() );
+        fieldComponent.layoutNodeId( entity.getLayoutNodeId() );
+        fieldComponent.fieldDefId( entity.getFieldDefId() );
+        fieldComponent.componentType( entity.getComponentType() );
+        fieldComponent.labelName( entity.getLabelName() );
+        fieldComponent.placeholder( entity.getPlaceholder() );
+        fieldComponent.sortNo( entity.getSortNo() );
+        fieldComponent.requiredRule( entity.getRequiredRule() );
+        fieldComponent.readonlyRule( entity.getReadonlyRule() );
+        fieldComponent.visibleRule( entity.getVisibleRule() );
+        fieldComponent.componentProps( entity.getComponentProps() );
+        fieldComponent.dataProviderId( entity.getDataProviderId() );
+        fieldComponent.createdAt( entity.getCreatedAt() );
+        fieldComponent.updatedAt( entity.getUpdatedAt() );
+        fieldComponent.isDeleted( entity.getIsDeleted() );
 
-        return fieldComponent;
+        return fieldComponent.build();
     }
 
     @Override
@@ -67,6 +68,7 @@ public class EntityFieldComponentConverterImpl implements EntityFieldComponentCo
         fieldComponentEntity.setSortNo( domain.getSortNo() );
         fieldComponentEntity.setCreatedAt( domain.getCreatedAt() );
         fieldComponentEntity.setUpdatedAt( domain.getUpdatedAt() );
+        fieldComponentEntity.setIsDeleted( domain.getIsDeleted() );
 
         return fieldComponentEntity;
     }
@@ -132,6 +134,9 @@ public class EntityFieldComponentConverterImpl implements EntityFieldComponentCo
         }
         if ( domain.getUpdatedAt() != null ) {
             entity.setUpdatedAt( domain.getUpdatedAt() );
+        }
+        if ( domain.getIsDeleted() != null ) {
+            entity.setIsDeleted( domain.getIsDeleted() );
         }
     }
 }

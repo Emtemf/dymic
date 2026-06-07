@@ -1,7 +1,7 @@
 package com.contract.infrastructure.persistence.convert;
 
-import com.contract.adapter.persistence.entity.LayoutNodeEntity;
 import com.contract.domain.template.LayoutNode;
+import com.contract.infrastructure.persistence.entity.LayoutNodeEntity;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-06T23:35:17+0800",
+    date = "2026-06-07T21:33:07+0800",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.11 (Ubuntu)"
 )
 @Component
@@ -48,6 +48,7 @@ public class EntityLayoutNodeConverterImpl implements EntityLayoutNodeConverter 
         layoutNode.propsJson( entity.getPropsJson() );
         layoutNode.createdAt( entity.getCreatedAt() );
         layoutNode.updatedAt( entity.getUpdatedAt() );
+        layoutNode.isDeleted( entity.getIsDeleted() );
 
         return layoutNode.build();
     }
@@ -85,6 +86,7 @@ public class EntityLayoutNodeConverterImpl implements EntityLayoutNodeConverter 
         layoutNodeEntity.setPropsJson( domain.getPropsJson() );
         layoutNodeEntity.setCreatedAt( domain.getCreatedAt() );
         layoutNodeEntity.setUpdatedAt( domain.getUpdatedAt() );
+        layoutNodeEntity.setIsDeleted( domain.getIsDeleted() );
 
         return layoutNodeEntity;
     }
@@ -177,6 +179,9 @@ public class EntityLayoutNodeConverterImpl implements EntityLayoutNodeConverter 
         }
         if ( domain.getUpdatedAt() != null ) {
             entity.setUpdatedAt( domain.getUpdatedAt() );
+        }
+        if ( domain.getIsDeleted() != null ) {
+            entity.setIsDeleted( domain.getIsDeleted() );
         }
     }
 }

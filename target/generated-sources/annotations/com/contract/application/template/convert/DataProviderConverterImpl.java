@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-06T23:35:17+0800",
+    date = "2026-06-07T21:33:07+0800",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.11 (Ubuntu)"
 )
 @Component
@@ -29,8 +29,10 @@ public class DataProviderConverterImpl implements DataProviderConverter {
         dataProviderDTO.providerCode( domain.getProviderCode() );
         dataProviderDTO.providerName( domain.getProviderName() );
         dataProviderDTO.providerType( domain.getProviderType() );
+        dataProviderDTO.configJson( domain.getConfigJson() );
         dataProviderDTO.cacheEnabled( domain.getCacheEnabled() );
         dataProviderDTO.cacheTtlSeconds( domain.getCacheTtlSeconds() );
+        dataProviderDTO.isTemporary( domain.getIsTemporary() );
         dataProviderDTO.status( domain.getStatus() );
 
         return dataProviderDTO.build();
@@ -47,8 +49,11 @@ public class DataProviderConverterImpl implements DataProviderConverter {
         dataProvider.providerCode( dto.getProviderCode() );
         dataProvider.providerName( dto.getProviderName() );
         dataProvider.providerType( dto.getProviderType() );
+        dataProvider.configJson( dto.getConfigJson() );
         dataProvider.cacheEnabled( dto.getCacheEnabled() );
         dataProvider.cacheTtlSeconds( dto.getCacheTtlSeconds() );
+
+        dataProvider.isTemporary( 0 );
 
         return dataProvider.build();
     }
@@ -61,6 +66,9 @@ public class DataProviderConverterImpl implements DataProviderConverter {
 
         if ( dto.getProviderName() != null ) {
             domain.setProviderName( dto.getProviderName() );
+        }
+        if ( dto.getConfigJson() != null ) {
+            domain.setConfigJson( dto.getConfigJson() );
         }
         if ( dto.getCacheEnabled() != null ) {
             domain.setCacheEnabled( dto.getCacheEnabled() );

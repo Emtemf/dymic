@@ -16,10 +16,8 @@ CREATE TABLE IF NOT EXISTS t_ui_template (
     status VARCHAR(50) NOT NULL DEFAULT 'ENABLED',
     current_version_id BIGINT,
     created_by BIGINT,
-    created_name VARCHAR(100),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_by BIGINT,
-    updated_name VARCHAR(100),
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0,
     CONSTRAINT uk_ui_template_code UNIQUE (template_code)
@@ -39,10 +37,8 @@ CREATE TABLE IF NOT EXISTS t_ui_template_version (
     schema_hash VARCHAR(128),
     remark VARCHAR(1000),
     created_by BIGINT,
-    created_name VARCHAR(100),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_by BIGINT,
-    updated_name VARCHAR(100),
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0,
     CONSTRAINT uk_ui_template_version UNIQUE (template_id, version_no)
@@ -77,7 +73,9 @@ CREATE TABLE IF NOT EXISTS t_ui_layout_node (
     visible_rule JSON,
     readonly_rule JSON,
     props_json JSON,
+    created_by BIGINT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0,
     CONSTRAINT uk_ui_layout_node_code UNIQUE (template_version_id, node_code)
@@ -107,7 +105,9 @@ CREATE TABLE IF NOT EXISTS t_ui_field_def (
     default_value VARCHAR(1000),
     validate_rule JSON,
     props_json JSON,
+    created_by BIGINT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0,
     CONSTRAINT uk_ui_field_path UNIQUE (template_version_id, field_path)
@@ -134,7 +134,9 @@ CREATE TABLE IF NOT EXISTS t_ui_field_component (
     component_props JSON,
     data_provider_id BIGINT,
     sort_no INTEGER NOT NULL DEFAULT 0,
+    created_by BIGINT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0,
     CONSTRAINT uk_ui_field_component UNIQUE (template_version_id, layout_node_id, field_def_id)
@@ -154,12 +156,11 @@ CREATE TABLE IF NOT EXISTS t_ui_data_provider (
     config_json JSON NOT NULL,
     cache_enabled SMALLINT NOT NULL DEFAULT 0,
     cache_ttl_seconds INTEGER,
+    is_temporary SMALLINT NOT NULL DEFAULT 0,  -- 是否临时数据源（0/1）
     status VARCHAR(50) NOT NULL DEFAULT 'ENABLED',
     created_by BIGINT,
-    created_name VARCHAR(100),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_by BIGINT,
-    updated_name VARCHAR(100),
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0,
     CONSTRAINT uk_ui_data_provider_code UNIQUE (provider_code)
@@ -185,10 +186,8 @@ CREATE TABLE IF NOT EXISTS t_contract (
     source_system_code VARCHAR(100),
     source_biz_id VARCHAR(200),
     created_by BIGINT,
-    created_name VARCHAR(100),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_by BIGINT,
-    updated_name VARCHAR(100),
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0
 );
@@ -211,7 +210,6 @@ CREATE TABLE IF NOT EXISTS t_contract_data_snapshot (
     source_message_id BIGINT,
     save_reason VARCHAR(500),
     created_by BIGINT,
-    created_name VARCHAR(100),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uk_contract_snapshot_no UNIQUE (contract_id, snapshot_no)
 );
@@ -234,7 +232,10 @@ CREATE TABLE IF NOT EXISTS t_contract_field_value (
     value_datetime TIMESTAMP,
     value_bool SMALLINT,
     value_json JSON,
+    created_by BIGINT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0
 );
 
@@ -257,7 +258,9 @@ CREATE TABLE IF NOT EXISTS t_contract_detail_row (
     row_no INTEGER NOT NULL,
     row_data JSON NOT NULL,
     row_status VARCHAR(50) NOT NULL DEFAULT 'ACTIVE',
+    created_by BIGINT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0,
     CONSTRAINT uk_contract_detail_row_uid UNIQUE (contract_id, detail_code, row_uid)
@@ -283,7 +286,10 @@ CREATE TABLE IF NOT EXISTS t_contract_detail_field_value (
     value_datetime TIMESTAMP,
     value_bool SMALLINT,
     value_json JSON,
+    created_by BIGINT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0
 );
 
@@ -309,6 +315,9 @@ CREATE TABLE IF NOT EXISTS t_contract_search_index (
     contract_status VARCHAR(50),
     source_system_code VARCHAR(100),
     current_snapshot_id BIGINT NOT NULL,
+    created_by BIGINT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -329,8 +338,9 @@ CREATE TABLE IF NOT EXISTS t_contract_attachment (
     file_size BIGINT,
     biz_path VARCHAR(500),
     created_by BIGINT,
-    created_name VARCHAR(100),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0
 );
 
@@ -356,7 +366,9 @@ CREATE TABLE IF NOT EXISTS t_ui_query_config (
     bind_node_id BIGINT,
     page_size INTEGER DEFAULT 20,
     props_json JSON,
+    created_by BIGINT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0,
     CONSTRAINT uk_ui_query_code UNIQUE (template_version_id, query_code)
@@ -379,7 +391,9 @@ CREATE TABLE IF NOT EXISTS t_ui_query_param (
     required SMALLINT NOT NULL DEFAULT 0,
     default_value VARCHAR(1000),
     sort_no INTEGER NOT NULL DEFAULT 0,
+    created_by BIGINT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0,
     CONSTRAINT uk_ui_query_param UNIQUE (query_config_id, param_name)
@@ -397,7 +411,9 @@ CREATE TABLE IF NOT EXISTS t_ui_query_fill_rule (
     fill_mode VARCHAR(50) NOT NULL DEFAULT 'OVERWRITE',
     transform_json JSON,
     sort_no INTEGER NOT NULL DEFAULT 0,
+    created_by BIGINT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0
 );
@@ -422,7 +438,9 @@ CREATE TABLE IF NOT EXISTS t_ui_detail_table (
     allow_delete SMALLINT NOT NULL DEFAULT 1,
     delete_mode VARCHAR(50) NOT NULL DEFAULT 'MARK_IN_DRAFT',
     props_json JSON,
+    created_by BIGINT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0,
     CONSTRAINT uk_ui_detail_code UNIQUE (template_version_id, detail_code)
@@ -446,7 +464,9 @@ CREATE TABLE IF NOT EXISTS t_ui_action_config (
     after_rule JSON,
     props_json JSON,
     sort_no INTEGER NOT NULL DEFAULT 0,
+    created_by BIGINT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_deleted SMALLINT NOT NULL DEFAULT 0,
     CONSTRAINT uk_ui_action_code UNIQUE (template_version_id, action_code)

@@ -1,0 +1,192 @@
+<h2>设计第1部分：系统定位与功能范围</h2>
+<p class="subtitle">配置界面是什么，不是什么，核心闭环是什么</p>
+
+<div class="section">
+  <h3>🎯 系统定位</h3>
+  <div style="padding: 20px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
+    <h4 style="color: #4caf50; margin-bottom: 15px;">配置界面 = 开发验证工具（不是交付给业务用户的正式系统）</h4>
+
+    <div style="display: flex; gap: 20px;">
+      <div style="flex: 1; padding: 15px; background: white; border-radius: 8px;">
+        <div style="font-weight: bold; color: #4caf50; margin-bottom: 10px;">✅ 是什么</div>
+        <ul style="font-size: 14px; color: #333; list-style: none; padding: 0;">
+          <li style="margin-bottom: 8px;">• 验证后端API功能是否正确的工具</li>
+          <li style="margin-bottom: 8px;">• 开发人员自己验证配置流程</li>
+          <li style="margin-bottom: 8px;">• 验证数据入库是否正确</li>
+          <li style="margin-bottom: 8px;">• 验证动态渲染是否正确</li>
+          <li>• 相对简单，重点是功能完整</li>
+        </ul>
+      </div>
+
+      <div style="flex: 1; padding: 15px; background: white; border-radius: 8px;">
+        <div style="font-weight: bold; color: #f44336; margin-bottom: 10px;">❌ 不是什么</div>
+        <ul style="font-size: 14px; color: #333; list-style: none; padding: 0;">
+          <li style="margin-bottom: 8px;">• 不是低代码平台（不提供拖拽设计器给用户）</li>
+          <li style="margin-bottom: 8px;">• 不是审批系统（审批在其他系统）</li>
+          <li style="margin-bottom: 8px;">• 不是权限系统（权限在其他系统）</li>
+          <li style="margin-bottom: 8px;">• 不是用户管理（用户中心负责）</li>
+          <li>• 不交付给业务用户作为正式配置工具</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>📋 核心闭环（V1.0必须验证）</h3>
+  <div class="mockup">
+    <div class="mockup-header">配置 → 入库 → 预览 → 渲染 完整闭环</div>
+    <div class="mockup-body">
+      <div style="display: flex; gap: 10px; padding: 15px;">
+        <!-- 步骤1 -->
+        <div style="flex: 1; padding: 15px; border: 2px solid #4caf50; border-radius: 8px; text-align: center;">
+          <div style="background: #4caf50; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 10px;">步骤1</div>
+          <div style="font-weight: bold; margin-bottom: 8px;">配置模板</div>
+          <div style="font-size: 12px; color: #666; margin-bottom: 8px;">在 config.html 中配置</div>
+          <div style="font-size: 11px; color: #999;">
+            添加卡片 → 添加字段 → 添加按钮
+          </div>
+        </div>
+
+        <!-- 步骤2 -->
+        <div style="flex: 1; padding: 15px; border: 2px solid #2196f3; border-radius: 8px; text-align: center;">
+          <div style="background: #2196f3; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 10px;">步骤2</div>
+          <div style="font-weight: bold; margin-bottom: 8px;">数据入库</div>
+          <div style="font-size: 12px; color: #666; margin-bottom: 8px;">调用后端API保存</div>
+          <div style="font-size: 11px; color: #999;">
+            POST /api/layout-nodes<br>
+            POST /api/field-defs<br>
+            POST /api/action-configs
+          </div>
+        </div>
+
+        <!-- 步骤3 -->
+        <div style="flex: 1; padding: 15px; border: 2px solid #ff9800; border-radius: 8px; text-align: center;">
+          <div style="background: #ff9800; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 10px;">步骤3</div>
+          <div style="font-weight: bold; margin-bottom: 8px;">验证入库</div>
+          <div style="font-size: 12px; color: #666; margin-bottom: 8px;">在 data-viewer.html 验证</div>
+          <div style="font-size: 11px; color: #999;">
+            查看数据库中的配置JSON<br>
+            确认字段路径正确生成
+          </div>
+        </div>
+
+        <!-- 步骤4 -->
+        <div style="flex: 1; padding: 15px; border: 2px solid #9c27b0; border-radius: 8px; text-align: center;">
+          <div style="background: #9c27b0; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 10px;">步骤4</div>
+          <div style="font-weight: bold; margin-bottom: 8px;">预览渲染</div>
+          <div style="font-size: 12px; color: #666; margin-bottom: 8px;">在 preview.html 预览</div>
+          <div style="font-size: 11px; color: #999;">
+            GET /api/templates/{id}/schema<br>
+            动态渲染表单界面
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; padding: 10px; background: #fff3e0; border-radius: 8px; margin-top: 10px;">
+        <span style="font-weight: bold; color: #ff9800;">核心验证目标：</span>
+        <span style="font-size: 14px; color: #333;">配置数据正确入库 → 配置树正确读取 → 动态渲染正确显示</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>📦 三个界面定位</h3>
+  <div class="cards">
+    <div class="card" onclick="toggleSelect(this)">
+      <div class="card-image" style="padding: 20px; background: #e8f5e9;">
+        <div style="font-size: 40px; text-align: center;">📝</div>
+      </div>
+      <div class="card-body">
+        <h3>config.html — 配置主界面</h3>
+        <p><strong>用途：</strong>业务人员配置模板结构</p>
+        <p><strong>布局：</strong>三栏式（组件库 + 配置画布 + 属性面板）</p>
+        <p><strong>保存策略：</strong>实时保存（500ms延迟）+ 内存预览优化</p>
+        <p><strong>用户：</strong>业务配置人员（开发验证）</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="toggleSelect(this)">
+      <div class="card-image" style="padding: 20px; background: #e3f2fd;">
+        <div style="font-size: 40px; text-align: center;">👁</div>
+      </div>
+      <div class="card-body">
+        <h3>preview.html — 独立预览界面</h3>
+        <p><strong>用途：</strong>验证已保存配置的渲染效果</p>
+        <p><strong>流程：</strong>读取配置树 → 动态渲染表单</p>
+        <p><strong>功能：</strong>GET /api/templates/{id}/schema → 渲染</p>
+        <p><strong>用户：</strong>开发验证用</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="toggleSelect(this)">
+      <div class="card-image" style="padding: 20px; background: #fff3e0;">
+        <div style="font-size: 40px; text-align: center;">🔍</div>
+      </div>
+      <div class="card-body">
+        <h3>data-viewer.html — 数据验证界面</h3>
+        <p><strong>用途：</strong>验证配置是否正确入库</p>
+        <p><strong>功能：</strong>查看数据库中的配置JSON</p>
+        <p><strong>验证：</strong>字段路径自动生成、JSONB存储正确</p>
+        <p><strong>用户：</strong>开发验证用</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>⚠️ 第一阶段边界</h3>
+  <div style="display: flex; gap: 15px;">
+    <div style="flex: 1; padding: 15px; background: #e8f5e9; border-radius: 8px;">
+      <div style="font-weight: bold; color: #4caf50; margin-bottom: 10px;">✅ 必须包含</div>
+      <ul style="font-size: 14px; color: #333; list-style: none; padding: 0;">
+        <li style="margin-bottom: 5px;">• 所有基础组件（文本、数字、日期、下拉、金额）</li>
+        <li style="margin-bottom: 5px;">• 卡片容器布局</li>
+        <li style="margin-bottom: 5px;">• 保存按钮、查询按钮</li>
+        <li style="margin-bottom: 5px;">• 从上到下堆积布局</li>
+        <li style="margin-bottom: 5px;">• 实时保存 + 内存预览优化</li>
+        <li style="margin-bottom: 5px;">• 查询功能预留（字段查询、表格查询）</li>
+        <li>• 数据入库验证界面</li>
+      </ul>
+    </div>
+
+    <div style="flex: 1; padding: 15px; background: #fff3e0; border-radius: 8px;">
+      <div style="font-weight: bold; color: #ff9800; margin-bottom: 10px;">⏳ 后续阶段</div>
+      <ul style="font-size: 14px; color: #333; list-style: none; padding: 0;">
+        <li style="margin-bottom: 5px;">• 明细表组件（行列操作复杂）</li>
+        <li style="margin-bottom: 5px;">• 拖拽排序功能</li>
+        <li style="margin-bottom: 5px;">• 规则配置（显隐、必填、只读）</li>
+        <li style="margin-bottom: 5px;">• 查询弹窗配置</li>
+        <li style="margin-bottom: 5px;">• 外部数据集成</li>
+        <li>• 合同录入功能</li>
+      </ul>
+    </div>
+
+    <div style="flex: 1; padding: 15px; background: #ffebee; border-radius: 8px;">
+      <div style="font-weight: bold; color: #f44336; margin-bottom: 10px;">❌ 不在范围内</div>
+      <ul style="font-size: 14px; color: #333; list-style: none; padding: 0;">
+        <li style="margin-bottom: 5px;">• 工作流审批（审批系统负责）</li>
+        <li style="margin-bottom: 5px;">• 多人协作草稿（协作系统负责）</li>
+        <li style="margin-bottom: 5px;">• 多租户隔离（平台层负责）</li>
+        <li style="margin-bottom: 5px;">• 权限管理（权限系统负责）</li>
+        <li style="margin-bottom: 5px;">• 用户管理（用户中心负责）</li>
+        <li>• Redis缓存、MQ消息队列</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 30px; padding: 20px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+  <h4 style="color: #2196f3; margin-bottom: 15px;">✅ 设计第1部分确认清单</h4>
+  <p style="font-size: 14px; color: #333;">
+    请确认以下内容是否正确：
+  </p>
+  <div style="font-size: 14px; color: #333;">
+    <span style="color: #4caf50;">✓</span> 系统定位：开发验证工具，不交付给业务用户<br>
+    <span style="color: #4caf50;">✓</span> 核心闭环：配置 → 入库 → 验证 → 预览 → 渲染<br>
+    <span style="color: #4caf50;">✓</span> 三个界面：config.html、preview.html、data-viewer.html<br>
+    <span style="color: #4caf50;">✓</span> 第一阶段范围：基础组件 + 卡片 + 按钮 + 查询预留<br>
+    <span style="color: #4caf50;">✓</span> 后续阶段：明细表、拖拽、规则配置、合同录入
+  </div>
+</div>

@@ -1,0 +1,379 @@
+<h2>设计第3部分：数据验证与预览界面</h2>
+<p class="subtitle">如何验证配置是否正确入库，如何预览渲染效果</p>
+
+<div class="section">
+  <h3>🔍 data-viewer.html — 数据验证界面</h3>
+  <div class="mockup">
+    <div class="mockup-header">验证配置是否正确入库</div>
+    <div class="mockup-body">
+      <div style="padding: 15px;">
+        <!-- 顶部工具栏 -->
+        <div style="padding: 15px; background: #f5f5f5; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-weight: bold; font-size: 16px;">
+            🔍 数据验证界面 — 查看数据库中的配置
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <select class="mock-input" style="width: 200px;">
+              <option>模板：采购合同模板</option>
+              <option>模板：销售合同模板</option>
+            </select>
+            <select class="mock-input" style="width: 150px;">
+              <option>版本：V1.0（草稿）</option>
+              <option>版本：V1.1（已发布）</option>
+            </select>
+            <button class="mock-button" style="background: #2196f3; color: white;">刷新数据</button>
+          </div>
+        </div>
+
+        <!-- 三列数据展示 -->
+        <div style="display: flex; gap: 15px;">
+          <!-- 列1：布局节点 -->
+          <div style="flex: 1; border: 2px solid #4caf50; padding: 15px; border-radius: 8px;">
+            <div style="font-weight: bold; color: #4caf50; margin-bottom: 10px;">
+              📄 布局节点（t_ui_layout_node）
+            </div>
+            <div style="padding: 10px; background: white; border-radius: 8px; font-size: 12px;">
+              <div style="margin-bottom: 8px; padding: 8px; border: 1px solid #4caf50; border-radius: 4px;">
+                <strong>ID: 1</strong><br>
+                nodeCode: <span style="color: #4caf50;">"card_jiben_xinxi"</span><br>
+                nodePath: <span style="color: #4caf50;">"/card_jiben_xinxi"</span><br>
+                nodeType: CARD<br>
+                nodeName: 基本信息
+              </div>
+              <div style="padding: 8px; border: 1px solid #4caf50; border-radius: 4px;">
+                <strong>ID: 2</strong><br>
+                nodeCode: <span style="color: #4caf50;">"card_hetong_tiaokuan"</span><br>
+                nodePath: <span style="color: #4caf50;">"/card_hetong_tiaokuan"</span><br>
+                nodeType: CARD<br>
+                nodeName: 合同条款
+              </div>
+            </div>
+            <div style="margin-top: 10px; padding: 10px; background: #e8f5e9; border-radius: 8px; font-size: 11px; color: #666;">
+              ✅ nodeCode/nodePath 自动生成（拼音转换）
+            </div>
+          </div>
+
+          <!-- 列2：字段定义 -->
+          <div style="flex: 1; border: 2px solid #2196f3; padding: 15px; border-radius: 8px;">
+            <div style="font-weight: bold; color: #2196f3; margin-bottom: 10px;">
+              📝 字段定义（t_ui_field_def）
+            </div>
+            <div style="padding: 10px; background: white; border-radius: 8px; font-size: 12px;">
+              <div style="margin-bottom: 8px; padding: 8px; border: 1px solid #2196f3; border-radius: 4px;">
+                <strong>ID: 3</strong><br>
+                fieldCode: <span style="color: #2196f3;">"field_hetong_mingcheng"</span><br>
+                fieldPath: <span style="color: #2196f3;">"/card_jiben_xinxi/field_hetong_mingcheng"</span><br>
+                dataType: STRING<br>
+                requiredDefault: 1
+              </div>
+              <div style="margin-bottom: 8px; padding: 8px; border: 1px solid #2196f3; border-radius: 4px;">
+                <strong>ID: 4</strong><br>
+                fieldCode: <span style="color: #2196f3;">"field_hetong_jine"</span><br>
+                fieldPath: <span style="color: #2196f3;">"/card_jiben_xinxi/field_hetong_jine"</span><br>
+                dataType: DECIMAL<br>
+                requiredDefault: 0
+              </div>
+              <div style="padding: 8px; border: 1px solid #2196f3; border-radius: 4px;">
+                <strong>ID: 5</strong><br>
+                fieldCode: <span style="color: #2196f3;">"field_qianyue_riqi"</span><br>
+                fieldPath: <span style="color: #2196f3;">"/card_jiben_xinxi/field_qianyue_riqi"</span><br>
+                dataType: DATE<br>
+                requiredDefault: 0
+              </div>
+            </div>
+            <div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 8px; font-size: 11px; color: #666;">
+              ✅ fieldCode/fieldPath 自动生成（拼音转换 + 父节点路径）
+            </div>
+          </div>
+
+          <!-- 列3：字段组件 -->
+          <div style="flex: 1; border: 2px solid #ff9800; padding: 15px; border-radius: 8px;">
+            <div style="font-weight: bold; color: #ff9800; margin-bottom: 10px;">
+              🎨 字段组件绑定（t_ui_field_component）
+            </div>
+            <div style="padding: 10px; background: white; border-radius: 8px; font-size: 12px;">
+              <div style="margin-bottom: 8px; padding: 8px; border: 1px solid #ff9800; border-radius: 4px;">
+                <strong>ID: 6</strong><br>
+                componentType: TEXT_INPUT<br>
+                labelName: 合同名称<br>
+                placeholder: 请输入合同名称<br>
+                dataProviderId: null<br>
+                requiredRule: <span style="color: #ff9800;">"{...}"</span> (JSONB)
+              </div>
+              <div style="margin-bottom: 8px; padding: 8px; border: 1px solid #ff9800; border-radius: 4px;">
+                <strong>ID: 7</strong><br>
+                componentType: AMOUNT_INPUT<br>
+                labelName: 合同金额<br>
+                placeholder: 请输入金额<br>
+                dataProviderId: 1（币种列表）<br>
+                componentProps: <span style="color: #ff9800;">"{...}"</span> (JSONB)
+              </div>
+              <div style="padding: 8px; border: 1px solid #ff9800; border-radius: 4px;">
+                <strong>ID: 8</strong><br>
+                componentType: DATE_PICKER<br>
+                labelName: 签订日期<br>
+                placeholder: 请选择日期<br>
+                dataProviderId: null<br>
+                visibleRule: <span style="color: #ff9800;">"{...}"</span> (JSONB)
+              </div>
+            </div>
+            <div style="margin-top: 10px; padding: 10px; background: #fff3e0; border-radius: 8px; font-size: 11px; color: #666;">
+              ✅ JSONB字段存储规则配置（String类型）
+            </div>
+          </div>
+        </div>
+
+        <!-- 完整配置树JSON -->
+        <div style="margin-top: 15px; border: 2px solid #9c27b0; padding: 15px; border-radius: 8px;">
+          <div style="font-weight: bold; color: #9c27b0; margin-bottom: 10px;">
+            🌳 完整配置树JSON（GET /api/templates/{id}/versions/{vid}/schema）
+          </div>
+          <div style="padding: 15px; background: #f3e5f5; border-radius: 8px; font-size: 11px; color: #333; font-family: monospace; overflow-x: auto;">
+{<br>
+&nbsp;&nbsp;"templateId": 1,<br>
+&nbsp;&nbsp;"versionId": 1,<br>
+&nbsp;&nbsp;"layoutNodes": [<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"id": 1,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"nodeCode": "card_jiben_xinxi",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"nodePath": "/card_jiben_xinxi",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"nodeName": "基本信息",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"children": [<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ "fieldCode": "field_hetong_mingcheng", "fieldPath": "...", "component": {...} },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ "fieldCode": "field_hetong_jine", "fieldPath": "...", "component": {...} }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{ "id": 2, "nodeCode": "card_hetong_tiaokuan", ... }<br>
+&nbsp;&nbsp;],<br>
+&nbsp;&nbsp;"actionConfigs": [<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{ "id": 9, "actionCode": "action_save", "actionName": "保存合同" }<br>
+&nbsp;&nbsp;]<br>
+}
+          </div>
+        </div>
+
+        <!-- 验证结果 -->
+        <div style="margin-top: 15px; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
+          <div style="font-weight: bold; color: #4caf50; margin-bottom: 10px;">✅ 验证结果</div>
+          <div style="font-size: 14px; color: #333;">
+            <span style="color: #4caf50;">✓</span> 布局节点：2个卡片，nodeCode/nodePath 自动生成正确<br>
+            <span style="color: #4caf50;">✓</span> 字段定义：3个字段，fieldCode/fieldPath 自动生成正确<br>
+            <span style="color: #4caf50;">✓</span> 字段组件：3个组件绑定，JSONB存储正确<br>
+            <span style="color: #4caf50;">✓</span> 动作配置：1个保存按钮，actionCode 自动生成正确<br>
+            <span style="color: #4caf50;">✓</span> 配置树结构：嵌套关系正确，父节点路径正确
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>👁 preview.html — 独立预览界面</h3>
+  <div class="mockup">
+    <div class="mockup-header">验证配置渲染效果</div>
+    <div class="mockup-body">
+      <div style="padding: 15px;">
+        <!-- 顶部工具栏 -->
+        <div style="padding: 15px; background: #f5f5f5; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-weight: bold; font-size: 16px;">
+            👁 预览界面 — 验证动态渲染效果
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <select class="mock-input" style="width: 200px;">
+              <option>模板：采购合同模板</option>
+            </select>
+            <select class="mock-input" style="width: 150px;">
+              <option>版本：V1.0（草稿）</option>
+            </select>
+            <button class="mock-button" style="background: #2196f3; color: white;">刷新预览</button>
+          </div>
+        </div>
+
+        <!-- API调用说明 -->
+        <div style="padding: 15px; background: #e3f2fd; border-radius: 8px; margin-bottom: 15px;">
+          <div style="font-weight: bold; color: #2196f3; margin-bottom: 10px;">API调用流程</div>
+          <div style="font-size: 12px; color: #333;">
+            <strong>1. GET /api/templates/{id}/versions/{vid}/schema</strong><br>
+            → 返回完整配置树JSON（包含布局节点、字段定义、字段组件、动作配置）<br>
+            <br>
+            <strong>2. 前端动态渲染：</strong><br>
+            → 遍历 layoutNodes，渲染卡片容器<br>
+            → 遍历 children（字段），渲染字段组件（文本框、下拉框等）<br>
+            → 渲染动作按钮（保存、查询等）
+          </div>
+        </div>
+
+        <!-- 渲染效果预览 -->
+        <div style="border: 2px solid #9c27b0; padding: 20px; border-radius: 8px; background: white;">
+          <div style="font-weight: bold; color: #9c27b0; margin-bottom: 15px;">
+            动态渲染效果（基于配置树）
+          </div>
+
+          <!-- 卡片1：基本信息 -->
+          <div style="border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 8px;">
+            <div style="font-weight: bold; margin-bottom: 15px; font-size: 16px;">基本信息</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <!-- 字段1：合同名称 -->
+              <div>
+                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
+                  合同名称 <span style="color: #f44336;">*</span>
+                </div>
+                <input class="mock-input" style="width: 100%;" placeholder="请输入合同名称">
+              </div>
+              <!-- 字段2：合同金额 -->
+              <div>
+                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">合同金额</div>
+                <div style="display: flex; gap: 5px;">
+                  <select class="mock-input" style="width: 80px;">
+                    <option>CNY</option>
+                    <option>USD</option>
+                    <option>EUR</option>
+                  </select>
+                  <input class="mock-input" style="flex: 1;" placeholder="1,000,000.00">
+                </div>
+              </div>
+              <!-- 字段3：签订日期 -->
+              <div>
+                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">签订日期</div>
+                <input class="mock-input" style="width: 100%;" type="date" placeholder="2026-01-01">
+              </div>
+              <!-- 字段4：币种（下拉框示例） -->
+              <div>
+                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
+                  币种 <span style="color: #f44336;">*</span>
+                </div>
+                <select class="mock-input" style="width: 100%;">
+                  <option>CNY - 人民币</option>
+                  <option>USD - 美元</option>
+                  <option>EUR - 欧元</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 卡片2：合同条款 -->
+          <div style="border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 8px;">
+            <div style="font-weight: bold; margin-bottom: 15px; font-size: 16px;">合同条款</div>
+            <!-- 字段5：合同类型 -->
+            <div>
+              <div style="font-size: 12px; color: #666; margin-bottom: 5px;">合同类型</div>
+              <select class="mock-input" style="width: 100%;">
+                <option>采购合同</option>
+                <option>销售合同</option>
+                <option>租赁合同</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 动作按钮 -->
+          <div style="display: flex; gap: 15px; justify-content: center;">
+            <button class="mock-button" style="background: #4caf50; color: white; padding: 15px 30px;">
+              💾 保存合同
+            </button>
+          </div>
+        </div>
+
+        <!-- 渲染验证 -->
+        <div style="margin-top: 15px; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
+          <div style="font-weight: bold; color: #4caf50; margin-bottom: 10px;">✅ 渲染验证结果</div>
+          <div style="font-size: 14px; color: #333;">
+            <span style="color: #4caf50;">✓</span> 卡片容器渲染：2个卡片，名称正确显示<br>
+            <span style="color: #4caf50;">✓</span> 字段组件渲染：5个字段，组件类型正确（文本框、金额框、日期、下拉框）<br>
+            <span style="color: #4caf50;">✓</span> 必填标识：合同名称、币种显示红色*号<br>
+            <span style="color: #4caf50;">✓</span> 数据源绑定：币种下拉框绑定"币种列表"DataProvider<br>
+            <span style="color: #4caf50;">✓</span> 动作按钮渲染：保存按钮正确显示
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>🔄 完整验证流程</h3>
+  <div style="padding: 20px; background: #f5f5f5; border-radius: 8px;">
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <!-- 步骤1 -->
+      <div style="flex: 1; padding: 15px; border: 2px solid #4caf50; border-radius: 8px; text-align: center;">
+        <div style="background: #4caf50; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 10px;">步骤1</div>
+        <div style="font-size: 14px; color: #333; margin-bottom: 5px;">
+          <strong>config.html 配置</strong>
+        </div>
+        <div style="font-size: 12px; color: #666;">
+          添加卡片 → 添加字段 → 添加按钮<br>
+          实时保存（500ms延迟）
+        </div>
+      </div>
+
+      <!-- → -->
+      <div style="font-size: 30px; color: #4caf50;">→</div>
+
+      <!-- 步骤2 -->
+      <div style="flex: 1; padding: 15px; border: 2px solid #2196f3; border-radius: 8px; text-align: center;">
+        <div style="background: #2196f3; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 10px;">步骤2</div>
+        <div style="font-size: 14px; color: #333; margin-bottom: 5px;">
+          <strong>后端API保存</strong>
+        </div>
+        <div style="font-size: 12px; color: #666;">
+          POST layout-nodes<br>
+          POST field-defs + components<br>
+          POST action-configs
+        </div>
+      </div>
+
+      <!-- → -->
+      <div style="font-size: 30px; color: #2196f3;">→</div>
+
+      <!-- 步骤3 -->
+      <div style="flex: 1; padding: 15px; border: 2px solid #ff9800; border-radius: 8px; text-align: center;">
+        <div style="background: #ff9800; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 10px;">步骤3</div>
+        <div style="font-size: 14px; color: #333; margin-bottom: 5px;">
+          <strong>data-viewer.html 验证</strong>
+        </div>
+        <div style="font-size: 12px; color: #666;">
+          查看数据库中的配置JSON<br>
+          确认自动生成字段正确
+        </div>
+      </div>
+
+      <!-- → -->
+      <div style="font-size: 30px; color: #ff9800;">→</div>
+
+      <!-- 步骤4 -->
+      <div style="flex: 1; padding: 15px; border: 2px solid #9c27b0; border-radius: 8px; text-align: center;">
+        <div style="background: #9c27b0; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 10px;">步骤4</div>
+        <div style="font-size: 14px; color: #333; margin-bottom: 5px;">
+          <strong>preview.html 预览</strong>
+        </div>
+        <div style="font-size: 12px; color: #666;">
+          GET schema API<br>
+          动态渲染表单界面
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; padding: 15px; background: #e8f5e9; border-radius: 8px; margin-top: 15px;">
+      <strong style="color: #4caf50;">✅ 完整闭环验证：</strong>
+      <span style="font-size: 14px; color: #333;">
+        配置数据正确入库 → 配置树正确读取 → 动态渲染正确显示
+      </span>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 30px; padding: 20px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+  <h4 style="color: #2196f3; margin-bottom: 15px;">✅ 设计第3部分确认清单</h4>
+  <p style="font-size: 14px; color: #333;">
+    请确认以下内容是否正确：
+  </p>
+  <div style="font-size: 14px; color: #333;">
+    <span style="color: #4caf50;">✓</span> data-viewer.html：三列展示布局节点、字段定义、字段组件绑定<br>
+    <span style="color: #4caf50;">✓</span> 验证自动生成字段：nodeCode/nodePath、fieldCode/fieldPath<br>
+    <span style="color: #4caf50;">✓</span> 验证JSONB存储：requiredRule、visibleRule、componentProps<br>
+    <span style="color: #4caf50;">✓</span> 验证配置树结构：完整配置树JSON（GET schema API）<br>
+    <span style="color: #4caf50;">✓</span> preview.html：动态渲染表单界面（基于配置树）<br>
+    <span style="color: #4caf50;">✓</span> 渲染验证：卡片、字段组件、必填标识、数据源绑定、动作按钮<br>
+    <span style="color: #4caf50;">✓</span> 完整闭环：配置 → 入库 → 验证 → 预览 → 渲染
+  </div>
+</div>

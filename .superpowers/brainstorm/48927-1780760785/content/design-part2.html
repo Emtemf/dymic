@@ -1,0 +1,405 @@
+<h2>设计第2部分：config.html 详细设计</h2>
+<p class="subtitle">配置主界面的布局、交互、保存策略详细设计</p>
+
+<div class="section">
+  <h3>🎨 三栏布局结构</h3>
+  <div class="mockup">
+    <div class="mockup-header">config.html 最终布局</div>
+    <div class="mockup-body">
+      <div style="padding: 10px;">
+        <!-- 顶部工具栏 -->
+        <div style="padding: 15px; background: #f5f5f5; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-weight: bold; font-size: 16px;">
+            📝 模板配置界面 — 模板名称：采购合同模板（版本：V1.0 草稿）
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="mock-button" style="background: #2196f3; color: white;">👁 预览</button>
+            <button class="mock-button" style="background: #ff9800; color: white;">🔍 验证入库</button>
+            <button class="mock-button" style="background: #f44336; color: white;">🚀 发布版本</button>
+          </div>
+        </div>
+
+        <!-- 三栏布局 -->
+        <div style="display: flex; gap: 10px;">
+          <!-- 左侧：组件库（200px） -->
+          <div style="width: 200px; border: 2px solid #4caf50; padding: 10px; border-radius: 8px;">
+            <div style="font-weight: bold; color: #4caf50; margin-bottom: 10px; font-size: 14px;">
+              📦 组件库（点击添加）
+            </div>
+
+            <!-- 基础组件 -->
+            <div style="margin-bottom: 15px;">
+              <div class="label" style="margin-bottom: 8px; font-size: 12px;">基础组件</div>
+              <div style="padding: 8px; border: 1px dashed #ccc; margin-bottom: 5px; border-radius: 4px; cursor: pointer; background: white;">
+                📝 文本输入框
+              </div>
+              <div style="padding: 8px; border: 1px dashed #ccc; margin-bottom: 5px; border-radius: 4px; cursor: pointer; background: white;">
+                🔢 数字输入框
+              </div>
+              <div style="padding: 8px; border: 1px dashed #ccc; margin-bottom: 5px; border-radius: 4px; cursor: pointer; background: white;">
+                📅 日期选择器
+              </div>
+              <div style="padding: 8px; border: 1px dashed #ccc; margin-bottom: 5px; border-radius: 4px; cursor: pointer; background: white;">
+                📋 下拉选择框
+              </div>
+              <div style="padding: 8px; border: 1px dashed #ccc; border-radius: 4px; cursor: pointer; background: white;">
+                💰 金额输入框
+              </div>
+            </div>
+
+            <!-- 布局组件 -->
+            <div style="margin-bottom: 15px;">
+              <div class="label" style="margin-bottom: 8px; font-size: 12px;">布局组件</div>
+              <div style="padding: 8px; border: 1px dashed #ccc; margin-bottom: 5px; border-radius: 4px; cursor: pointer; background: white;">
+                📄 卡片容器
+              </div>
+              <div style="padding: 8px; border: 1px dashed #ccc; border-radius: 4px; cursor: pointer; background: #f5f5f5; opacity: 0.5;">
+                📊 明细表（后续）
+              </div>
+            </div>
+
+            <!-- 按钮组件 -->
+            <div>
+              <div class="label" style="margin-bottom: 8px; font-size: 12px;">按钮组件</div>
+              <div style="padding: 8px; border: 1px dashed #ccc; margin-bottom: 5px; border-radius: 4px; cursor: pointer; background: white;">
+                💾 保存按钮
+              </div>
+              <div style="padding: 8px; border: 1px dashed #ccc; border-radius: 4px; cursor: pointer; background: white;">
+                🔍 查询按钮
+              </div>
+            </div>
+          </div>
+
+          <!-- 中间：配置画布（flex-grow） -->
+          <div style="flex: 1; border: 2px solid #2196f3; padding: 10px; border-radius: 8px;">
+            <div style="font-weight: bold; color: #2196f3; margin-bottom: 10px; font-size: 14px;">
+              🎨 配置画布（从上到下堆积）
+            </div>
+
+            <!-- 已配置组件列表 -->
+            <div style="padding: 15px; border: 1px dashed #2196f3; background: white; border-radius: 8px;">
+              <!-- 卡片1 -->
+              <div style="padding: 10px; border: 2px solid #4caf50; margin-bottom: 10px; border-radius: 8px; background: #e8f5e9;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                  <div style="font-weight: bold;">卡片1：基本信息</div>
+                  <div style="font-size: 12px; color: #666;">点击选中 → 配置属性</div>
+                </div>
+                <!-- 字段1 -->
+                <div style="padding: 8px; border: 1px dashed #ccc; margin-left: 20px; margin-bottom: 5px; background: white; border-radius: 4px;">
+                  <div style="font-size: 12px; color: #666;">字段1：合同名称（文本输入框）</div>
+                </div>
+                <!-- 字段2 -->
+                <div style="padding: 8px; border: 1px dashed #ccc; margin-left: 20px; margin-bottom: 5px; background: white; border-radius: 4px;">
+                  <div style="font-size: 12px; color: #666;">字段2：合同金额（金额输入框）</div>
+                </div>
+                <!-- 字段3 -->
+                <div style="padding: 8px; border: 1px dashed #ccc; margin-left: 20px; background: white; border-radius: 4px;">
+                  <div style="font-size: 12px; color: #666;">字段3：签订日期（日期选择器）</div>
+                </div>
+              </div>
+
+              <!-- 卡片2 -->
+              <div style="padding: 10px; border: 2px solid #4caf50; margin-bottom: 10px; border-radius: 8px; background: #e8f5e9;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                  <div style="font-weight: bold;">卡片2：合同条款</div>
+                  <div style="font-size: 12px; color: #666;">点击选中 → 配置属性</div>
+                </div>
+                <!-- 字段4 -->
+                <div style="padding: 8px; border: 1px dashed #ccc; margin-left: 20px; background: white; border-radius: 4px;">
+                  <div style="font-size: 12px; color: #666;">字段4：合同类型（下拉选择框）</div>
+                </div>
+              </div>
+
+              <!-- 按钮 -->
+              <div style="padding: 10px; border: 2px solid #ff9800; border-radius: 8px; background: #fff3e0;">
+                <div style="font-weight: bold; color: #ff9800;">按钮：保存合同</div>
+              </div>
+
+              <div style="margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 8px; text-align: center; font-size: 12px; color: #666;">
+                ⚠️ 点击左侧组件库 → 添加到画布（从上到下）<br>
+                点击画布中的组件 → 右侧显示属性面板
+              </div>
+            </div>
+          </div>
+
+          <!-- 右侧：属性面板（250px） -->
+          <div style="width: 250px; border: 2px solid #ff9800; padding: 10px; border-radius: 8px;">
+            <div style="font-weight: bold; color: #ff9800; margin-bottom: 10px; font-size: 14px;">
+              ⚙️ 属性面板（选中组件后显示）
+            </div>
+
+            <!-- 当前选中 -->
+            <div style="padding: 10px; background: #fff3e0; border-radius: 8px; margin-bottom: 10px;">
+              <div class="label" style="font-size: 12px; margin-bottom: 5px;">当前选中：字段1 - 合同名称</div>
+            </div>
+
+            <!-- 业务属性 -->
+            <div style="margin-bottom: 15px;">
+              <div class="label" style="font-size: 12px; margin-bottom: 8px;">业务属性</div>
+              <div style="margin-bottom: 8px;">
+                <div style="font-size: 12px; color: #666; margin-bottom: 3px;">字段名称：</div>
+                <input class="mock-input" style="width: 100%;" placeholder="合同名称">
+              </div>
+              <div style="margin-bottom: 8px;">
+                <div style="font-size: 12px; color: #666; margin-bottom: 3px;">是否必填：</div>
+                <select class="mock-input" style="width: 100%;">
+                  <option>否</option>
+                  <option>是</option>
+                </select>
+              </div>
+              <div style="margin-bottom: 8px;">
+                <div style="font-size: 12px; color: #666; margin-bottom: 3px;">提示文字：</div>
+                <input class="mock-input" style="width: 100%;" placeholder="请输入合同名称">
+              </div>
+            </div>
+
+            <!-- 数据来源（下拉框特有） -->
+            <div style="margin-bottom: 15px; padding: 10px; background: #e3f2fd; border-radius: 8px;">
+              <div class="label" style="font-size: 12px; margin-bottom: 8px;">数据来源（下拉框）</div>
+              <select class="mock-input" style="width: 100%; margin-bottom: 8px;">
+                <option>静态选项</option>
+                <option>引用数据提供方</option>
+              </select>
+              <div style="font-size: 12px; color: #666;">
+                静态选项：直接输入选项列表<br>
+                数据提供方：下拉选择已配置的提供方
+              </div>
+            </div>
+
+            <!-- 查询功能预留 -->
+            <div style="margin-bottom: 15px; padding: 10px; background: #fff3e0; border-radius: 8px; border: 1px dashed #ff9800;">
+              <div class="label" style="font-size: 12px; margin-bottom: 8px;">🔍 查询功能预留</div>
+              <div style="margin-bottom: 8px;">
+                <div style="font-size: 12px; color: #666; margin-bottom: 3px;">是否需要查询：</div>
+                <select class="mock-input" style="width: 100%;">
+                  <option>否</option>
+                  <option>是（字段旁边显示查询按钮）</option>
+                </select>
+              </div>
+              <div style="font-size: 11px; color: #999;">
+                ⚠️ 选择"是"后，字段旁边会显示查询按钮<br>
+                点击按钮 → 弹出查询窗口 → 选择数据 → 回填字段
+              </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <button class="mock-button" style="width: 100%; background: #4caf50; color: white; margin-bottom: 5px;">
+              ✅ 应用属性（自动保存）
+            </button>
+            <button class="mock-button" style="width: 100%; background: #f44336; color: white;">
+              🗑 删除组件
+            </button>
+          </div>
+        </div>
+
+        <!-- 底部状态栏 -->
+        <div style="padding: 10px; background: #f5f5f5; border-radius: 8px; margin-top: 10px; display: flex; justify-content: space-between; font-size: 12px; color: #666;">
+          <div>✅ 配置已自动保存（500ms延迟）</div>
+          <div>上次保存时间：2026-06-07 00:05:30</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>📝 交互流程详解</h3>
+  <div style="padding: 20px; background: #f5f5f5; border-radius: 8px;">
+    <div style="display: flex; gap: 20px;">
+      <!-- 流程步骤 -->
+      <div style="flex: 1;">
+        <h4 style="color: #4caf50; margin-bottom: 15px;">从上到下配置流程</h4>
+        <div style="padding: 15px; background: white; border-radius: 8px;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="background: #4caf50; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold;">1</div>
+            <div style="font-size: 14px;">
+              <strong>点击左侧"卡片容器"</strong> → 添加到画布顶部
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="background: #2196f3; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold;">2</div>
+            <div style="font-size: 14px;">
+              <strong>点击卡片 → 右侧显示属性面板</strong> → 配置卡片名称
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="background: #2196f3; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold;">3</div>
+            <div style="font-size: 14px;">
+              <strong>点击左侧"文本输入框"</strong> → 添加到卡片内部
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="background: #ff9800; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold;">4</div>
+            <div style="font-size: 14px;">
+              <strong>点击字段 → 右侧显示属性面板</strong> → 配置字段名称、是否必填、查询功能
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="background: #ff9800; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold;">5</div>
+            <div style="font-size: 14px;">
+              <strong>点击左侧"保存按钮"</strong> → 添加到画布底部
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- API调用示例 -->
+      <div style="flex: 1;">
+        <h4 style="color: #2196f3; margin-bottom: 15px;">实时保存API调用</h4>
+        <div style="padding: 15px; background: white; border-radius: 8px;">
+          <div style="padding: 8px; background: #e3f2fd; border-radius: 4px; margin-bottom: 8px; font-size: 12px;">
+            <strong>① 添加卡片：</strong><br>
+            POST /api/templates/{id}/versions/{vid}/layout-nodes<br>
+            → 自动生成 nodeCode、nodePath
+          </div>
+          <div style="padding: 8px; background: #e3f2fd; border-radius: 4px; margin-bottom: 8px; font-size: 12px;">
+            <strong>② 添加字段：</strong><br>
+            POST /api/templates/{id}/versions/{vid}/field-defs<br>
+            → 同时创建 field-def + field-component<br>
+            → 自动生成 fieldCode、fieldPath、dataType
+          </div>
+          <div style="padding: 8px; background: #e3f2fd; border-radius: 4px; margin-bottom: 8px; font-size: 12px;">
+            <strong>③ 更新字段属性：</strong><br>
+            PUT /api/field-defs/{fieldId}<br>
+            PUT /api/field-components/{componentId}<br>
+            → 500ms延迟保存（避免频繁请求）
+          </div>
+          <div style="padding: 8px; background: #e3f2fd; border-radius: 4px; font-size: 12px;">
+            <strong>④ 添加按钮：</strong><br>
+            POST /api/templates/{id}/versions/{vid}/action-configs<br>
+            → 自动生成 actionCode
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>💾 实时保存 + 内存预览优化</h3>
+  <div style="padding: 20px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
+    <h4 style="color: #4caf50; margin-bottom: 15px;">混合方案实现细节</h4>
+
+    <div style="display: flex; gap: 20px;">
+      <div style="flex: 1;">
+        <h5 style="margin-bottom: 10px;">实时保存机制</h5>
+        <ul style="font-size: 14px; color: #333; list-style: none; padding: 0;">
+          <li style="margin-bottom: 8px;">
+            <span style="color: #4caf50;">✓</span> 每次操作立即调用API保存
+          </li>
+          <li style="margin-bottom: 8px;">
+            <span style="color: #4caf50;">✓</span> 500ms延迟保存（debounce）
+          </li>
+          <li style="margin-bottom: 8px;">
+            <span style="color: #4caf50;">✓</span> 乐观更新：先更新UI，API失败后回滚
+          </li>
+          <li style="margin-bottom: 8px;">
+            <span style="color: #4caf50;">✓</span> 自动生成技术字段（nodeCode、fieldPath等）
+          </li>
+          <li>
+            <span style="color: #4caf50;">✓</span> 配置不丢失（刷新页面后可恢复）
+          </li>
+        </ul>
+      </div>
+
+      <div style="flex: 1;">
+        <h5 style="margin-bottom: 10px;">内存预览优化</h5>
+        <ul style="font-size: 14px; color: #333; list-style: none; padding: 0;">
+          <li style="margin-bottom: 8px;">
+            <span style="color: #4caf50;">✓</span> 内存中维护配置树副本
+          </li>
+          <li style="margin-bottom: 8px;">
+            <span style="color: #4caf50;">✓</span> 操作后立即更新内存配置树
+          </li>
+          <li style="margin-bottom: 8px;">
+            <span style="color: #4caf50;">✓</span> 基于内存配置树渲染预览（无延迟）
+          </li>
+          <li style="margin-bottom: 8px;">
+            <span style="color: #4caf50;">✓</span> 同时调用API验证（确保入库正确）
+          </li>
+          <li>
+            <span style="color: #4caf50;">✓</span> API失败时回滚内存配置树
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 8px;">
+      <strong style="color: #2196f3;">预览渲染时机：</strong>
+      <div style="font-size: 14px; color: #333; margin-top: 5px;">
+        每次操作成功后，调用 GET /api/templates/{id}/versions/{vid}/schema → 渲染右侧预览<br>
+        或基于内存配置树直接渲染（更快，但需要与API数据同步验证）
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>🔍 查询功能预留设计</h3>
+  <div style="display: flex; gap: 15px;">
+    <!-- 字段查询预留 -->
+    <div style="flex: 1; padding: 15px; background: #e3f2fd; border-radius: 8px;">
+      <h4 style="color: #2196f3; margin-bottom: 10px;">字段查询预留</h4>
+      <div class="mockup" style="margin-bottom: 10px;">
+        <div class="mockup-body" style="padding: 10px;">
+          <div style="display: flex; gap: 5px;">
+            <input class="mock-input" style="flex: 1;" placeholder="供应商名称">
+            <button class="mock-button" style="padding: 5px 10px; background: #2196f3; color: white;">🔍</button>
+          </div>
+        </div>
+      </div>
+      <div style="font-size: 12px; color: #333;">
+        <strong>配置方式：</strong>在字段属性面板中勾选"是否需要查询"<br>
+        <strong>渲染效果：</strong>字段旁边显示查询按钮<br>
+        <strong>交互流程：</strong>点击按钮 → 弹出查询窗口 → 选择数据 → 回填字段
+      </div>
+    </div>
+
+    <!-- 表格查询预留 -->
+    <div style="flex: 1; padding: 15px; background: #fff3e0; border-radius: 8px;">
+      <h4 style="color: #ff9800; margin-bottom: 10px;">明细表查询预留（后续）</h4>
+      <div class="mockup" style="margin-bottom: 10px;">
+        <div class="mockup-body" style="padding: 10px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr style="background: #f5f5f5;">
+              <th style="padding: 5px; border: 1px solid #ccc; font-size: 11px;">产品</th>
+              <th style="padding: 5px; border: 1px solid #ccc; font-size: 11px;">数量</th>
+            </tr>
+          </table>
+          <button class="mock-button" style="margin-top: 5px; font-size: 11px; padding: 5px 10px; background: #ff9800; color: white; width: 100%;">
+            🔍 批量查询产品
+          </button>
+        </div>
+      </div>
+      <div style="font-size: 12px; color: #333;">
+        <strong>配置方式：</strong>明细表组件自带"批量查询"按钮属性<br>
+        <strong>渲染效果：</strong>明细表底部显示批量查询按钮<br>
+        <strong>交互流程：</strong>点击按钮 → 弹出查询窗口 → 选择多条 → 批量添加行
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 15px; padding: 15px; background: #ffebee; border-radius: 8px; border-left: 4px solid #f44336;">
+    <strong style="color: #f44336;">⚠️ 第一阶段查询功能范围：</strong>
+    <div style="font-size: 14px; color: #333; margin-top: 5px;">
+      只预留查询功能的配置选项（"是否需要查询"），<br>
+      不实现查询弹窗、数据选择、回填逻辑（后续阶段实现）
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 30px; padding: 20px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+  <h4 style="color: #2196f3; margin-bottom: 15px;">✅ 设计第2部分确认清单</h4>
+  <p style="font-size: 14px; color: #333;">
+    请确认以下内容是否正确：
+  </p>
+  <div style="font-size: 14px; color: #333;">
+    <span style="color: #4caf50;">✓</span> 三栏布局：左侧组件库（200px） + 中间配置画布（flex） + 右侧属性面板（250px）<br>
+    <span style="color: #4caf50;">✓</span> 组件库：基础组件 + 布局组件 + 按钮组件，点击添加到画布<br>
+    <span style="color: #4caf50;">✓</span> 配置画布：从上到下堆积，点击选中组件 → 右侧显示属性面板<br>
+    <span style="color: #4caf50;">✓</span> 属性面板：业务属性（名称、必填、提示） + 数据来源 + 查询预留<br>
+    <span style="color: #4caf50;">✓</span> 实时保存：500ms延迟 + 乐观更新 + 自动生成技术字段<br>
+    <span style="color: #4caf50;">✓</span> 内存预览：内存配置树 + API验证 + 预览无延迟<br>
+    <span style="color: #4caf50;">✓</span> 查询预留：字段查询（勾选选项） + 表格查询（后续明细表自带）
+  </div>
+</div>

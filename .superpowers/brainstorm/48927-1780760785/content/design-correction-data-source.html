@@ -1,0 +1,298 @@
+<h2>修正：数据源配置设计（业务友好）</h2>
+<p class="subtitle">业务人员只需要"选择数据源"，不暴露技术概念</p>
+
+<div style="padding: 20px; background: #ffebee; border-radius: 8px; border-left: 4px solid #f44336; margin-bottom: 20px;">
+  <h4 style="color: #f44336; margin-bottom: 15px;">❌ 原设计的问题</h4>
+  <p style="font-size: 14px; color: #333; margin-bottom: 10px;">
+    <strong style="color: #f44336;">错误：</strong>暴露了"数据来源"、"静态选项"、"数据提供方"等技术概念
+  </p>
+  <div style="font-size: 14px; color: #333;">
+    业务人员看到：<br>
+    • 数据来源：静态选项 / 引用数据提供方 ❌（技术术语，业务不懂）<br>
+    • 需要理解什么是"静态选项"、什么是"数据提供方" ❌（增加理解成本）
+  </div>
+</div>
+
+<div class="section">
+  <h3>✅ 修正后的设计（业务友好）</h3>
+  <div style="padding: 20px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
+    <h4 style="color: #4caf50; margin-bottom: 15px;">正确：业务人员只需要"选择数据源"</h4>
+    <p style="font-size: 14px; color: #333; margin-bottom: 15px;">
+      <strong style="color: #4caf50;">核心原则：</strong>业务人员不懂技术，只看到可选的数据源列表
+    </p>
+
+    <div style="display: flex; gap: 20px;">
+      <!-- 左侧：业务人员视角 -->
+      <div style="flex: 1; padding: 15px; background: white; border-radius: 8px;">
+        <h5 style="color: #2196f3; margin-bottom: 10px;">业务人员看到的界面</h5>
+        <div class="mockup">
+          <div class="mockup-body" style="padding: 15px;">
+            <div style="margin-bottom: 10px;">
+              <div style="font-size: 12px; color: #666; margin-bottom: 5px;">字段名称：</div>
+              <input class="mock-input" style="width: 100%;" placeholder="币种">
+            </div>
+            <div style="margin-bottom: 10px;">
+              <div style="font-size: 12px; color: #666; margin-bottom: 5px;">组件类型：</div>
+              <select class="mock-input" style="width: 100%;">
+                <option>下拉选择框</option>
+              </select>
+            </div>
+            <div style="margin-bottom: 10px;">
+              <div style="font-size: 12px; color: #666; margin-bottom: 5px;">选择数据源：</div>
+              <select class="mock-input" style="width: 100%;">
+                <option>币种列表（IT配置）</option>
+                <option>合同类型（IT配置）</option>
+                <option>供应商列表（IT配置）</option>
+                <option>自定义选项（自己输入）</option>
+              </select>
+            </div>
+            <div style="padding: 10px; background: #fff3e0; border-radius: 8px; border: 1px dashed #ff9800;">
+              <div style="font-size: 11px; color: #999;">
+                ⚠️ 选择"自定义选项"后，下方显示输入框，直接输入选项列表
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧：数据源来源说明 -->
+      <div style="flex: 1; padding: 15px; background: white; border-radius: 8px;">
+        <h5 style="color: #4caf50; margin-bottom: 10px;">数据源来源（后台逻辑）</h5>
+        <div style="font-size: 14px; color: #333;">
+          <div style="margin-bottom: 15px; padding: 10px; background: #e3f2fd; border-radius: 8px;">
+            <strong style="color: #2196f3;">① IT后台配置的数据源：</strong><br>
+            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+              • 币种列表（DataProvider配置好的）<br>
+              • 合同类型（DataProvider配置好的）<br>
+              • 供应商列表（DataProvider配置好的）<br>
+              • ...更多IT配置的数据源
+            </div>
+          </div>
+
+          <div style="margin-bottom: 15px; padding: 10px; background: #fff3e0; border-radius: 8px;">
+            <strong style="color: #ff9800;">② 业务人员自己输入：</strong><br>
+            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+              选择"自定义选项"后，显示输入框<br>
+              直接输入选项列表（如：是/否、同意/拒绝等）
+            </div>
+          </div>
+
+          <div style="padding: 10px; background: #e8f5e9; border-radius: 8px;">
+            <strong style="color: #4caf50;">业务人员看到的：</strong><br>
+            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+              只是"选择数据源"下拉框，里面有所有可用选项<br>
+              不需要区分IT配置还是自己输入，直接选就行
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>🔧 后台实现逻辑</h3>
+  <div style="padding: 20px; background: #f5f5f5; border-radius: 8px;">
+    <div style="display: flex; gap: 20px;">
+      <!-- 数据源列表API -->
+      <div style="flex: 1;">
+        <h5 style="color: #2196f3; margin-bottom: 15px;">数据源列表API</h5>
+        <div style="padding: 15px; background: white; border-radius: 8px;">
+          <div style="padding: 10px; background: #e3f2fd; border-radius: 8px; margin-bottom: 10px; font-size: 12px;">
+            <strong>GET /api/data-providers</strong><br>
+            <div style="margin-top: 5px;">
+              返回所有IT配置的数据源列表：<br>
+              [<br>
+              &nbsp;&nbsp;{ "id": 1, "name": "币种列表", "code": "CURRENCY" },<br>
+              &nbsp;&nbsp;{ "id": 2, "name": "合同类型", "code": "CONTRACT_TYPE" },<br>
+              &nbsp;&nbsp;{ "id": 3, "name": "供应商列表", "code": "SUPPLIER" }<br>
+              ]
+            </div>
+          </div>
+
+          <div style="padding: 10px; background: #fff3e0; border-radius: 8px; font-size: 12px;">
+            <strong>前端动态添加：</strong><br>
+            <div style="margin-top: 5px;">
+              在数据源列表末尾添加：<br>
+              "自定义选项（自己输入）"
+            </div>
+          </div>
+
+          <div style="padding: 10px; background: #e8f5e9; border-radius: 8px; font-size: 12px;">
+            <strong>业务人员看到的下拉框：</strong><br>
+            <div style="margin-top: 5px;">
+              币种列表（IT配置）<br>
+              合同类型（IT配置）<br>
+              供应商列表（IT配置）<br>
+              自定义选项（自己输入） ← 前端添加的特殊选项
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 自定义选项输入 -->
+      <div style="flex: 1;">
+        <h5 style="color: #ff9800; margin-bottom: 15px;">自定义选项输入界面</h5>
+        <div style="padding: 15px; background: white; border-radius: 8px;">
+          <div class="mockup">
+            <div class="mockup-body" style="padding: 15px;">
+              <div style="font-size: 12px; color: #666; margin-bottom: 8px;">
+                选择数据源：<strong style="color: #ff9800;">自定义选项（自己输入）</strong>
+              </div>
+              <div style="padding: 10px; background: #fff3e0; border-radius: 8px; border: 2px solid #ff9800;">
+                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
+                  输入选项列表（每行一个）：
+                </div>
+                <textarea class="mock-input" style="width: 100%; height: 80px;" placeholder="是
+否
+同意
+拒绝"></textarea>
+                <div style="margin-top: 5px; font-size: 11px; color: #999;">
+                  ⚠️ 直接输入选项文本，一行一个，保存后自动创建静态数据源
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="padding: 10px; background: #e3f2fd; border-radius: 8px; margin-top: 10px; font-size: 12px;">
+            <strong>保存逻辑：</strong><br>
+            <div style="margin-top: 5px;">
+              后端自动创建临时DataProvider：<br>
+              • providerCode: field_{fieldId}_static<br>
+              • providerName: {字段名称}_静态选项<br>
+              • providerType: STATIC<br>
+              • configJson: {"options": ["是", "否", "同意", "拒绝"]}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>📋 完整属性面板设计（修正版）</h3>
+  <div class="mockup">
+    <div class="mockup-header">右侧属性面板（业务友好版）</div>
+    <div class="mockup-body">
+      <div style="padding: 15px;">
+        <!-- 当前选中 -->
+        <div style="padding: 10px; background: #fff3e0; border-radius: 8px; margin-bottom: 15px;">
+          <div class="label" style="font-size: 12px;">当前选中：字段4 - 币种</div>
+        </div>
+
+        <!-- 基本信息 -->
+        <div style="margin-bottom: 15px;">
+          <div class="label" style="font-size: 12px; margin-bottom: 10px;">基本信息</div>
+          <div style="margin-bottom: 10px;">
+            <div style="font-size: 12px; color: #666; margin-bottom: 3px;">字段名称：</div>
+            <input class="mock-input" style="width: 100%;" placeholder="币种">
+          </div>
+          <div style="margin-bottom: 10px;">
+            <div style="font-size: 12px; color: #666; margin-bottom: 3px;">是否必填：</div>
+            <select class="mock-input" style="width: 100%;">
+              <option>否</option>
+              <option>是</option>
+            </select>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <div style="font-size: 12px; color: #666; margin-bottom: 3px;">提示文字：</div>
+            <input class="mock-input" style="width: 100%;" placeholder="请选择币种">
+          </div>
+        </div>
+
+        <!-- 组件配置（下拉框特有） -->
+        <div style="margin-bottom: 15px; padding: 15px; background: #e3f2fd; border-radius: 8px; border: 2px solid #2196f3;">
+          <div class="label" style="font-size: 12px; margin-bottom: 10px; color: #2196f3;">下拉框配置</div>
+
+          <div style="margin-bottom: 10px;">
+            <div style="font-size: 12px; color: #666; margin-bottom: 3px;">选择数据源：</div>
+            <select class="mock-input" style="width: 100%;">
+              <option>币种列表</option>
+              <option>合同类型</option>
+              <option>供应商列表</option>
+              <option selected>自定义选项（自己输入）</option>
+            </select>
+          </div>
+
+          <!-- 自定义选项输入（选择"自定义选项"后显示） -->
+          <div style="padding: 10px; background: #fff3e0; border-radius: 8px; border: 1px dashed #ff9800;">
+            <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
+              输入选项列表（每行一个）：
+            </div>
+            <textarea class="mock-input" style="width: 100%; height: 60px;">CNY - 人民币
+USD - 美元
+EUR - 欧元</textarea>
+          </div>
+        </div>
+
+        <!-- 查询功能预留 -->
+        <div style="margin-bottom: 15px; padding: 15px; background: #fff3e0; border-radius: 8px; border: 1px dashed #ff9800;">
+          <div class="label" style="font-size: 12px; margin-bottom: 10px; color: #ff9800;">🔍 查询功能</div>
+          <div style="margin-bottom: 10px;">
+            <div style="font-size: 12px; color: #666; margin-bottom: 3px;">是否需要查询：</div>
+            <select class="mock-input" style="width: 100%;">
+              <option>否</option>
+              <option>是（字段旁边显示查询按钮）</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <button class="mock-button" style="width: 100%; background: #4caf50; color: white; margin-bottom: 8px;">
+          ✅ 应用属性（自动保存）
+        </button>
+        <button class="mock-button" style="width: 100%; background: #f44336; color: white;">
+          🗑 删除字段
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>🎯 设计对比总结</h3>
+  <div style="display: flex; gap: 15px;">
+    <div style="flex: 1; padding: 15px; background: #ffebee; border-radius: 8px;">
+      <h4 style="color: #f44336; margin-bottom: 10px;">❌ 原设计（技术化）</h4>
+      <div style="font-size: 12px; color: #333;">
+        业务人员看到：<br>
+        • 数据来源：静态选项 / 引用数据提供方<br>
+        <br>
+        <strong style="color: #f44336;">问题：</strong><br>
+        • 业务人员不懂什么是"数据来源"<br>
+        • 业务人员不懂什么是"静态选项"<br>
+        • 业务人员不懂什么是"数据提供方"<br>
+        • 需要理解技术概念才能配置
+      </div>
+    </div>
+
+    <div style="flex: 1; padding: 15px; background: #e8f5e9; border-radius: 8px;">
+      <h4 style="color: #4caf50; margin-bottom: 10px;">✅ 修正设计（业务友好）</h4>
+      <div style="font-size: 12px; color: #333;">
+        业务人员看到：<br>
+        • 选择数据源：币种列表 / 合同类型 / 自定义选项<br>
+        <br>
+        <strong style="color: #4caf50;">优势：</strong><br>
+        • 不需要理解技术概念<br>
+        • 直接选择可用数据源就行<br>
+        • 选择"自定义选项" → 直接输入<br>
+        • 简单直观，符合业务直觉
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 30px; padding: 20px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+  <h4 style="color: #2196f3; margin-bottom: 15px;">✅ 数据源配置修正确认</h4>
+  <p style="font-size: 14px; color: #333;">
+    请确认以下修正内容是否正确：
+  </p>
+  <div style="font-size: 14px; color: #333;">
+    <span style="color: #4caf50;">✓</span> 业务人员只看到"选择数据源"下拉框（不暴露技术概念）<br>
+    <span style="color: #4caf50;">✓</span> 数据源列表包括：IT配置的数据源 + "自定义选项（自己输入）"<br>
+    <span style="color: #4caf50;">✓</span> 选择"自定义选项"后，显示输入框，业务人员直接输入选项列表<br>
+    <span style="color: #4caf50;">✓</span> 后端自动创建临时DataProvider保存自定义选项<br>
+    <span style="color: #4caf50;">✓</span> 简单直观，符合业务直觉（不需要理解技术概念）
+  </div>
+</div>

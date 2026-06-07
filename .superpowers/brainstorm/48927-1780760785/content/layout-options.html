@@ -1,0 +1,262 @@
+<h2>配置界面布局方案</h2>
+<p class="subtitle">业务人员配置界面的具体布局结构</p>
+
+<div class="section">
+  <h3>方案对比：配置界面如何组织？</h3>
+  <div class="split">
+    <div class="mockup">
+      <div class="mockup-header">方案A：三栏式（推荐）</div>
+      <div class="mockup-body">
+        <div style="display: flex; gap: 10px; padding: 10px;">
+          <!-- 左侧：组件库 -->
+          <div style="width: 200px; border: 2px solid #4caf50; padding: 10px; border-radius: 8px;">
+            <div style="font-weight: bold; color: #4caf50; margin-bottom: 10px;">📦 组件库</div>
+            <div style="margin-bottom: 8px;">
+              <div class="label">基础组件</div>
+              <div style="font-size: 12px; padding: 5px; border: 1px dashed #ccc; margin-bottom: 3px;">📝 文本输入框</div>
+              <div style="font-size: 12px; padding: 5px; border: 1px dashed #ccc; margin-bottom: 3px;">🔢 数字输入框</div>
+              <div style="font-size: 12px; padding: 5px; border: 1px dashed #ccc; margin-bottom: 3px;">📅 日期选择器</div>
+              <div style="font-size: 12px; padding: 5px; border: 1px dashed #ccc; margin-bottom: 3px;">📋 下拉选择框</div>
+            </div>
+            <div style="margin-bottom: 8px;">
+              <div class="label">布局组件</div>
+              <div style="font-size: 12px; padding: 5px; border: 1px dashed #ccc; margin-bottom: 3px;">📄 卡片容器</div>
+              <div style="font-size: 12px; padding: 5px; border: 1px dashed #ccc; margin-bottom: 3px;">📊 明细表</div>
+            </div>
+            <div>
+              <div class="label">按钮组件</div>
+              <div style="font-size: 12px; padding: 5px; border: 1px dashed #ccc;">💾 保存按钮</div>
+            </div>
+          </div>
+
+          <!-- 中间：配置画布 -->
+          <div style="flex: 1; border: 2px solid #2196f3; padding: 10px; border-radius: 8px;">
+            <div style="font-weight: bold; color: #2196f3; margin-bottom: 10px;">🎨 配置画布（从上到下）</div>
+            <div style="padding: 10px; border: 1px dashed #2196f3; margin-bottom: 8px; background: white;">
+              <div style="font-size: 12px; color: #666;">卡片1：基本信息</div>
+              <div style="margin-left: 20px; font-size: 11px; color: #999;">├ 字段1：合同名称</div>
+              <div style="margin-left: 20px; font-size: 11px; color: #999;">├ 字段2：合同金额</div>
+            </div>
+            <div style="padding: 10px; border: 1px dashed #2196f3; margin-bottom: 8px; background: white;">
+              <div style="font-size: 12px; color: #666;">卡片2：合同条款</div>
+              <div style="margin-left: 20px; font-size: 11px; color: #999;">├ 字段3：签订日期</div>
+            </div>
+            <div style="padding: 10px; border: 1px dashed #ff9800; background: white;">
+              <div style="font-size: 12px; color: #666;">按钮：保存合同</div>
+            </div>
+            <div style="margin-top: 10px; font-size: 11px; color: #666;">
+              ⚠️ 点击组件添加到画布（从上到下）
+            </div>
+          </div>
+
+          <!-- 右侧：属性面板 -->
+          <div style="width: 250px; border: 2px solid #ff9800; padding: 10px; border-radius: 8px;">
+            <div style="font-weight: bold; color: #ff9800; margin-bottom: 10px;">⚙️ 属性面板</div>
+            <div style="margin-bottom: 10px;">
+              <div class="label">当前选中：卡片1</div>
+            </div>
+            <div style="margin-bottom: 8px;">
+              <div style="font-size: 12px; color: #666;">卡片名称：</div>
+              <input class="mock-input" style="width: 100%;" placeholder="基本信息">
+            </div>
+            <div style="margin-bottom: 8px;">
+              <div style="font-size: 12px; color: #666;">是否折叠：</div>
+              <select class="mock-input" style="width: 100%;">
+                <option>否</option>
+                <option>是</option>
+              </select>
+            </div>
+            <button class="mock-button" style="width: 100%; background: #4caf50; color: white;">
+              ✅ 应用属性
+            </button>
+          </div>
+        </div>
+
+        <div class="pros-cons" style="margin-top: 10px;">
+          <div class="pros">
+            <h4>优点</h4>
+            <ul>
+              <li>组件库、画布、属性分离清晰</li>
+              <li>业务人员从组件库选择 → 添加到画布 → 配置属性</li>
+              <li>符合用户直觉，易于理解</li>
+              <li>预留查询功能：可添加"查询按钮"组件</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>缺点</h4>
+            <ul>
+              <li>三栏占用空间较多</li>
+              <li>小屏幕可能需要滚动</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mockup">
+      <div class="mockup-header">方案B：两栏式（紧凑）</div>
+      <div class="mockup-body">
+        <div style="display: flex; gap: 10px; padding: 10px;">
+          <!-- 左侧：配置表单 -->
+          <div style="flex: 1; border: 2px solid #4caf50; padding: 10px; border-radius: 8px;">
+            <div style="font-weight: bold; color: #4caf50; margin-bottom: 10px;">📝 配置表单</div>
+
+            <!-- 步骤1 -->
+            <div style="margin-bottom: 15px; padding: 10px; border: 1px dashed #4caf50; background: white;">
+              <div class="label">步骤1：添加卡片</div>
+              <input class="mock-input" style="width: 100%; margin-top: 5px;" placeholder="卡片名称：基本信息">
+              <button class="mock-button" style="width: 100%; margin-top: 5px; background: #4caf50; color: white;">
+                ➕ 添加卡片
+              </button>
+            </div>
+
+            <!-- 步骤2 -->
+            <div style="margin-bottom: 15px; padding: 10px; border: 1px dashed #2196f3; background: white;">
+              <div class="label">步骤2：在卡片内添加字段</div>
+              <select class="mock-input" style="width: 100%; margin-top: 5px;">
+                <option>选择卡片：基本信息</option>
+                <option>选择卡片：合同条款</option>
+              </select>
+              <input class="mock-input" style="width: 100%; margin-top: 5px;" placeholder="字段名称：合同名称">
+              <select class="mock-input" style="width: 100%; margin-top: 5px;">
+                <option>组件类型：文本输入框</option>
+                <option>组件类型：数字输入框</option>
+                <option>组件类型：下拉选择框</option>
+              </select>
+              <button class="mock-button" style="width: 100%; margin-top: 5px; background: #2196f3; color: white;">
+                ➕ 添加字段
+              </button>
+            </div>
+
+            <!-- 步骤3 -->
+            <div style="margin-bottom: 15px; padding: 10px; border: 1px dashed #ff9800; background: white;">
+              <div class="label">步骤3：添加按钮</div>
+              <input class="mock-input" style="width: 100%; margin-top: 5px;" placeholder="按钮名称：保存合同">
+              <button class="mock-button" style="width: 100%; margin-top: 5px; background: #ff9800; color: white;">
+                ➕ 添加按钮
+              </button>
+            </div>
+          </div>
+
+          <!-- 右侧：实时预览 -->
+          <div style="flex: 1; border: 2px solid #9c27b0; padding: 10px; border-radius: 8px;">
+            <div style="font-weight: bold; color: #9c27b0; margin-bottom: 10px;">👁 实时预览</div>
+            <div style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; background: white;">
+              <div style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+                <div style="font-weight: bold; margin-bottom: 8px;">基本信息</div>
+                <input class="mock-input" style="width: 100%; margin-bottom: 8px;" placeholder="合同名称">
+                <input class="mock-input" style="width: 100%;" placeholder="合同金额">
+              </div>
+              <div style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+                <div style="font-weight: bold; margin-bottom: 8px;">合同条款</div>
+                <input class="mock-input" style="width: 100%;" placeholder="签订日期">
+              </div>
+              <button class="mock-button" style="width: 100%; background: #4caf50; color: white;">
+                保存合同
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pros-cons" style="margin-top: 10px;">
+          <div class="pros">
+            <h4>优点</h4>
+            <ul>
+              <li>紧凑，占用空间少</li>
+              <li>步骤清晰（1→2→3）</li>
+              <li>实时预览，所见即所得</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>缺点</h4>
+            <ul>
+              <li>没有独立组件库，需要下拉选择</li>
+              <li>不够直观，业务人员需要理解步骤</li>
+              <li>预留查询功能：需要额外步骤</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>关键决策：如何预留表格查询功能？</h3>
+  <div style="padding: 15px; background: #fff3e0; border-radius: 8px; border-left: 4px solid #ff9800;">
+    <p style="font-size: 14px; color: #333; margin-bottom: 10px;">
+      <strong>用户需求：</strong>"肯定要有表格的查询功能的"
+    </p>
+    <p style="font-size: 14px; color: #333; margin-bottom: 10px;">
+      <strong>查询功能类型：</strong>
+    </p>
+    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+      <div style="flex: 1; padding: 10px; border: 1px dashed #2196f3; border-radius: 4px;">
+        <div style="font-weight: bold; margin-bottom: 5px;">🔍 字段查询</div>
+        <div style="font-size: 12px; color: #666;">
+          点击字段旁边的查询按钮 → 弹出查询窗口 → 选择数据 → 回填字段
+        </div>
+        <div class="mockup" style="margin-top: 5px;">
+          <div class="mockup-body" style="padding: 5px;">
+            <div style="display: flex; gap: 5px;">
+              <input class="mock-input" style="flex: 1;" placeholder="供应商名称">
+              <button class="mock-button" style="padding: 5px 10px;">🔍</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="flex: 1; padding: 10px; border: 1px dashed #9c27b0; border-radius: 4px;">
+        <div style="font-weight: bold; margin-bottom: 5px;">📊 表格查询</div>
+        <div style="font-size: 12px; color: #666;">
+          明细表的查询按钮 → 弹出查询窗口 → 选择多条数据 → 批量添加行
+        </div>
+        <div class="mockup" style="margin-top: 5px;">
+          <div class="mockup-body" style="padding: 5px;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr style="background: #f5f5f5;">
+                <th style="padding: 3px; border: 1px solid #ccc; font-size: 10px;">产品</th>
+                <th style="padding: 3px; border: 1px solid #ccc; font-size: 10px;">数量</th>
+              </tr>
+            </table>
+            <button class="mock-button" style="margin-top: 3px; font-size: 10px; padding: 3px 8px;">
+              🔍 批量查询产品
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p style="font-size: 14px; color: #333;">
+      <strong style="color: #ff9800;">预留方案：</strong>
+      在字段组件配置时，添加"是否需要查询功能"选项，
+      明细表组件自带"批量查询"按钮属性。
+    </p>
+  </div>
+</div>
+
+<div class="section">
+  <h3>你的选择？</h3>
+  <div class="options">
+    <div class="option" data-choice="three-columns" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>方案A：三栏式（推荐）</h3>
+        <p>组件库 + 配置画布 + 属性面板，直观易用，预留查询功能清晰</p>
+      </div>
+    </div>
+    <div class="option" data-choice="two-columns" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>方案B：两栏式（紧凑）</h3>
+        <p>配置表单 + 实时预览，步骤清晰但不够直观</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px;">
+  <h4 style="color: #4caf50; margin-bottom: 10px;">✅ 我的推荐：方案A（三栏式）</h4>
+  <p style="font-size: 14px; color: #333;">
+    <strong>理由：</strong>业务人员更直观，点击组件库 → 添加到画布 → 配置属性，
+    符合"所见即所得"的直觉。预留查询功能时，可以在属性面板中添加"查询配置"选项。
+  </p>
+</div>

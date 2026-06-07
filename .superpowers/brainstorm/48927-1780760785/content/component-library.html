@@ -1,0 +1,221 @@
+<h2>组件库设计</h2>
+<p class="subtitle">业务人员配置界面需要哪些组件类型？</p>
+
+<div class="section">
+  <h3>📦 基础组件（必须）</h3>
+  <p style="font-size: 14px; color: #666; margin-bottom: 15px;">
+    这些是业务人员配置模板时必须的基础输入组件
+  </p>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="text-input" onclick="toggleSelect(this)">
+      <div class="letter">1</div>
+      <div class="content">
+        <h3>文本输入框</h3>
+        <p><strong>用途：</strong>合同名称、备注、说明等文本字段</p>
+        <div class="mockup" style="margin-top: 10px;">
+          <div class="mockup-body" style="padding: 10px;">
+            <div style="font-size: 12px; color: #666;">字段名称：合同名称</div>
+            <input class="mock-input" style="width: 100%;" placeholder="请输入合同名称">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="option" data-choice="number-input" onclick="toggleSelect(this)">
+      <div class="letter">2</div>
+      <div class="content">
+        <h3>数字输入框</h3>
+        <p><strong>用途：</strong>合同金额、数量、单价等数值字段</p>
+        <div class="mockup" style="margin-top: 10px;">
+          <div class="mockup-body" style="padding: 10px;">
+            <div style="font-size: 12px; color: #666;">字段名称：合同金额</div>
+            <input class="mock-input" style="width: 100%;" placeholder="0.00" type="number">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="option" data-choice="date-picker" onclick="toggleSelect(this)">
+      <div class="letter">3</div>
+      <div class="content">
+        <h3>日期选择器</h3>
+        <p><strong>用途：</strong>签订日期、生效日期、到期日期等</p>
+        <div class="mockup" style="margin-top: 10px;">
+          <div class="mockup-body" style="padding: 10px;">
+            <div style="font-size: 12px; color: #666;">字段名称：签订日期</div>
+            <input class="mock-input" style="width: 100%;" placeholder="2026-01-01" type="date">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="option" data-choice="select" onclick="toggleSelect(this)">
+      <div class="letter">4</div>
+      <div class="content">
+        <h3>下拉选择框</h3>
+        <p><strong>用途：</strong>币种、合同类型、状态等选项字段</p>
+        <div class="mockup" style="margin-top: 10px;">
+          <div class="mockup-body" style="padding: 10px;">
+            <div style="font-size: 12px; color: #666;">字段名称：币种</div>
+            <select class="mock-input" style="width: 100%;">
+              <option>CNY - 人民币</option>
+              <option>USD - 美元</option>
+              <option>EUR - 欧元</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="option" data-choice="amount-input" onclick="toggleSelect(this)">
+      <div class="letter">5</div>
+      <div class="content">
+        <h3>金额输入框（特殊）</h3>
+        <p><strong>用途：</strong>带币种符号的金额输入，自动格式化</p>
+        <div class="mockup" style="margin-top: 10px;">
+          <div class="mockup-body" style="padding: 10px;">
+            <div style="font-size: 12px; color: #666;">字段名称：合同金额</div>
+            <div style="display: flex; gap: 5px;">
+              <select class="mock-input" style="width: 80px;">
+                <option>CNY</option>
+                <option>USD</option>
+              </select>
+              <input class="mock-input" style="flex: 1;" placeholder="1,000,000.00">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>📦 布局组件（可选）</h3>
+  <p style="font-size: 14px; color: #666; margin-bottom: 15px;">
+    用于组织字段的容器组件，第一阶段先支持简单布局
+  </p>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="card" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>卡片容器</h3>
+        <p><strong>用途：</strong>分组字段，如"基本信息"、"合同条款"</p>
+        <div class="mockup" style="margin-top: 10px;">
+          <div class="mockup-body" style="padding: 10px;">
+            <div style="border: 1px solid #ccc; border-radius: 4px; padding: 15px;">
+              <div style="font-weight: bold; margin-bottom: 10px;">基本信息</div>
+              <input class="mock-input" style="width: 100%; margin-bottom: 8px;" placeholder="合同名称">
+              <input class="mock-input" style="width: 100%;" placeholder="签订日期">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="option" data-choice="table" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>明细表（复杂，后续支持）</h3>
+        <p><strong>用途：</strong>合同明细行、付款计划等表格数据</p>
+        <div class="mockup" style="margin-top: 10px;">
+          <div class="mockup-body" style="padding: 10px;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr style="background: #f5f5f5;">
+                <th style="padding: 8px; border: 1px solid #ccc;">序号</th>
+                <th style="padding: 8px; border: 1px solid #ccc;">产品名称</th>
+                <th style="padding: 8px; border: 1px solid #ccc;">数量</th>
+                <th style="padding: 8px; border: 1px solid #ccc;">单价</th>
+              </tr>
+              <tr>
+                <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">1</td>
+                <td style="padding: 8px; border: 1px solid #ccc;">
+                  <input class="mock-input" style="width: 100%;" placeholder="产品A">
+                </td>
+                <td style="padding: 8px; border: 1px solid #ccc;">
+                  <input class="mock-input" style="width: 100%;" placeholder="100">
+                </td>
+                <td style="padding: 8px; border: 1px solid #ccc;">
+                  <input class="mock-input" style="width: 100%;" placeholder="50.00">
+                </td>
+              </tr>
+            </table>
+            <button class="mock-button" style="margin-top: 10px; font-size: 12px;">+ 添加行</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>📦 按钮组件（必须）</h3>
+  <p style="font-size: 14px; color: #666; margin-bottom: 15px;">
+    合同录入界面的操作按钮，配置时绑定动作
+  </p>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="save-button" onclick="toggleSelect(this)">
+      <div class="letter">S</div>
+      <div class="content">
+        <h3>保存按钮</h3>
+        <p><strong>用途：</strong>保存合同数据到数据库</p>
+        <div class="mockup" style="margin-top: 10px;">
+          <div class="mockup-body" style="padding: 10px; text-align: center;">
+            <button class="mock-button" style="background: #4caf50; color: white; padding: 10px 20px;">
+              💾 保存合同
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="option" data-choice="query-button" onclick="toggleSelect(this)">
+      <div class="letter">Q</div>
+      <div class="content">
+        <h3>查询按钮</h3>
+        <p><strong>用途：</strong>弹出查询窗口，选择数据回填字段</p>
+        <div class="mockup" style="margin-top: 10px;">
+          <div class="mockup-body" style="padding: 10px; text-align: center;">
+            <button class="mock-button" style="background: #2196f3; color: white; padding: 10px 20px;">
+              🔍 查询选择
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 30px; padding: 20px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+  <h3 style="color: #2196f3; margin-bottom: 10px;">🎯 第一阶段范围建议</h3>
+  <p style="font-size: 14px; color: #333; margin-bottom: 10px;">
+    <strong style="color: #4caf50;">必须实现：</strong>文本输入框、数字输入框、日期选择器、下拉选择框、卡片容器、保存按钮
+  </p>
+  <p style="font-size: 14px; color: #333; margin-bottom: 10px;">
+    <strong style="color: #ff9800;">可选实现：</strong>金额输入框、查询按钮
+  </p>
+  <p style="font-size: 14px; color: #333;">
+    <strong style="color: #f44336;">后续支持：</strong>明细表（复杂，需要行列操作）
+  </p>
+</div>
+
+<div style="margin-top: 20px; padding: 15px; background: #fff3e0; border-radius: 8px;">
+  <h4 style="color: #ff9800; margin-bottom: 10px;">💡 配置流程（从上到下）</h4>
+  <p style="font-size: 14px; color: #333;">
+    业务人员在左侧配置表单中，从上到下依次添加组件：
+  </p>
+  <div style="display: flex; gap: 10px; margin-top: 10px;">
+    <div style="flex: 1; padding: 10px; border: 1px dashed #4caf50; border-radius: 4px;">
+      <div style="font-weight: bold; margin-bottom: 5px;">1. 添加卡片容器</div>
+      <div style="font-size: 12px; color: #666;">卡片名称：基本信息</div>
+    </div>
+    <div style="flex: 1; padding: 10px; border: 1px dashed #2196f3; border-radius: 4px;">
+      <div style="font-weight: bold; margin-bottom: 5px;">2. 在卡片内添加字段</div>
+      <div style="font-size: 12px; color: #666;">字段1：合同名称（文本输入框）</div>
+      <div style="font-size: 12px; color: #666;">字段2：合同金额（数字输入框）</div>
+    </div>
+    <div style="flex: 1; padding: 10px; border: 1px dashed #ff9800; border-radius: 4px;">
+      <div style="font-weight: bold; margin-bottom: 5px;">3. 添加保存按钮</div>
+      <div style="font-size: 12px; color: #666;">按钮名称：保存合同</div>
+    </div>
+  </div>
+</div>

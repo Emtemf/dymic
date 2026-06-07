@@ -1,0 +1,301 @@
+<h2>配置保存策略</h2>
+<p class="subtitle">业务人员配置界面如何与后端API交互？</p>
+
+<div class="section">
+  <h3>关键问题：何时保存配置？</h3>
+  <div style="padding: 15px; background: #f5f5f5; border-radius: 8px; margin-bottom: 15px;">
+    <p style="font-size: 14px; color: #333; margin-bottom: 10px;">
+      <strong>业务人员配置过程：</strong>
+    </p>
+    <div style="display: flex; gap: 10px;">
+      <div style="flex: 1; padding: 10px; border: 1px dashed #4caf50; border-radius: 4px; text-align: center;">
+        <div style="font-weight: bold;">添加卡片1</div>
+        <div style="font-size: 12px; color: #666;">基本信息</div>
+      </div>
+      <div style="flex: 1; padding: 10px; border: 1px dashed #2196f3; border-radius: 4px; text-align: center;">
+        <div style="font-weight: bold;">添加字段1</div>
+        <div style="font-size: 12px; color: #666;">合同名称</div>
+      </div>
+      <div style="flex: 1; padding: 10px; border: 1px dashed #2196f3; border-radius: 4px; text-align: center;">
+        <div style="font-weight: bold;">添加字段2</div>
+        <div style="font-size: 12px; color: #666;">合同金额</div>
+      </div>
+      <div style="flex: 1; padding: 10px; border: 1px dashed #ff9800; border-radius: 4px; text-align: center;">
+        <div style="font-weight: bold;">添加按钮</div>
+        <div style="font-size: 12px; color: #666;">保存合同</div>
+      </div>
+    </div>
+    <p style="font-size: 14px; color: #333; margin-top: 10px;">
+      <strong style="color: #f44336;">问题：</strong>
+      每个操作都调用API保存？还是在内存中构建配置树，最后一次性保存？
+    </p>
+  </div>
+</div>
+
+<div class="section">
+  <h3>方案对比：保存策略</h3>
+  <div class="split">
+    <div class="mockup">
+      <div class="mockup-header">方案1：实时保存（推荐）</div>
+      <div class="mockup-body">
+        <div style="padding: 15px;">
+          <h4 style="color: #4caf50; margin-bottom: 10px;">流程：每次操作立即调用API</h4>
+
+          <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <!-- 操作序列 -->
+            <div style="flex: 1; padding: 10px; border: 1px solid #4caf50; border-radius: 8px;">
+              <div style="font-weight: bold; margin-bottom: 8px;">用户操作</div>
+              <div style="font-size: 12px; padding: 5px; border: 1px dashed #ccc; margin-bottom: 3px;">
+                ① 添加卡片"基本信息"
+              </div>
+              <div style="font-size: 12px; padding: 5px; border: 1px dashed #ccc; margin-bottom: 3px;">
+                ② 添加字段"合同名称"
+              </div>
+              <div style="font-size: 12px; padding: 5px; border: 1px dashed #ccc; margin-bottom: 3px;">
+                ③ 添加字段"合同金额"
+              </div>
+              <div style="font-size: 12px; padding: 5px; border: 1px dashed #ccc;">
+                ④ 添加按钮"保存"
+              </div>
+            </div>
+
+            <!-- API调用 -->
+            <div style="flex: 1; padding: 10px; border: 1px solid #2196f3; border-radius: 8px;">
+              <div style="font-weight: bold; margin-bottom: 8px;">API调用（立即）</div>
+              <div style="font-size: 11px; padding: 5px; background: #e3f2fd; margin-bottom: 3px; border-radius: 3px;">
+                POST /api/layout-nodes
+              </div>
+              <div style="font-size: 11px; padding: 5px; background: #e3f2fd; margin-bottom: 3px; border-radius: 3px;">
+                POST /api/field-defs + field-components
+              </div>
+              <div style="font-size: 11px; padding: 5px; background: #e3f2fd; margin-bottom: 3px; border-radius: 3px;">
+                POST /api/field-defs + field-components
+              </div>
+              <div style="font-size: 11px; padding: 5px; background: #e3f2fd; border-radius: 3px;">
+                POST /api/action-configs
+              </div>
+            </div>
+
+            <!-- 数据库状态 -->
+            <div style="flex: 1; padding: 10px; border: 1px solid #ff9800; border-radius: 8px;">
+              <div style="font-weight: bold; margin-bottom: 8px;">数据库状态</div>
+              <div style="font-size: 11px; color: #666; margin-bottom: 5px;">
+                ✅ 卡片已保存（ID=1）
+              </div>
+              <div style="font-size: 11px; color: #666; margin-bottom: 5px;">
+                ✅ 字段已保存（ID=2）
+              </div>
+              <div style="font-size: 11px; color: #666; margin-bottom: 5px;">
+                ✅ 字段已保存（ID=3）
+              </div>
+              <div style="font-size: 11px; color: #666;">
+                ✅ 按钮已保存（ID=4）
+              </div>
+            </div>
+          </div>
+
+          <!-- 技术实现 -->
+          <div style="padding: 10px; background: #e8f5e9; border-radius: 8px; margin-bottom: 10px;">
+            <div style="font-weight: bold; color: #4caf50; margin-bottom: 8px;">技术实现：</div>
+            <div style="font-size: 12px; color: #333;">
+              <strong>自动保存机制：</strong>500ms延迟，避免频繁请求
+            </div>
+            <div style="font-size: 12px; color: #333;">
+              <strong>乐观更新：</strong>先更新前端UI，API失败后再回滚
+            </div>
+            <div style="font-size: 12px; color: #333;">
+              <strong>实时预览：</strong>每次保存成功后，刷新右侧预览
+            </div>
+          </div>
+
+          <!-- 优点缺点 -->
+          <div class="pros-cons">
+            <div class="pros">
+              <h4>优点</h4>
+              <ul>
+                <li>配置不丢失（随时保存）</li>
+                <li>实时验证API正确性</li>
+                <li>支持撤销/重做（后续）</li>
+                <li>多设备协同（后续）</li>
+              </ul>
+            </div>
+            <div class="cons">
+              <h4>缺点</h4>
+              <ul>
+                <li>API调用频繁（500ms延迟可缓解）</li>
+                <li>网络不稳定时可能失败</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mockup">
+      <div class="mockup-header">方案2：批量保存</div>
+      <div class="mockup-body">
+        <div style="padding: 15px;">
+          <h4 style="color: #2196f3; margin-bottom: 10px;">流程：内存中构建配置树，最后一次性保存</h4>
+
+          <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <!-- 操作序列 -->
+            <div style="flex: 1; padding: 10px; border: 1px solid #4caf50; border-radius: 8px;">
+              <div style="font-weight: bold; margin-bottom: 8px;">用户操作</div>
+              <div style="font-size: 12px; padding: 5px; border: 1px dashed #ccc; margin-bottom: 3px;">
+                ① 添加卡片"基本信息"
+              </div>
+              <div style="font-size: 12px; padding: 5px; border: 1px dashed #ccc; margin-bottom: 3px;">
+                ② 添加字段"合同名称"
+              </div>
+              <div style="font-size: 12px; padding: 5px; border: 1px dashed #ccc; margin-bottom: 3px;">
+                ③ 添加字段"合同金额"
+              </div>
+              <div style="font-size: 12px; padding: 5px; border: 1px dashed #ccc;">
+                ④ 点击"保存配置"按钮
+              </div>
+            </div>
+
+            <!-- 内存状态 -->
+            <div style="flex: 1; padding: 10px; border: 1px solid #9c27b0; border-radius: 8px;">
+              <div style="font-weight: bold; margin-bottom: 8px;">内存配置树</div>
+              <div style="font-size: 11px; padding: 5px; background: #f3e5f5; margin-bottom: 3px; border-radius: 3px;">
+                { "layoutNodes": [...], "fieldDefs": [...], "fieldComponents": [...] }
+              </div>
+              <div style="font-size: 11px; color: #666;">
+                ⚠️ 配置只在内存中，未入库
+              </div>
+            </div>
+
+            <!-- API调用 -->
+            <div style="flex: 1; padding: 10px; border: 1px solid #f44336; border-radius: 8px;">
+              <div style="font-weight: bold; margin-bottom: 8px;">API调用（一次性）</div>
+              <div style="font-size: 11px; padding: 5px; background: #ffebee; margin-bottom: 3px; border-radius: 3px;">
+                POST /api/templates/save-config
+              </div>
+              <div style="font-size: 11px; padding: 5px; background: #ffebee; border-radius: 3px;">
+                （批量保存所有配置）
+              </div>
+            </div>
+          </div>
+
+          <!-- 技术实现 -->
+          <div style="padding: 10px; background: #e3f2fd; border-radius: 8px; margin-bottom: 10px;">
+            <div style="font-weight: bold; color: #2196f3; margin-bottom: 8px;">技术实现：</div>
+            <div style="font-size: 12px; color: #333;">
+              <strong>前端状态管理：</strong>内存中构建完整配置树
+            </div>
+            <div style="font-size: 12px; color: #333;">
+              <strong>批量API：</strong>一次性提交所有配置数据
+            </div>
+            <div style="font-size: 12px; color: #333;">
+              <strong>实时预览：</strong>基于内存配置树渲染，不依赖API
+            </div>
+          </div>
+
+          <!-- 优点缺点 -->
+          <div class="pros-cons">
+            <div class="pros">
+              <h4>优点</h4>
+              <ul>
+                <li>API调用少（一次性）</li>
+                <li>网络请求集中</li>
+                <li>预览不依赖API响应</li>
+              </ul>
+            </div>
+            <div class="cons">
+              <h4>缺点</h4>
+              <ul>
+                <li>配置可能丢失（刷新页面丢失）</li>
+                <li>无法验证单组件API正确性</li>
+                <li>批量保存失败时全部丢失</li>
+                <li>不支持多设备协同</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>实时预览策略对比</h3>
+  <div style="padding: 15px; background: #fff3e0; border-radius: 8px;">
+    <div style="display: flex; gap: 15px;">
+      <div style="flex: 1;">
+        <h4 style="color: #4caf50; margin-bottom: 10px;">方案1：基于已保存数据预览</h4>
+        <div style="font-size: 12px; color: #333;">
+          <strong>流程：</strong>
+          <div style="margin-left: 15px; margin-bottom: 5px;">
+            ① 添加组件 → API保存成功 → GET /api/templates/{id}/schema → 渲染预览
+          </div>
+        </div>
+        <div style="font-size: 12px; color: #666;">
+          ✅ 预览数据与数据库一致，验证真实效果
+        </div>
+        <div style="font-size: 12px; color: #666;">
+          ❌ 依赖API响应速度，预览可能有延迟
+        </div>
+      </div>
+
+      <div style="flex: 1;">
+        <h4 style="color: #2196f3; margin-bottom: 10px;">方案2：基于内存数据预览</h4>
+        <div style="font-size: 12px; color: #333;">
+          <strong>流程：</strong>
+          <div style="margin-left: 15px; margin-bottom: 5px;">
+            ① 添加组件 → 更新内存配置树 → 直接渲染预览（不调用API）
+          </div>
+        </div>
+        <div style="font-size: 12px; color: #666;">
+          ✅ 预览无延迟，用户体验流畅
+        </div>
+        <div style="font-size: 12px; color: #666;">
+          ❌ 预览数据可能与数据库不一致（保存失败时）
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>我的推荐：方案1（实时保存）+ 方案2预览优化</h3>
+  <div style="padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
+    <h4 style="color: #4caf50; margin-bottom: 10px;">✅ 推荐方案：实时保存 + 内存预览优化</h4>
+    <p style="font-size: 14px; color: #333; margin-bottom: 10px;">
+      <strong>保存策略：</strong>每次操作立即调用API保存（500ms延迟）
+    </p>
+    <p style="font-size: 14px; color: #333; margin-bottom: 10px;">
+      <strong>预览策略：</strong>同时更新内存配置树 + 调用API验证
+    </p>
+    <p style="font-size: 14px; color: #333;">
+      <strong>优势：</strong>配置不丢失 + 预览无延迟 + API实时验证
+    </p>
+  </div>
+</div>
+
+<div class="section">
+  <h3>你的选择？</h3>
+  <div class="options">
+    <div class="option" data-choice="realtime-save" onclick="toggleSelect(this)">
+      <div class="letter">1</div>
+      <div class="content">
+        <h3>方案1：实时保存</h3>
+        <p>每次操作立即调用API，配置不丢失，支持多设备协同</p>
+      </div>
+    </div>
+    <div class="option" data-choice="batch-save" onclick="toggleSelect(this)">
+      <div class="letter">2</div>
+      <div class="content">
+        <h3>方案2：批量保存</h3>
+        <p>内存构建配置树，最后一次性保存，API调用少</p>
+      </div>
+    </div>
+    <div class="option" data-choice="hybrid" onclick="toggleSelect(this)">
+      <div class="letter">H</div>
+      <div class="content">
+        <h3>混合方案（推荐）</h3>
+        <p>实时保存 + 内存预览优化，配置不丢失 + 预览无延迟</p>
+      </div>
+    </div>
+  </div>
+</div>

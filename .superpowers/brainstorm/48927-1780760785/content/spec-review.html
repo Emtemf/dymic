@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>规范文档审阅 - 合同模板配置界面设计</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      font-size: 32px;
+      color: #2196f3;
+      margin-bottom: 10px;
+      border-bottom: 3px solid #2196f3;
+      padding-bottom: 15px;
+    }
+    .meta {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 30px;
+      padding: 10px;
+      background: #e3f2fd;
+      border-radius: 8px;
+    }
+    h2 {
+      font-size: 24px;
+      color: #4caf50;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      border-left: 4px solid #4caf50;
+      padding-left: 15px;
+    }
+    h3 {
+      font-size: 20px;
+      color: #ff9800;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      border-left: 4px solid #ff9800;
+      padding-left: 10px;
+    }
+    h4 {
+      font-size: 18px;
+      color: #9c27b0;
+      margin-top: 15px;
+      margin-bottom: 10px;
+    }
+    p, li {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+    ul {
+      margin-left: 20px;
+      margin-bottom: 15px;
+    }
+    .section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #fafafa;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+    .success-box {
+      padding: 15px;
+      background: #e8f5e9;
+      border-radius: 8px;
+      border-left: 4px solid #4caf50;
+      margin-bottom: 15px;
+    }
+    .error-box {
+      padding: 15px;
+      background: #ffebee;
+      border-radius: 8px;
+      border-left: 4px solid #f44336;
+      margin-bottom: 15px;
+    }
+    .warning-box {
+      padding: 15px;
+      background: #fff3e0;
+      border-radius: 8px;
+      border-left: 4px solid #ff9800;
+      margin-bottom: 15px;
+    }
+    .info-box {
+      padding: 15px;
+      background: #e3f2fd;
+      border-radius: 8px;
+      border-left: 4px solid #2196f3;
+      margin-bottom: 15px;
+    }
+    .mockup {
+      background: #fff;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 15px 0;
+      font-family: monospace;
+      font-size: 14px;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .checklist {
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .checklist-item {
+      padding: 8px 0;
+      font-size: 16px;
+    }
+    .checklist-item:before {
+      content: '☐ ';
+      color: #999;
+    }
+    .flow-diagram {
+      display: flex;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .flow-step {
+      flex: 1;
+      padding: 15px;
+      border: 2px solid #4caf50;
+      border-radius: 8px;
+      text-align: center;
+      background: #e8f5e9;
+    }
+    .flow-step-title {
+      font-weight: bold;
+      color: #4caf50;
+      margin-bottom: 10px;
+    }
+    .review-footer {
+      margin-top: 40px;
+      padding: 20px;
+      background: #e3f2fd;
+      border-radius: 8px;
+      border-left: 4px solid #2196f3;
+    }
+    .review-footer h3 {
+      color: #2196f3;
+      border-left: none;
+      padding-left: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #e0e0e0;
+      text-align: left;
+    }
+    th {
+      background: #e3f2fd;
+      color: #2196f3;
+      font-weight: bold;
+    }
+    td {
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>合同模板配置界面设计规范</h1>
+
+    <div class="meta">
+      <strong>日期：</strong> 2026-06-07 | <strong>版本：</strong> V1.0 | <strong>状态：</strong> 待审阅 | <strong>文档：</strong> docs/superpowers/specs/2026-06-07-config-interface-design.md
+    </div>
+
+    <!-- 第1部分：系统定位 -->
+    <div class="section">
+      <h2>1. 系统定位</h2>
+
+      <h3>1.1 配置界面是什么</h3>
+      <div class="success-box">
+        <strong style="color: #4caf50;">核心定位：</strong> 开发验证工具，用于验证后端API功能是否正确
+        <ul style="margin-top: 10px;">
+          <li>✅ 验证后端API功能是否正确的工具</li>
+          <li>✅ 开发人员自己验证配置流程</li>
+          <li>✅ 验证数据入库是否正确</li>
+          <li>✅ 验证动态渲染是否正确</li>
+          <li>✅ 相对简单，重点是功能完整</li>
+        </ul>
+      </div>
+
+      <h3>1.2 配置界面不是什么</h3>
+      <div class="error-box">
+        <strong style="color: #f44336;">不在范围内的功能：</strong>
+        <ul style="margin-top: 10px;">
+          <li>❌ 不是低代码平台（不提供拖拽设计器给用户）</li>
+          <li>❌ 不是审批系统（审批在其他系统）</li>
+          <li>❌ 不是权限系统（权限在其他系统）</li>
+          <li>❌ 不是用户管理（用户中心负责）</li>
+          <li>❌ 不交付给业务用户作为正式配置工具</li>
+        </ul>
+      </div>
+
+      <h3>1.3 核心验证闭环</h3>
+      <div class="info-box">
+        <strong style="color: #2196f3;">V1.0必须验证的完整闭环：</strong>
+      </div>
+
+      <div class="flow-diagram">
+        <div class="flow-step">
+          <div class="flow-step-title">步骤1</div>
+          <div>config.html 配置</div>
+          <div style="font-size: 12px; color: #666; margin-top: 5px;">添加卡片、字段、按钮</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-title">步骤2</div>
+          <div>后端API保存</div>
+          <div style="font-size: 12px; color: #666; margin-top: 5px;">POST layout-nodes、field-defs</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-title">步骤3</div>
+          <div>data-viewer.html 验证</div>
+          <div style="font-size: 12px; color: #666; margin-top: 5px;">查看数据库JSON</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-title">步骤4</div>
+          <div>preview.html 预览</div>
+          <div style="font-size: 12px; color: #666; margin-top: 5px;">GET schema API渲染</div>
+        </div>
+      </div>
+
+      <div class="warning-box">
+        <strong style="color: #ff9800;">核心验证目标：</strong> 配置数据正确入库 → 配置树正确读取 → 动态渲染正确显示
+      </div>
+    </div>
+
+    <!-- 第2部分：三个界面定位 -->
+    <div class="section">
+      <h2>2. 三个界面定位</h2>
+
+      <h3>2.1 config.html — 配置主界面</h3>
+      <table>
+        <tr>
+          <th width="20%">用途</th>
+          <td>业务人员配置模板结构（开发验证）</td>
+        </tr>
+        <tr>
+          <th>布局</th>
+          <td>三栏式：左侧组件库 + 中间配置画布 + 右侧属性面板</td>
+        </tr>
+        <tr>
+          <th>保存策略</th>
+          <td>实时保存（500ms延迟）+ 内存预览优化</td>
+        </tr>
+        <tr>
+          <th>用户</th>
+          <td>业务配置人员（开发验证）</td>
+        </tr>
+      </table>
+
+      <h3>2.2 preview.html — 独立预览界面</h3>
+      <table>
+        <tr>
+          <th width="20%">用途</th>
+          <td>验证已保存配置的渲染效果</td>
+        </tr>
+        <tr>
+          <th>流程</th>
+          <td>GET schema API → 动态渲染表单界面</td>
+        </tr>
+        <tr>
+          <th>用户</th>
+          <td>开发验证用</td>
+        </tr>
+      </table>
+
+      <h3>2.3 data-viewer.html — 数据验证界面</h3>
+      <table>
+        <tr>
+          <th width="20%">用途</th>
+          <td>验证配置是否正确入库</td>
+        </tr>
+        <tr>
+          <th>布局</th>
+          <td>三列展示：布局节点 + 字段定义 + 字段组件绑定</td>
+        </tr>
+        <tr>
+          <th>用户</th>
+          <td>开发验证用</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- 第3部分：config.html详细设计 -->
+    <div class="section">
+      <h2>3. config.html 详细设计</h2>
+
+      <h3>3.1 三栏布局</h3>
+
+      <h4>3.1.1 左侧组件库</h4>
+      <div class="mockup">
+基础组件：
+  • 文本框（TEXT_INPUT）
+  • 数字框（NUMBER_INPUT）
+  • 金额框（MONEY_INPUT）
+  • 日期选择（DATE_PICKER）
+  • 下拉选择框（SELECT）
+
+布局组件：
+  • 卡片容器（CARD_CONTAINER）
+  • 分隔线（SEPARATOR）
+
+按钮组件：
+  • 保存按钮（SAVE_BUTTON）
+  • 查询按钮（QUERY_BUTTON）
+  • 自定义按钮（CUSTOM_BUTTON）
+      </div>
+
+      <h4>3.1.2 中间配置画布</h4>
+      <div class="mockup">
+┌─────────────────────────────────────┐
+│ 卡片1：基本信息                       │
+├─────────────────────────────────────┤
+│ 字段1：合同名称 [文本框]              │
+│ 字段2：合同金额 [金额框]              │
+│ 字段3：签订日期 [日期选择]            │
+│ 字段4：币种      [下拉框]             │
+│                                     │
+│ [保存按钮]  [查询按钮]                │
+└─────────────────────────────────────┘
+      </div>
+
+      <h3>3.3 下拉框特有配置（业务友好设计）</h3>
+
+      <div class="warning-box">
+        <strong style="color: #ff9800;">关键设计决策：</strong> 业务人员只看到"选择数据源"下拉框，不暴露技术概念
+      </div>
+
+      <h4>业务人员看到的界面</h4>
+      <div class="mockup">
+选择数据源：
+┌─────────────────────────────────────┐
+│ 币种列表                             │ ← IT配置的数据源
+│ 合同类型                             │ ← IT配置的数据源
+│ 供应商列表                           │ ← IT配置的数据源
+│ 自定义选项（自己输入）               │ ← 前端添加的特殊选项
+└─────────────────────────────────────┘
+      </div>
+
+      <h4>选择"自定义选项"后</h4>
+      <div class="mockup">
+输入选项列表（每行一个）：
+┌─────────────────────────────────────┐
+│ CNY - 人民币                         │
+│ USD - 美元                           │
+│ EUR - 欧元                           │
+└─────────────────────────────────────┘
+      </div>
+
+      <h4>后台实现逻辑</h4>
+      <table>
+        <tr>
+          <th width="30%">数据源列表API</th>
+          <td>GET /api/data-providers 返回IT配置的数据源列表</td>
+        </tr>
+        <tr>
+          <th>前端动态添加</th>
+          <td>在数据源列表末尾添加"自定义选项（自己输入）"</td>
+        </tr>
+        <tr>
+          <th>自定义选项保存</th>
+          <td>后端自动创建临时DataProvider（providerCode: field_{fieldId}_static）</td>
+        </tr>
+      </table>
+
+      <h3>3.5 保存策略</h3>
+      <div class="success-box">
+        <strong style="color: #4caf50;">实时保存机制：</strong>
+        <ul style="margin-top: 10px;">
+          <li>自动保存：500ms延迟，避免频繁请求</li>
+          <li>乐观更新：先更新前端UI，API失败后再回滚</li>
+          <li>实时预览：每次保存成功后，刷新右侧预览</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 第4部分：preview.html详细设计 -->
+    <div class="section">
+      <h2>4. preview.html 详细设计</h2>
+
+      <h3>4.1 渲染流程</h3>
+      <div class="flow-diagram">
+        <div class="flow-step">
+          <div class="flow-step-title">步骤1</div>
+          <div>GET schema API</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-title">步骤2</div>
+          <div>遍历layoutNodes</div>
+          <div style="font-size: 12px; color: #666;">渲染卡片容器</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-title">步骤3</div>
+          <div>遍历children</div>
+          <div style="font-size: 12px; color: #666;">渲染字段组件</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-title">步骤4</div>
+          <div>渲染actionConfigs</div>
+          <div style="font-size: 12px; color: #666;">渲染动作按钮</div>
+        </div>
+      </div>
+
+      <h3>4.2 渲染验证点</h3>
+      <table>
+        <tr>
+          <th width="30%">验证类型</th>
+          <th>验证内容</th>
+        </tr>
+        <tr>
+          <td>卡片容器</td>
+          <td>卡片标题正确显示、字段列表正确显示</td>
+        </tr>
+        <tr>
+          <td>字段组件</td>
+          <td>字段标签正确、必填标识正确、组件类型正确、placeholder正确</td>
+        </tr>
+        <tr>
+          <td>数据源绑定</td>
+          <td>币种下拉框绑定DataProvider、下拉选项正确显示</td>
+        </tr>
+        <tr>
+          <td>动作按钮</td>
+          <td>保存按钮正确显示、查询按钮正确显示</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- 第5部分：data-viewer.html详细设计 -->
+    <div class="section">
+      <h2>5. data-viewer.html 详细设计</h2>
+
+      <h3>5.1 三列布局</h3>
+      <table>
+        <tr>
+          <th width="20%">列1：布局节点</th>
+          <th width="20%">列2：字段定义</th>
+          <th width="20%">列3：字段组件绑定</th>
+        </tr>
+        <tr>
+          <td>
+            • nodeCode（拼音转换）<br>
+            • nodePath（父节点路径）<br>
+            • nodeName（卡片名称）<br>
+            • nodeType（CARD）
+          </td>
+          <td>
+            • fieldCode（拼音转换）<br>
+            • fieldPath（父节点路径）<br>
+            • fieldName（字段名称）<br>
+            • dataType<br>
+            • requiredDefault
+          </td>
+          <td>
+            • componentType<br>
+            • labelName<br>
+            • placeholder<br>
+            • dataProviderId<br>
+            • configJson（JSONB）
+          </td>
+        </tr>
+      </table>
+
+      <h3>5.2 自动生成字段路径</h3>
+      <div class="info-box">
+        <strong style="color: #2196f3;">nodeCode生成规则：</strong> 卡片名称 → 拼音转换（基本信息 → basicInfo）<br>
+        <strong style="color: #2196f3;">fieldCode生成规则：</strong> 字段名称 → 拼音转换（合同名称 → contractName）<br>
+        <strong style="color: #2196f3;">fieldPath生成规则：</strong> 父节点路径拼接（root.basicInfo.contractName）
+      </div>
+    </div>
+
+    <!-- 第6部分：第一阶段边界 -->
+    <div class="section">
+      <h2>6. 第一阶段边界</h2>
+
+      <div style="display: flex; gap: 15px;">
+        <div style="flex: 1; padding: 15px; background: #e8f5e9; border-radius: 8px;">
+          <div style="font-weight: bold; color: #4caf50; margin-bottom: 10px;">✅ 必须包含</div>
+          <ul style="font-size: 14px; color: #333; list-style: none; padding: 0;">
+            <li style="margin-bottom: 5px;">• 所有基础组件</li>
+            <li style="margin-bottom: 5px;">• 卡片容器布局</li>
+            <li style="margin-bottom: 5px;">• 保存按钮、查询按钮</li>
+            <li style="margin-bottom: 5px;">• 从上到下堆积布局</li>
+            <li style="margin-bottom: 5px;">• 实时保存 + 内存预览优化</li>
+            <li style="margin-bottom: 5px;">• 查询功能预留</li>
+            <li>• 数据入库验证界面</li>
+          </ul>
+        </div>
+
+        <div style="flex: 1; padding: 15px; background: #fff3e0; border-radius: 8px;">
+          <div style="font-weight: bold; color: #ff9800; margin-bottom: 10px;">⏳ 后续阶段</div>
+          <ul style="font-size: 14px; color: #333; list-style: none; padding: 0;">
+            <li style="margin-bottom: 5px;">• 明细表组件</li>
+            <li style="margin-bottom: 5px;">• 拖拽排序功能</li>
+            <li style="margin-bottom: 5px;">• 规则配置（显隐、必填、只读）</li>
+            <li style="margin-bottom: 5px;">• 查询弹窗配置</li>
+            <li style="margin-bottom: 5px;">• 外部数据集成</li>
+            <li>• 合同录入功能</li>
+          </ul>
+        </div>
+
+        <div style="flex: 1; padding: 15px; background: #ffebee; border-radius: 8px;">
+          <div style="font-weight: bold; color: #f44336; margin-bottom: 10px;">❌ 不在范围内</div>
+          <ul style="font-size: 14px; color: #333; list-style: none; padding: 0;">
+            <li style="margin-bottom: 5px;">• 工作流审批</li>
+            <li style="margin-bottom: 5px;">• 多人协作草稿</li>
+            <li style="margin-bottom: 5px;">• 多租户隔离</li>
+            <li style="margin-bottom: 5px;">• 权限管理</li>
+            <li style="margin-bottom: 5px;">• 用户管理</li>
+            <li>• Redis缓存、MQ</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 第7部分：验证清单 -->
+    <div class="section">
+      <h2>7. 验证清单</h2>
+
+      <h3>7.1 config.html验证</h3>
+      <div class="checklist">
+        <div class="checklist-item">组件库显示正确（基础、布局、按钮）</div>
+        <div class="checklist-item">点击组件添加到配置画布</div>
+        <div class="checklist-item">卡片容器正确显示</div>
+        <div class="checklist-item">字段列表正确显示</div>
+        <div class="checklist-item">属性面板动态切换</div>
+        <div class="checklist-item">字段属性保存正确</div>
+        <div class="checklist-item">下拉框数据源选择正确</div>
+        <div class="checklist-item">自定义选项输入正确</div>
+        <div class="checklist-item">实时保存生效（500ms延迟）</div>
+        <div class="checklist-item">查询功能预留显示</div>
+      </div>
+
+      <h3>7.2 preview.html验证</h3>
+      <div class="checklist">
+        <div class="checklist-item">GET schema API成功</div>
+        <div class="checklist-item">卡片容器渲染正确</div>
+        <div class="checklist-item">字段组件渲染正确</div>
+        <div class="checklist-item">必填标识显示正确</div>
+        <div class="checklist-item">数据源绑定正确</div>
+        <div class="checklist-item">下拉选项显示正确</div>
+        <div class="checklist-item">动作按钮渲染正确</div>
+      </div>
+
+      <h3>7.3 data-viewer.html验证</h3>
+      <div class="checklist">
+        <div class="checklist-item">布局节点显示正确</div>
+        <div class="checklist-item">字段定义显示正确</div>
+        <div class="checklist-item">字段组件绑定显示正确</div>
+        <div class="checklist-item">nodeCode/nodePath自动生成正确</div>
+        <div class="checklist-item">fieldCode/fieldPath自动生成正确</div>
+        <div class="checklist-item">JSONB存储正确</div>
+        <div class="checklist-item">完整配置树JSON正确</div>
+      </div>
+    </div>
+
+    <!-- 第8部分：设计决策记录 -->
+    <div class="section">
+      <h2>8. 设计决策记录</h2>
+
+      <h3>8.1 为什么选择实时保存？</h3>
+      <div class="info-box">
+        <strong style="color: #2196f3;">决策：</strong> 实时保存（500ms延迟）+ 内存预览优化<br>
+        <strong style="color: #2196f3;">原因：</strong><br>
+        • 配置不丢失（随时保存到数据库）<br>
+        • 实时验证API正确性（每次操作都调用API）<br>
+        • 预览无延迟（内存配置树 + API验证）<br>
+        • 支持撤销/重做（后续阶段）<br>
+        • 支持多设备协同（后续阶段）
+      </div>
+
+      <h3>8.2 为什么选择业务友好的数据源设计？</h3>
+      <div class="info-box">
+        <strong style="color: #2196f3;">决策：</strong> 业务人员只看到"选择数据源"下拉框<br>
+        <strong style="color: #2196f3;">原因：</strong><br>
+        • 业务人员不懂技术概念（数据来源、静态选项、数据提供方）<br>
+        • 降低理解成本（直接选择就行）<br>
+        • 后端自动处理技术细节（创建临时DataProvider）<br>
+        • 符合业务直觉（IT配置 + 自己输入）
+      </div>
+    </div>
+
+    <!-- 审阅确认 -->
+    <div class="review-footer">
+      <h3>✅ 规范文档审阅确认</h3>
+      <p style="font-size: 16px; color: #333; margin-bottom: 15px;">
+        请审阅以上完整设计规范，确认以下内容是否正确：
+      </p>
+      <div style="font-size: 16px; color: #333;">
+        <span style="color: #4caf50;">✓</span> 系统定位：开发验证工具，不交付给业务用户<br>
+        <span style="color: #4caf50;">✓</span> 核心闭环：配置 → 入库 → 验证 → 预览 → 渲染<br>
+        <span style="color: #4caf50;">✓</span> 三个界面：config.html、preview.html、data-viewer.html<br>
+        <span style="color: #4caf50;">✓</span> 业务友好设计：只看到"选择数据源"，不暴露技术概念<br>
+        <span style="color: #4caf50;">✓</span> 实时保存：500ms延迟 + 乐观更新 + 内存预览优化<br>
+        <span style="color: #4caf50;">✓</span> 第一阶段范围：基础组件 + 卡片 + 按钮 + 查询预留<br>
+        <span style="color: #4caf50;">✓</span> 验证清单完整：config.html、preview.html、data-viewer.html
+      </div>
+      <p style="margin-top: 20px; font-size: 14px; color: #666;">
+        <strong style="color: #2196f3;">文档位置：</strong> docs/superpowers/specs/2026-06-07-config-interface-design.md
+      </p>
+      <p style="margin-top: 15px; font-size: 16px; color: #333;">
+        如果确认无误，回复"确认"，我将调用writing-plans skill创建详细的实现计划。<br>
+        如果需要修改，告诉我需要调整的内容。
+      </p>
+    </div>
+  </div>
+</body>
+</html>

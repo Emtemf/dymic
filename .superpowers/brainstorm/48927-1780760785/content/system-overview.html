@@ -1,0 +1,157 @@
+<h2>当前系统架构理解</h2>
+<p class="subtitle">你看到的两个界面是什么，缺失的配置流程是什么</p>
+
+<div class="section">
+  <h3>❌ 你看到的（演示界面）</h3>
+  <div class="mockup">
+    <div class="mockup-header">simple.html / complex.html — 合同录入演示界面</div>
+    <div class="mockup-body">
+      <div style="padding: 20px; background: #f5f5f5; border-radius: 8px;">
+        <div style="font-weight: bold; color: #d32f2f; margin-bottom: 10px;">⚠️ 这是最终用户看到的界面，不是配置界面</div>
+        <div class="mock-nav" style="margin-bottom: 15px;">
+          <span style="font-weight: bold;">合同录入界面</span> | 填写合同数据 | 保存合同
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <div class="mock-content" style="flex: 1; padding: 15px; border: 1px dashed #ccc;">
+            <div style="font-size: 12px; color: #666;">字段1：合同名称</div>
+            <input class="mock-input" style="width: 100%; margin-bottom: 10px;" placeholder="请输入">
+            <div style="font-size: 12px; color: #666;">字段2：合同金额</div>
+            <input class="mock-input" style="width: 100%; margin-bottom: 10px;" placeholder="0.00">
+            <button class="mock-button">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>✅ 你需要的（配置界面）</h3>
+  <div class="mockup">
+    <div class="mockup-header">config.html — 业务人员配置界面</div>
+    <div class="mockup-body">
+      <div style="display: flex; gap: 20px; padding: 20px; background: #f5f5f5; border-radius: 8px;">
+        <!-- 左侧：配置表单 -->
+        <div style="flex: 1; border: 2px solid #4caf50; padding: 15px; border-radius: 8px;">
+          <div style="font-weight: bold; color: #4caf50; margin-bottom: 15px;">📝 配置表单（左侧）</div>
+          <div style="margin-bottom: 15px;">
+            <div class="label" style="margin-bottom: 5px;">步骤1：创建模板</div>
+            <input class="mock-input" style="width: 100%;" placeholder="模板名称：采购合同模板">
+          </div>
+          <div style="margin-bottom: 15px;">
+            <div class="label" style="margin-bottom: 5px;">步骤2：配置字段</div>
+            <div style="display: flex; gap: 10px;">
+              <input class="mock-input" style="flex: 1;" placeholder="字段名称：合同名称">
+              <select class="mock-input" style="flex: 1;">
+                <option>文本输入框</option>
+                <option>数字输入框</option>
+                <option>下拉选择框</option>
+              </select>
+            </div>
+          </div>
+          <button class="mock-button" style="background: #4caf50; color: white;">添加字段</button>
+        </div>
+
+        <!-- 右侧：实时预览 -->
+        <div style="flex: 1; border: 2px solid #2196f3; padding: 15px; border-radius: 8px;">
+          <div style="font-weight: bold; color: #2196f3; margin-bottom: 15px;">👁 实时预览（右侧）</div>
+          <div style="padding: 10px; border: 1px dashed #2196f3; border-radius: 4px; background: white;">
+            <div style="font-size: 12px; color: #666; margin-bottom: 8px;">字段1：合同名称</div>
+            <input class="mock-input" style="width: 100%; margin-bottom: 8px;" placeholder="请输入">
+            <div style="font-size: 12px; color: #666; margin-bottom: 8px;">字段2：合同金额</div>
+            <input class="mock-input" style="width: 100%;" placeholder="0.00">
+          </div>
+          <div style="margin-top: 10px; font-size: 11px; color: #666;">
+            配置后实时渲染预览效果
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>🔄 配置流程对比</h3>
+  <div class="split">
+    <div class="mockup">
+      <div class="mockup-header">❌ 当前流程（缺失）</div>
+      <div class="mockup-body">
+        <div style="padding: 15px; background: #ffebee; border-radius: 8px;">
+          <div style="color: #d32f2f; font-weight: bold; margin-bottom: 10px;">不知道在哪里配置</div>
+          <div style="color: #666; font-size: 14px; margin-bottom: 8px;">❓ 在哪个界面配置模板？</div>
+          <div style="color: #666; font-size: 14px; margin-bottom: 8px;">❓ 如何预览配置效果？</div>
+          <div style="color: #666; font-size: 14px;">❓ 如何确认数据入库？</div>
+        </div>
+      </div>
+    </div>
+    <div class="mockup">
+      <div class="mockup-header">✅ 完整流程（需要实现）</div>
+      <div class="mockup-body">
+        <div style="padding: 15px; background: #e8f5e9; border-radius: 8px;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="background: #4caf50; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold;">1</div>
+            <div>打开 config.html 配置界面</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="background: #4caf50; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold;">2</div>
+            <div>左侧填写配置表单</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="background: #4caf50; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold;">3</div>
+            <div>右侧实时预览渲染效果</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="background: #4caf50; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold;">4</div>
+            <div>点击"保存配置"按钮</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="background: #2196f3; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold;">5</div>
+            <div>打开 data-viewer.html 验证入库数据</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>📋 三个新界面定位</h3>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="config" onclick="toggleSelect(this)">
+      <div class="letter">1</div>
+      <div class="content">
+        <h3>config.html — 配置主界面</h3>
+        <p><strong>用途：</strong>业务人员配置模板结构</p>
+        <p><strong>功能：</strong>左侧配置表单 + 右侧实时预览 + 保存按钮</p>
+        <p><strong>用户：</strong>业务配置人员</p>
+      </div>
+    </div>
+    <div class="option" data-choice="preview" onclick="toggleSelect(this)">
+      <div class="letter">2</div>
+      <div class="content">
+        <h3>preview.html — 独立预览界面</h3>
+        <p><strong>用途：</strong>验证已保存的配置渲染效果</p>
+        <p><strong>功能：</strong>读取配置树 → 动态渲染表单</p>
+        <p><strong>用户：</strong>开发验证用</p>
+      </div>
+    </div>
+    <div class="option" data-choice="data-viewer" onclick="toggleSelect(this)">
+      <div class="letter">3</div>
+      <div class="content">
+        <h3>data-viewer.html — 数据验证界面</h3>
+        <p><strong>用途：</strong>验证配置是否正确入库</p>
+        <p><strong>功能：</strong>查看数据库中的配置 JSON</p>
+        <p><strong>用户：</strong>开发验证用</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 30px; padding: 20px; background: #fff3e0; border-radius: 8px; border-left: 4px solid #ff9800;">
+  <h3 style="color: #ff9800; margin-bottom: 10px;">💡 关键理解</h3>
+  <p style="font-size: 14px; color: #333;">
+    <strong>simple.html/complex.html</strong> 是<span style="color: #d32f2f; font-weight: bold;">最终用户看到的合同录入界面</span>，
+    不是配置界面。你需要的是<strong style="color: #4caf50;">config.html 配置界面</strong>，
+    让业务人员可以配置模板，实时预览，并验证数据入库。
+  </p>
+</div>

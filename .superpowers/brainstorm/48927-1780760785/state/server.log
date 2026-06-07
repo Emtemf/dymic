@@ -1,0 +1,23 @@
+{"type":"server-started","port":60402,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:60402","screen_dir":"/home/wula/IdeaProjects/dymic/.superpowers/brainstorm/48927-1780760785/content","state_dir":"/home/wula/IdeaProjects/dymic/.superpowers/brainstorm/48927-1780760785/state"}
+{"type":"screen-added","file":"/home/wula/IdeaProjects/dymic/.superpowers/brainstorm/48927-1780760785/content/system-overview.html"}
+{"source":"user-event","type":"click","text":"1\n      \n        config.html — 配置主界面\n        用途：业务人员配置模板结构\n        功能：左侧配置表单 + 右侧实时预览 + 保存按钮\n        用户：业务配置人员","choice":"config","id":null,"timestamp":1780760905861}
+{"source":"user-event","type":"click","text":"2\n      \n        preview.html — 独立预览界面\n        用途：验证已保存的配置渲染效果\n        功能：读取配置树 → 动态渲染表单\n        用户：开发验证用","choice":"preview","id":null,"timestamp":1780760907192}
+{"source":"user-event","type":"click","text":"3\n      \n        data-viewer.html — 数据验证界面\n        用途：验证配置是否正确入库\n        功能：查看数据库中的配置 JSON\n        用户：开发验证用","choice":"data-viewer","id":null,"timestamp":1780760908357}
+{"type":"screen-added","file":"/home/wula/IdeaProjects/dymic/.superpowers/brainstorm/48927-1780760785/content/component-library.html"}
+{"source":"user-event","type":"click","text":"1\n      \n        文本输入框\n        用途：合同名称、备注、说明等文本字段\n        \n          \n            字段名称：合同名称","choice":"text-input","id":null,"timestamp":1780761171294}
+{"source":"user-event","type":"click","text":"2\n      \n        数字输入框\n        用途：合同金额、数量、单价等数值字段\n        \n          \n            字段名称：合同金额","choice":"number-input","id":null,"timestamp":1780761174000}
+{"source":"user-event","type":"click","text":"3\n      \n        日期选择器\n        用途：签订日期、生效日期、到期日期等\n        \n          \n            字段名称：签订日期","choice":"date-picker","id":null,"timestamp":1780761175554}
+{"source":"user-event","type":"click","text":"4\n      \n        下拉选择框\n        用途：币种、合同类型、状态等选项字段\n        \n          \n            字段名称：币种\n            \n              CNY - 人民币\n              USD - 美元\n              EUR - 欧元","choice":"select","id":null,"timestamp":1780761177773}
+{"source":"user-event","type":"click","text":"5\n      \n        金额输入框（特殊）\n        用途：带币种符号的金额输入，自动格式化\n        \n          \n            字段名称：合同金额\n            \n              \n                CNY\n                USD","choice":"amount-input","id":null,"timestamp":1780761178835}
+{"source":"user-event","type":"click","text":"A\n      \n        卡片容器\n        用途：分组字段，如\"基本信息\"、\"合同条款\"\n        \n          \n            \n              基本信息","choice":"card","id":null,"timestamp":1780761180929}
+{"source":"user-event","type":"click","text":"B\n      \n        明细表（复杂，后续支持）\n        用途：合同明细行、付款计划等表格数据\n        \n          \n            \n              \n                序号\n                产品名称\n                数量\n                单价\n              \n              \n                1\n                \n                  \n                \n                \n                  \n                \n                \n                  \n                \n              \n            \n            + 添加行","choice":"table","id":null,"timestamp":1780761182568}
+{"source":"user-event","type":"click","text":"S\n      \n        保存按钮\n        用途：保存合同数据到数据库\n        \n          \n            \n              💾 保存合同","choice":"save-button","id":null,"timestamp":1780761183977}
+{"source":"user-event","type":"click","text":"Q\n      \n        查询按钮\n        用途：弹出查询窗口，选择数据回填字段\n        \n          \n            \n              🔍 查询选择","choice":"query-button","id":null,"timestamp":1780761185381}
+{"type":"screen-added","file":"/home/wula/IdeaProjects/dymic/.superpowers/brainstorm/48927-1780760785/content/layout-options.html"}
+{"type":"screen-added","file":"/home/wula/IdeaProjects/dymic/.superpowers/brainstorm/48927-1780760785/content/save-strategy.html"}
+{"type":"screen-added","file":"/home/wula/IdeaProjects/dymic/.superpowers/brainstorm/48927-1780760785/content/design-part1.html"}
+{"type":"screen-added","file":"/home/wula/IdeaProjects/dymic/.superpowers/brainstorm/48927-1780760785/content/design-part2.html"}
+{"type":"screen-added","file":"/home/wula/IdeaProjects/dymic/.superpowers/brainstorm/48927-1780760785/content/design-correction-data-source.html"}
+{"type":"screen-added","file":"/home/wula/IdeaProjects/dymic/.superpowers/brainstorm/48927-1780760785/content/design-part3.html"}
+{"type":"screen-added","file":"/home/wula/IdeaProjects/dymic/.superpowers/brainstorm/48927-1780760785/content/spec-review.html"}
+{"type":"server-stopped","reason":"idle timeout"}
