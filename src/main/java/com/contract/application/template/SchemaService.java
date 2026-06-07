@@ -10,7 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -76,11 +78,15 @@ public class SchemaService {
     }
 
     /**
-     * 批量保存配置（替换式保存）
+     * 批量保存配置（替换式保存，带前端ID→数据库ID映射）
      */
     @Transactional
     public SchemaDTO saveSchema(Long templateId, Long versionId, SchemaSaveDTO dto) {
         log.info("Saving schema for templateId={}, versionId={}", templateId, versionId);
+
+        Map<String, Long> nodeIdMap = new HashMap<>();
+        Map<String, Long> fieldDefIdMap = new HashMap<>();
+        Map<String, FieldComponentDTO> autoCreatedComponents = new HashMap<>();
 
         // 1. 删除旧数据（按外键依赖反序）
         actionConfigService.deleteByVersionId(versionId);
@@ -88,11 +94,22 @@ public class SchemaService {
         fieldDefService.deleteByVersionId(versionId);
         layoutNodeService.deleteByVersionId(versionId);
 
-        // 2. 插入新数据（按外键依赖顺序）
+        // 2. 创建布局节点（先父后子，建立ID映射）
         if (dto.getLayoutNodes() != null) {
-            for (SchemaSaveDTO.LayoutNodeSaveItem item : dto.getLayoutNodes()) {
+            // 按层级排序：parentId为null的排前面
+            List<SchemaSaveDTO.LayoutNodeSaveItem> sorted = dto.getLayoutNodes().stream()
+                .sorted((a, b) -> {
+                    if (a.getParentId() == null && b.getParentId() != null) return -1;
+                    if (a.getParentId() != null && b.getParentId() == null) return 1;
+                    return 0;
+                })
+                .collect(Collectors.toList());
+
+            for (SchemaSaveDTO.LayoutNodeSaveItem item : sorted) {
                 LayoutNodeCreateDTO createDTO = new LayoutNodeCreateDTO();
-                createDTO.setParentId(item.getParentId());
+                if (item.getParentId() != null && nodeIdMap.containsKey(item.getParentId())) {
+                    createDTO.setParentId(nodeIdMap.get(item.getParentId()));
+                }
                 createDTO.setNodeType(item.getNodeType());
                 createDTO.setNodeName(item.getNodeName() != null ? item.getNodeName() : item.getNodeType());
                 createDTO.setSortNo(item.getSortNo() != null ? item.getSortNo() : 0);
@@ -106,51 +123,83 @@ public class SchemaService {
                 createDTO.setColSpan(item.getColSpan());
                 createDTO.setRowSpan(item.getRowSpan());
                 createDTO.setBindType(item.getBindType());
-                createDTO.setBindRefId(item.getBindRefId());
                 createDTO.setVisibleRule(item.getVisibleRule());
                 createDTO.setReadonlyRule(item.getReadonlyRule());
                 createDTO.setPropsJson(item.getPropsJson());
-                layoutNodeService.create(templateId, versionId, createDTO);
+
+                LayoutNodeDTO created = layoutNodeService.create(templateId, versionId, createDTO);
+                if (item.getId() != null) {
+                    nodeIdMap.put(item.getId(), created.getId());
+                }
             }
         }
 
+        // 3. 创建字段定义（会自动创建字段组件绑定，避免重复）
         if (dto.getFieldDefs() != null) {
             for (SchemaSaveDTO.FieldDefSaveItem item : dto.getFieldDefs()) {
                 FieldDefCreateDTO createDTO = new FieldDefCreateDTO();
+                if (item.getLayoutNodeId() != null && nodeIdMap.containsKey(item.getLayoutNodeId())) {
+                    createDTO.setLayoutNodeId(nodeIdMap.get(item.getLayoutNodeId()));
+                }
                 createDTO.setFieldNameCn(item.getFieldNameCn());
                 createDTO.setDataType(item.getDataType());
-                createDTO.setLayoutNodeId(item.getLayoutNodeId());
                 createDTO.setPlaceholder(item.getPlaceholder());
                 createDTO.setSortNo(item.getSortNo());
                 if (item.getRequiredDefault() != null && item.getRequiredDefault() == 1) {
                     createDTO.setRequired(true);
                 }
-                fieldDefService.create(templateId, versionId, createDTO);
+
+                FieldDefCreateResult result = fieldDefService.create(templateId, versionId, createDTO);
+                if (item.getId() != null) {
+                    fieldDefIdMap.put(item.getId(), result.getFieldDef().getId());
+                    if (result.getFieldComponent() != null) {
+                        autoCreatedComponents.put(item.getId(), result.getFieldComponent());
+                    }
+                }
             }
         }
 
+        // 4. 更新自动创建的字段组件（补充前端传入的额外属性）
         if (dto.getFieldComponents() != null) {
             for (SchemaSaveDTO.FieldComponentSaveItem item : dto.getFieldComponents()) {
-                FieldComponentCreateRequest createDTO = new FieldComponentCreateRequest();
-                createDTO.setLayoutNodeId(item.getLayoutNodeId());
-                createDTO.setFieldDefId(item.getFieldDefId());
-                createDTO.setComponentType(item.getComponentType());
-                createDTO.setLabelName(item.getLabelName());
-                createDTO.setPlaceholder(item.getPlaceholder());
-                createDTO.setComponentProps(item.getComponentProps());
-                createDTO.setSortNo(item.getSortNo() != null ? item.getSortNo() : 0);
-                createDTO.setDataProviderId(item.getDataProviderId());
-                fieldComponentService.create(templateId, versionId, createDTO);
+                FieldComponentDTO autoComponent = item.getFieldDefId() != null
+                    ? autoCreatedComponents.get(item.getFieldDefId()) : null;
+                if (autoComponent != null) {
+                    FieldComponentUpdateDTO updateDTO = new FieldComponentUpdateDTO();
+                    boolean needUpdate = false;
+                    if (item.getLabelName() != null) {
+                        updateDTO.setLabelName(item.getLabelName());
+                        needUpdate = true;
+                    }
+                    if (item.getPlaceholder() != null) {
+                        updateDTO.setPlaceholder(item.getPlaceholder());
+                        needUpdate = true;
+                    }
+                    if (item.getComponentProps() != null) {
+                        updateDTO.setComponentProps(item.getComponentProps());
+                        needUpdate = true;
+                    }
+                    if (item.getRequiredRule() != null) {
+                        updateDTO.setRequiredRule(item.getRequiredRule());
+                        needUpdate = true;
+                    }
+                    if (needUpdate) {
+                        fieldComponentService.update(autoComponent.getId(), updateDTO);
+                    }
+                }
             }
         }
 
+        // 5. 创建动作配置（映射bindNodeId）
         if (dto.getActionConfigs() != null) {
             for (SchemaSaveDTO.ActionConfigSaveItem item : dto.getActionConfigs()) {
                 if (item.getBindNodeId() == null) continue;
                 ActionConfigCreateRequest createDTO = new ActionConfigCreateRequest();
                 createDTO.setActionName(item.getActionName());
                 createDTO.setActionType(item.getActionType());
-                createDTO.setBindNodeId(item.getBindNodeId());
+                if (nodeIdMap.containsKey(item.getBindNodeId())) {
+                    createDTO.setBindNodeId(nodeIdMap.get(item.getBindNodeId()));
+                }
                 createDTO.setSortNo(item.getSortNo() != null ? item.getSortNo() : 0);
                 actionConfigService.create(templateId, versionId, createDTO);
             }

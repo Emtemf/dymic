@@ -13,8 +13,8 @@ public class SchemaSaveDTO {
 
     @Data
     public static class LayoutNodeSaveItem {
-        private Long id;
-        private Long parentId;
+        private String id;
+        private String parentId;
         private String nodeCode;
         private String nodeName;
         private String nodeType;
@@ -29,7 +29,7 @@ public class SchemaSaveDTO {
         private Integer colSpan;
         private Integer rowSpan;
         private String bindType;
-        private Long bindRefId;
+        private String bindRefId;
         private String visibleRule;
         private String readonlyRule;
         private String propsJson;
@@ -37,8 +37,8 @@ public class SchemaSaveDTO {
 
     @Data
     public static class FieldDefSaveItem {
-        private Long id;
-        private Long layoutNodeId;
+        private String id;
+        private String layoutNodeId;
         private String fieldCode;
         private String fieldPath;
         private String fieldNameCn;
@@ -56,9 +56,9 @@ public class SchemaSaveDTO {
 
     @Data
     public static class FieldComponentSaveItem {
-        private Long id;
-        private Long layoutNodeId;
-        private Long fieldDefId;
+        private String id;
+        private String layoutNodeId;
+        private String fieldDefId;
         private String componentType;
         private String labelName;
         private String placeholder;
@@ -83,7 +83,7 @@ public class SchemaSaveDTO {
         private String actionCode;
         private String actionName;
         private String actionType;
-        private Long bindNodeId;
+        private String bindNodeId;
         private Long bindQueryId;
         private Integer confirmRequired;
         private String confirmText;
