@@ -2,6 +2,7 @@ package com.contract.adapter.controller;
 
 import com.contract.application.template.SchemaService;
 import com.contract.application.template.dto.SchemaDTO;
+import com.contract.application.template.dto.SchemaSaveDTO;
 import com.contract.common.result.Result;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,17 @@ public class SchemaController {
     ) {
         log.info("API call: GET /api/templates/{}/versions/{}/schema", templateId, versionId);
         SchemaDTO schema = schemaService.getSchema(templateId, versionId);
+        return Result.ok(schema);
+    }
+
+    @PutMapping
+    public Result<SchemaDTO> saveSchema(
+        @PathVariable Long templateId,
+        @PathVariable Long versionId,
+        @RequestBody SchemaSaveDTO dto
+    ) {
+        log.info("API call: PUT /api/templates/{}/versions/{}/schema", templateId, versionId);
+        SchemaDTO schema = schemaService.saveSchema(templateId, versionId, dto);
         return Result.ok(schema);
     }
 }
