@@ -487,7 +487,9 @@ body {
     display: flex;
 }
 
-.modal {
+.dialog {
+    display: block;
+    position: relative;
     background-color: var(--bg-primary);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);

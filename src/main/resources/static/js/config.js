@@ -178,7 +178,8 @@ async function selectTemplate() {
         select.innerHTML = '<option value="">请选择模板</option>';
 
         templates.forEach(t => {
-            select.innerHTML += `<option value="${t.id}">${t.templateCode} - ${t.templateName}</option>`;
+            // 使用字符串ID避免JavaScript精度丢失
+            select.innerHTML += `<option value="${String(t.id)}">${t.templateCode} - ${t.templateName}</option>`;
         });
     } catch (error) {
         configManager.showNotification('加载模板列表失败', 'error');
@@ -200,7 +201,8 @@ async function loadTemplateVersions() {
         select.innerHTML = '<option value="">请选择版本</option>';
 
         versions.forEach(v => {
-            select.innerHTML += `<option value="${v.id}">版本 ${v.versionNumber} (${v.versionStatus})</option>`;
+            // 使用字符串ID避免JavaScript精度丢失
+            select.innerHTML += `<option value="${String(v.id)}">版本 ${v.versionNo} (${v.versionStatus})</option>`;
         });
     } catch (error) {
         configManager.showNotification('加载版本列表失败', 'error');
@@ -302,22 +304,22 @@ function createNodeElement(node) {
     div.setAttribute('data-node-id', node.id);
 
     div.innerHTML = `
-        <div class="node-header" onclick="selectNode(${node.id})">
+        <div class="node-header" onclick="selectNode('${node.id}')">
             <i class="fas fa-square node-icon"></i>
             <span class="node-name">${node.nodeName}</span>
             <span class="node-code">${node.nodeCode}</span>
             <div class="node-actions">
-                <button onclick="deleteNode(${node.id})" title="删除">
+                <button onclick="event.stopPropagation(); deleteNode('${node.id}')" title="删除">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
         </div>
         <div class="node-content">
             <div class="field-list" id="fields-${node.id}">
-                ${renderFields(node.children || [])}
+                ${renderFields(node.children, node.components)}
             </div>
             <div class="action-list" id="actions-${node.id}">
-                ${renderActions(node.actionConfigs || [])}
+                ${renderActions(node.actions || [])}
             </div>
         </div>
     `;
@@ -333,28 +335,32 @@ function createNodeElement(node) {
 /**
  * 渲染字段列表
  */
-function renderFields(fields) {
-    if (fields.length === 0) return '';
+function renderFields(fields, components) {
+    // 使用components数组（从schema返回）
+    const items = components || fields || [];
+    if (items.length === 0) return '';
 
-    return fields.map(field => `
-        <div class="field-item" data-field-id="${field.id}" onclick="selectField(${field.id})">
-            <i class="fas fa-${getFieldIcon(field.component?.componentType)} field-icon"></i>
-            <span class="field-label">${field.component?.labelName || field.fieldNameCn}</span>
-            ${field.requiredDefault ? '<span class="required-mark">*</span>' : ''}
-            <span class="field-type">${getFieldTypeName(field.component?.componentType)}</span>
-        </div>
-    `).join('');
+    return items.map(comp => {
+        // components数组中的每个元素就是FieldComponent，包含componentType
+        return `
+            <div class="field-item" data-field-id="${comp.fieldDefId}" data-component-id="${comp.id}" onclick="selectField('${comp.fieldDefId}', '${comp.id}')">
+                <i class="fas fa-${getFieldIcon(comp.componentType)} field-icon"></i>
+                <span class="field-label">${comp.labelName || '未命名字段'}</span>
+                <span class="field-type">${getFieldTypeName(comp.componentType)}</span>
+            </div>
+        `;
+    }).join('');
 }
 
 /**
  * 渲染动作按钮列表
  */
 function renderActions(actions) {
-    if (actions.length === 0) return '';
+    if (!actions || actions.length === 0) return '';
 
     return actions.map(action => `
-        <div class="action-item" data-action-id="${action.id}" onclick="selectAction(${action.id})">
-            <i class="fas fa-${action.actionType === 'SAVE_BUTTON' ? 'save' : 'search'}"></i>
+        <div class="action-item" data-action-id="${action.id}" onclick="selectAction('${action.id}')">
+            <i class="fas fa-${action.actionType === 'SAVE_BUTTON' || action.actionType === 'SAVE' ? 'save' : 'search'}"></i>
             <span>${action.actionName}</span>
         </div>
     `).join('');
@@ -365,9 +371,13 @@ function renderActions(actions) {
  */
 function getFieldIcon(type) {
     const icons = {
+        'TEXT': 'font',
         'TEXT_INPUT': 'font',
+        'NUMBER': 'sort-numeric-up',
         'NUMBER_INPUT': 'sort-numeric-up',
+        'MONEY': 'dollar-sign',
         'MONEY_INPUT': 'dollar-sign',
+        'DATE': 'calendar',
         'DATE_PICKER': 'calendar',
         'SELECT': 'list'
     };
@@ -379,9 +389,13 @@ function getFieldIcon(type) {
  */
 function getFieldTypeName(type) {
     const names = {
+        'TEXT': '文本框',
         'TEXT_INPUT': '文本框',
+        'NUMBER': '数字框',
         'NUMBER_INPUT': '数字框',
+        'MONEY': '金额框',
         'MONEY_INPUT': '金额框',
+        'DATE': '日期选择',
         'DATE_PICKER': '日期选择',
         'SELECT': '下拉框'
     };
@@ -517,26 +531,13 @@ async function createComponent(nodeId, componentType) {
                     fieldNameCn: fieldNameCn,
                     dataType: getDataType(componentType),
                     layoutNodeId: nodeId,
-                    requiredDefault: false
+                    required: false
                 }
             );
 
-            const fieldDef = fieldDefResponse.data.data;
-
-            // 2. 创建字段组件绑定
-            const componentResponse = await axios.post(
-                `/api/templates/${configManager.templateId}/versions/${configManager.versionId}/field-components`,
-                {
-                    fieldDefId: fieldDef.id,
-                    layoutNodeId: nodeId,
-                    componentType: componentType,
-                    labelName: fieldNameCn,
-                    placeholder: '请输入' + fieldNameCn,
-                    sortNo: ++configManager.fieldSortNo
-                }
-            );
-
-            const fieldComponent = componentResponse.data.data;
+            const result = fieldDefResponse.data.data;
+            const fieldDef = result.fieldDef;
+            const fieldComponent = result.fieldComponent;
 
             // 乐观更新：立即添加字段到节点
             const fieldList = document.getElementById(`fields-${nodeId}`);
@@ -600,10 +601,10 @@ async function selectNode(nodeId) {
 
     // 更新选中状态
     document.querySelectorAll('.node-header').forEach(el => el.classList.remove('selected'));
-    document.querySelector(`[data-node-id="${nodeId}"] > .node-header`).classList.add('selected');
+    document.querySelector(`[data-node-id="${nodeId}"] > .node-header`)?.classList.add('selected');
 
     // 加载节点属性
-    const node = configManager.configTree.layoutNodes.find(n => n.id === nodeId);
+    const node = configManager.configTree.layoutNodes.find(n => String(n.id) === String(nodeId));
     if (!node) return;
 
     renderNodePropertyPanel(node);
@@ -612,26 +613,31 @@ async function selectNode(nodeId) {
 /**
  * 选择字段
  */
-async function selectField(fieldId) {
-    configManager.selectedElement = { type: 'fieldComponent', id: fieldId };
+async function selectField(fieldDefId, componentId) {
+    configManager.selectedElement = { type: 'fieldComponent', id: componentId, fieldDefId: fieldDefId };
 
     // 更新选中状态
     document.querySelectorAll('.field-item').forEach(el => el.classList.remove('selected'));
-    document.querySelector(`[data-field-id="${fieldId}"]`).classList.add('selected');
+    document.querySelector(`[data-component-id="${componentId}"]`)?.classList.add('selected');
 
-    // 找到字段定义和组件
+    // 从schema中找到字段定义和组件
     let fieldDef = null;
     let fieldComponent = null;
 
-    configManager.configTree.layoutNodes.forEach(node => {
-        const field = node.children?.find(c => c.id === fieldId);
-        if (field) {
-            fieldDef = field;
-            fieldComponent = field.component;
-        }
-    });
+    // 从fieldDefs数组查找
+    if (configManager.configTree.fieldDefs) {
+        fieldDef = configManager.configTree.fieldDefs.find(fd => String(fd.id) === String(fieldDefId));
+    }
 
-    if (!fieldDef) return;
+    // 从fieldComponents数组查找
+    if (configManager.configTree.fieldComponents) {
+        fieldComponent = configManager.configTree.fieldComponents.find(fc => String(fc.id) === String(componentId));
+    }
+
+    if (!fieldDef || !fieldComponent) {
+        console.error('Field not found:', { fieldDefId, componentId });
+        return;
+    }
 
     renderFieldPropertyPanel(fieldDef, fieldComponent);
 }
@@ -644,13 +650,21 @@ async function selectAction(actionId) {
 
     // 更新选中状态
     document.querySelectorAll('.action-item').forEach(el => el.classList.remove('selected'));
-    document.querySelector(`[data-action-id="${actionId}"]`).classList.add('selected');
+    document.querySelector(`[data-action-id="${actionId}"]`)?.classList.add('selected');
 
-    // 找到动作配置
+    // 从actionConfigs数组查找
     let action = null;
-    configManager.configTree.layoutNodes.forEach(node => {
-        action = node.actionConfigs?.find(a => a.id === actionId);
-    });
+    if (configManager.configTree.actionConfigs) {
+        action = configManager.configTree.actionConfigs.find(a => String(a.id) === String(actionId));
+    }
+
+    // 如果没找到，尝试从节点中查找
+    if (!action && configManager.configTree.layoutNodes) {
+        configManager.configTree.layoutNodes.forEach(node => {
+            const found = node.actions?.find(a => String(a.id) === String(actionId));
+            if (found) action = found;
+        });
+    }
 
     if (!action) return;
 
@@ -674,7 +688,7 @@ function renderNodePropertyPanel(node) {
             <h4><i class="fas fa-info-circle"></i> 基本信息</h4>
             <div class="form-group">
                 <label>节点名称</label>
-                <input type="text" value="${node.nodeName}" onchange="updateNodeProperty(${node.id}, 'nodeName', this.value)">
+                <input type="text" value="${node.nodeName}" onchange="updateNodeProperty('${node.id}', 'nodeName', this.value)">
             </div>
             <div class="form-group">
                 <label>节点编码（自动生成）</label>
@@ -689,7 +703,7 @@ function renderNodePropertyPanel(node) {
             <h4><i class="fas fa-th-large"></i> 布局配置</h4>
             <div class="form-group">
                 <label>节点类型</label>
-                <select onchange="updateNodeProperty(${node.id}, 'nodeType', this.value)">
+                <select onchange="updateNodeProperty('${node.id}', 'nodeType', this.value)">
                     <option value="CARD_CONTAINER" ${node.nodeType === 'CARD_CONTAINER' ? 'selected' : ''}>卡片容器</option>
                     <option value="SEPARATOR" ${node.nodeType === 'SEPARATOR' ? 'selected' : ''}>分隔线</option>
                 </select>
@@ -708,12 +722,15 @@ function renderFieldPropertyPanel(fieldDef, fieldComponent) {
     placeholder.style.display = 'none';
     form.style.display = 'block';
 
+    // 组件类型映射（数据库存储值 -> 显示值）
+    const componentType = fieldComponent?.componentType || 'TEXT';
+
     form.innerHTML = `
         <div class="property-section">
             <h4><i class="fas fa-info-circle"></i> 基本信息</h4>
             <div class="form-group">
                 <label>字段标签</label>
-                <input type="text" value="${fieldComponent?.labelName || ''}" onchange="updateFieldComponentProperty(${fieldComponent?.id}, 'labelName', this.value)">
+                <input type="text" value="${fieldComponent?.labelName || ''}" onchange="updateFieldComponentProperty('${fieldComponent?.id}', 'labelName', this.value)">
             </div>
             <div class="form-group">
                 <label>字段名称（自动生成）</label>
@@ -732,29 +749,29 @@ function renderFieldPropertyPanel(fieldDef, fieldComponent) {
             <h4><i class="fas fa-cogs"></i> 组件配置</h4>
             <div class="form-group">
                 <label>组件类型</label>
-                <select onchange="updateFieldComponentProperty(${fieldComponent?.id}, 'componentType', this.value)">
-                    <option value="TEXT_INPUT" ${fieldComponent?.componentType === 'TEXT_INPUT' ? 'selected' : ''}>文本框</option>
-                    <option value="NUMBER_INPUT" ${fieldComponent?.componentType === 'NUMBER_INPUT' ? 'selected' : ''}>数字框</option>
-                    <option value="MONEY_INPUT" ${fieldComponent?.componentType === 'MONEY_INPUT' ? 'selected' : ''}>金额框</option>
-                    <option value="DATE_PICKER" ${fieldComponent?.componentType === 'DATE_PICKER' ? 'selected' : ''}>日期选择</option>
-                    <option value="SELECT" ${fieldComponent?.componentType === 'SELECT' ? 'selected' : ''}>下拉框</option>
+                <select onchange="updateFieldComponentProperty('${fieldComponent?.id}', 'componentType', this.value)">
+                    <option value="TEXT" ${componentType === 'TEXT' ? 'selected' : ''}>文本框</option>
+                    <option value="NUMBER" ${componentType === 'NUMBER' ? 'selected' : ''}>数字框</option>
+                    <option value="MONEY" ${componentType === 'MONEY' ? 'selected' : ''}>金额框</option>
+                    <option value="DATE" ${componentType === 'DATE' ? 'selected' : ''}>日期选择</option>
+                    <option value="SELECT" ${componentType === 'SELECT' ? 'selected' : ''}>下拉框</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>提示文字</label>
-                <input type="text" value="${fieldComponent?.placeholder || ''}" onchange="updateFieldComponentProperty(${fieldComponent?.id}, 'placeholder', this.value)">
+                <input type="text" value="${fieldComponent?.placeholder || ''}" onchange="updateFieldComponentProperty('${fieldComponent?.id}', 'placeholder', this.value)">
             </div>
             <div class="form-checkbox">
-                <input type="checkbox" ${fieldDef.requiredDefault ? 'checked' : ''} onchange="updateFieldDefProperty(${fieldDef.id}, 'requiredDefault', this.checked)">
+                <input type="checkbox" ${fieldDef.requiredDefault ? 'checked' : ''} onchange="updateFieldDefProperty('${fieldDef.id}', 'requiredDefault', this.checked)">
                 <label>是否必填</label>
             </div>
         </div>
-        ${fieldComponent?.componentType === 'SELECT' ? `
+        ${componentType === 'SELECT' ? `
         <div class="property-section">
             <h4><i class="fas fa-database"></i> 数据源配置</h4>
             <div class="form-group">
                 <label>数据源</label>
-                <button class="btn btn-outline-primary btn-sm" onclick="showDataSourceDialog(${fieldComponent?.id})">
+                <button class="btn btn-outline-primary btn-sm" onclick="showDataSourceDialog('${fieldComponent?.id}')">
                     <i class="fas fa-link"></i> 选择数据源
                 </button>
                 ${fieldComponent?.dataProviderId ? `<span style="margin-left: 8px;">已绑定</span>` : ''}
@@ -779,11 +796,11 @@ function renderActionPropertyPanel(action) {
             <h4><i class="fas fa-info-circle"></i> 基本信息</h4>
             <div class="form-group">
                 <label>动作名称</label>
-                <input type="text" value="${action.actionName}" onchange="updateActionProperty(${action.id}, 'actionName', this.value)">
+                <input type="text" value="${action.actionName}" onchange="updateActionProperty('${action.id}', 'actionName', this.value)">
             </div>
             <div class="form-group">
                 <label>动作类型</label>
-                <select onchange="updateActionProperty(${action.id}, 'actionType', this.value)">
+                <select onchange="updateActionProperty('${action.id}', 'actionType', this.value)">
                     <option value="SAVE_BUTTON" ${action.actionType === 'SAVE_BUTTON' ? 'selected' : ''}>保存按钮</option>
                     <option value="QUERY_BUTTON" ${action.actionType === 'QUERY_BUTTON' ? 'selected' : ''}>查询按钮</option>
                 </select>
@@ -798,28 +815,28 @@ function renderActionPropertyPanel(action) {
  * 更新节点属性
  */
 function updateNodeProperty(nodeId, property, value) {
-    configManager.optimisticUpdate('node', nodeId, { [property]: value });
+    configManager.optimisticUpdate('node', String(nodeId), { [property]: value });
 }
 
 /**
  * 更新字段定义属性
  */
 function updateFieldDefProperty(fieldDefId, property, value) {
-    configManager.optimisticUpdate('fieldDef', fieldDefId, { [property]: value });
+    configManager.optimisticUpdate('fieldDef', String(fieldDefId), { [property]: value });
 }
 
 /**
  * 更新字段组件属性
  */
 function updateFieldComponentProperty(fieldComponentId, property, value) {
-    configManager.optimisticUpdate('fieldComponent', fieldComponentId, { [property]: value });
+    configManager.optimisticUpdate('fieldComponent', String(fieldComponentId), { [property]: value });
 }
 
 /**
  * 更新动作属性
  */
 function updateActionProperty(actionId, property, value) {
-    configManager.optimisticUpdate('action', actionId, { [property]: value });
+    configManager.optimisticUpdate('action', String(actionId), { [property]: value });
 }
 
 // ==================== 数据源选择 ====================
@@ -936,7 +953,7 @@ function preview() {
     }
 
     // 打开预览页面
-    window.open(`/display/preview.html?templateId=${configManager.templateId}&versionId=${configManager.versionId}`, '_blank');
+    window.open(`/preview.html?templateId=${configManager.templateId}&versionId=${configManager.versionId}`, '_blank');
 }
 
 /**
@@ -949,7 +966,7 @@ function viewData() {
     }
 
     // 打开数据查看页面
-    window.open(`/display/data-viewer.html?templateId=${configManager.templateId}&versionId=${configManager.versionId}`, '_blank');
+    window.open(`/display/dynamic-display.html?templateId=${configManager.templateId}&versionId=${configManager.versionId}`, '_blank');
 }
 
 // ==================== 初始化 ====================

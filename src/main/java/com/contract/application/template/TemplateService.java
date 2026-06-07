@@ -2,16 +2,21 @@ package com.contract.application.template;
 
 import com.contract.common.exception.BizException;
 import com.contract.domain.template.Template;
+import com.contract.domain.template.TemplateVersion;
 import com.contract.domain.template.repository.TemplateRepository;
+import com.contract.domain.template.repository.TemplateVersionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class TemplateService {
 
     private final TemplateRepository templateRepository;
+    private final TemplateVersionRepository versionRepository;
 
     @Transactional
     public Template createTemplate(String templateCode, String templateName, String templateDesc, String bizType) {
@@ -21,7 +26,13 @@ public class TemplateService {
         }
 
         Template template = Template.create(templateCode, templateName, templateDesc, bizType);
-        return templateRepository.save(template);
+        template = templateRepository.save(template);
+
+        // 自动创建初始版本
+        TemplateVersion version = TemplateVersion.createDraft(template.getId(), 1, "初始版本");
+        versionRepository.save(version);
+
+        return template;
     }
 
     public Template getById(Long id) {
@@ -74,5 +85,14 @@ public class TemplateService {
         }
         template.setCurrentVersion(versionId);
         templateRepository.update(template);
+    }
+
+    /**
+     * 查询所有模板列表
+     *
+     * @return 模板列表
+     */
+    public List<Template> listAll() {
+        return templateRepository.findAll();
     }
 }

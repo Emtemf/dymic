@@ -35,11 +35,11 @@ public class LayoutNodeService {
         node.setId(idGenerator.nextId());
         node.setTemplateId(templateId);
         node.setTemplateVersionId(versionId);
-        node.setNodeName(dto.getDisplayName());
+        node.setNodeName(dto.getNodeName());
 
         // 自动生成 nodeCode 和 nodePath
-        node.setNodeCode(generateNodeCode(dto.getNodeType(), dto.getDisplayName()));
-        node.setNodePath(generateNodePath(dto.getParentId(), dto.getDisplayName()));
+        node.setNodeCode(generateNodeCode(dto.getNodeType(), dto.getNodeName()));
+        node.setNodePath(generateNodePath(dto.getParentId(), dto.getNodeName()));
 
         // 处理 JSONB 字段
         if (dto.getVisibleRule() != null) {

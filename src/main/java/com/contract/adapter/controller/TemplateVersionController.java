@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import java.util.List;
 
 /**
  * 模板版本管理 REST Controller
@@ -79,6 +80,18 @@ public class TemplateVersionController {
     public Result<TemplateVersion> getVersionById(@PathVariable Long versionId) {
         TemplateVersion version = versionService.getById(versionId);
         return Result.ok(version);
+    }
+
+    /**
+     * 查询模板的所有版本列表
+     *
+     * @param templateId 模板ID
+     * @return 版本列表
+     */
+    @GetMapping("/{templateId}/versions")
+    public Result<List<TemplateVersion>> listVersions(@PathVariable Long templateId) {
+        List<TemplateVersion> versions = versionService.findByTemplateId(templateId);
+        return Result.ok(versions);
     }
 
     /**

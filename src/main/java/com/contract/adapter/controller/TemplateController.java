@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import java.util.List;
 
 /**
  * 模板管理 REST Controller
@@ -59,6 +60,17 @@ public class TemplateController {
     public Result<Template> getByCode(@PathVariable String code) {
         Template template = templateService.getByCode(code);
         return Result.ok(template);
+    }
+
+    /**
+     * 查询所有模板列表
+     *
+     * @return 模板列表
+     */
+    @GetMapping
+    public Result<List<Template>> listAll() {
+        List<Template> templates = templateService.listAll();
+        return Result.ok(templates);
     }
 
     /**

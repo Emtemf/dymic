@@ -27,7 +27,7 @@ class LayoutNodeServiceTest {
     void testCreateLayoutNode() {
         LayoutNodeCreateDTO dto = new LayoutNodeCreateDTO();
         dto.setNodeType("CARD");
-        dto.setDisplayName("基本信息");
+        dto.setNodeName("基本信息");
         dto.setParentId(null);
         dto.setSortNo(1);
         dto.setLevelNo(1);
@@ -47,7 +47,7 @@ class LayoutNodeServiceTest {
         // 先创建父节点
         LayoutNodeCreateDTO parentDto = new LayoutNodeCreateDTO();
         parentDto.setNodeType("CARD");
-        parentDto.setDisplayName("基本信息");
+        parentDto.setNodeName("基本信息");
         parentDto.setParentId(null);
         parentDto.setSortNo(1);
 
@@ -56,7 +56,7 @@ class LayoutNodeServiceTest {
         // 创建子节点
         LayoutNodeCreateDTO childDto = new LayoutNodeCreateDTO();
         childDto.setNodeType("FIELD");
-        childDto.setDisplayName("合同名称");
+        childDto.setNodeName("合同名称");
         childDto.setParentId(parent.getId());
         childDto.setSortNo(1);
 
@@ -72,7 +72,7 @@ class LayoutNodeServiceTest {
     void testGetById() {
         LayoutNodeCreateDTO dto = new LayoutNodeCreateDTO();
         dto.setNodeType("CARD");
-        dto.setDisplayName("查询测试");
+        dto.setNodeName("查询测试");
         dto.setParentId(null);
         dto.setSortNo(1);
 
@@ -91,7 +91,7 @@ class LayoutNodeServiceTest {
     void testUpdate() {
         LayoutNodeCreateDTO dto = new LayoutNodeCreateDTO();
         dto.setNodeType("CARD");
-        dto.setDisplayName("更新测试");
+        dto.setNodeName("更新测试");
         dto.setParentId(null);
         dto.setSortNo(1);
 
@@ -110,14 +110,14 @@ class LayoutNodeServiceTest {
     void testListByVersionId() {
         LayoutNodeCreateDTO dto1 = new LayoutNodeCreateDTO();
         dto1.setNodeType("CARD");
-        dto1.setDisplayName("列表测试1");
+        dto1.setNodeName("列表测试1");
         dto1.setParentId(null);
         dto1.setSortNo(1);
         service.create(100L, 304L, dto1);
 
         LayoutNodeCreateDTO dto2 = new LayoutNodeCreateDTO();
         dto2.setNodeType("CARD");
-        dto2.setDisplayName("列表测试2");
+        dto2.setNodeName("列表测试2");
         dto2.setParentId(null);
         dto2.setSortNo(2);
         service.create(100L, 304L, dto2);
@@ -130,7 +130,7 @@ class LayoutNodeServiceTest {
     void testCreateWithGridProperties() {
         LayoutNodeCreateDTO dto = new LayoutNodeCreateDTO();
         dto.setNodeType("FIELD");
-        dto.setDisplayName("网格布局");
+        dto.setNodeName("网格布局");
         dto.setParentId(null);
         dto.setSortNo(1);
         dto.setGridX(0);
@@ -154,7 +154,7 @@ class LayoutNodeServiceTest {
     void testCreateWithRules() {
         LayoutNodeCreateDTO dto = new LayoutNodeCreateDTO();
         dto.setNodeType("FIELD");
-        dto.setDisplayName("规则测试");
+        dto.setNodeName("规则测试");
         dto.setParentId(null);
         dto.setSortNo(1);
 
@@ -176,7 +176,7 @@ class LayoutNodeServiceTest {
         // 创建节点
         LayoutNodeCreateDTO dto = new LayoutNodeCreateDTO();
         dto.setNodeType("CARD");
-        dto.setDisplayName("删除测试");
+        dto.setNodeName("删除测试");
         dto.setParentId(null);
         dto.setSortNo(1);
 

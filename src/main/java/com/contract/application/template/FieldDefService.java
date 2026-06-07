@@ -54,13 +54,17 @@ public class FieldDefService {
         fieldDef.setTemplateVersionId(versionId);
 
         // 自动生成 fieldCode 和 fieldPath
-        fieldDef.setFieldCode(generateFieldCode(dto.getDisplayName()));
-        fieldDef.setFieldPath(generateFieldPath(layoutNode.getNodePath(), dto.getDisplayName()));
+        fieldDef.setFieldCode(generateFieldCode(dto.getFieldNameCn()));
+        fieldDef.setFieldPath(generateFieldPath(layoutNode.getNodePath(), dto.getFieldNameCn()));
 
         // 自动检测数据类型
-        fieldDef.setDataType(detectDataType(dto.getComponentType()));
-        fieldDef.setFieldNameCn(dto.getDisplayName());
-        fieldDef.setRequiredDefault(dto.getRequired() ? 1 : 0);
+        if (dto.getDataType() != null) {
+            fieldDef.setDataType(dto.getDataType());
+        } else {
+            fieldDef.setDataType("TEXT");
+        }
+        fieldDef.setFieldNameCn(dto.getFieldNameCn());
+        fieldDef.setRequiredDefault(dto.getRequired() != null && dto.getRequired() ? 1 : 0);
 
         fieldDef.setCreatedAt(LocalDateTime.now());
         fieldDef.setUpdatedAt(LocalDateTime.now());
@@ -70,11 +74,11 @@ public class FieldDefService {
         // 3. 同时创建字段组件绑定
         FieldComponentDTO fieldComponent = fieldComponentService.createFromFieldDef(
             templateId, versionId, fieldDef.getId(), dto.getLayoutNodeId(),
-            dto.getComponentType(), dto.getDisplayName(), dto.getPlaceholder(), dto.getSortNo()
+            dto.getDataType(), dto.getFieldNameCn(), dto.getPlaceholder(), dto.getSortNo()
         );
 
         // 处理数据来源配置(针对 SELECT 类型)
-        if ("SELECT".equals(dto.getComponentType())) {
+        if ("SELECT".equals(dto.getDataType())) {
             FieldComponentUpdateDTO updateDTO = new FieldComponentUpdateDTO();
             Map<String, Object> props = new HashMap<>();
 
@@ -96,7 +100,7 @@ public class FieldDefService {
         }
 
         // 处理必填规则(非SELECT类型)
-        if (dto.getRequired() != null && dto.getRequired() && !"SELECT".equals(dto.getComponentType())) {
+        if (dto.getRequired() != null && dto.getRequired() && !"SELECT".equals(dto.getDataType())) {
             FieldComponentUpdateDTO updateDTO = new FieldComponentUpdateDTO();
             updateDTO.setRequiredRule("{\"required\": true}");
             fieldComponent = fieldComponentService.update(fieldComponent.getId(), updateDTO);

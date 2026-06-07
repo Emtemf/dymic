@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * 模板版本服务层
  * 负责模板版本的创建、发布、查询等业务逻辑
@@ -98,5 +100,15 @@ public class TemplateVersionService {
      */
     public TemplateVersion findCurrentVersion(Long templateId) {
         return versionRepository.findCurrentVersion(templateId);
+    }
+
+    /**
+     * 查询模板的所有版本列表
+     *
+     * @param templateId 模板ID
+     * @return 版本列表
+     */
+    public List<TemplateVersion> findByTemplateId(Long templateId) {
+        return versionRepository.findByTemplateId(templateId);
     }
 }

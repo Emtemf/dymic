@@ -88,7 +88,9 @@ public class ActionConfig {
         return ACTION_TYPE_SAVE.equals(actionType)
             || ACTION_TYPE_QUERY.equals(actionType)
             || ACTION_TYPE_CANCEL.equals(actionType)
-            || ACTION_TYPE_CUSTOM.equals(actionType);
+            || ACTION_TYPE_CUSTOM.equals(actionType)
+            || "SAVE_BUTTON".equals(actionType)
+            || "QUERY_BUTTON".equals(actionType);
     }
 
     /**

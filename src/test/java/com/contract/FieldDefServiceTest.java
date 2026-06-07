@@ -35,7 +35,7 @@ class FieldDefServiceTest {
     private LayoutNodeDTO createTestLayoutNode(Long templateId, Long versionId, String displayName) {
         LayoutNodeCreateDTO dto = new LayoutNodeCreateDTO();
         dto.setNodeType("CARD");
-        dto.setDisplayName(displayName);
+        dto.setNodeName(displayName);
         dto.setParentId(null);
         dto.setSortNo(1);
         dto.setLevelNo(1);
@@ -49,8 +49,8 @@ class FieldDefServiceTest {
 
         FieldDefCreateDTO dto = new FieldDefCreateDTO();
         dto.setLayoutNodeId(layoutNode.getId());
-        dto.setDisplayName("合同名称");
-        dto.setComponentType("INPUT");
+        dto.setFieldNameCn("合同名称");
+        dto.setDataType("INPUT");
         dto.setRequired(false);
         dto.setPlaceholder("请输入合同名称");
         dto.setSortNo(1);
@@ -77,8 +77,8 @@ class FieldDefServiceTest {
 
         FieldDefCreateDTO dto = new FieldDefCreateDTO();
         dto.setLayoutNodeId(layoutNode.getId());
-        dto.setDisplayName("合同金额");
-        dto.setComponentType("NUMBER");
+        dto.setFieldNameCn("合同金额");
+        dto.setDataType("NUMBER");
         dto.setRequired(true);
         dto.setSortNo(1);
 
@@ -94,8 +94,8 @@ class FieldDefServiceTest {
 
         FieldDefCreateDTO dto = new FieldDefCreateDTO();
         dto.setLayoutNodeId(layoutNode.getId());
-        dto.setDisplayName("签订日期");
-        dto.setComponentType("DATE");
+        dto.setFieldNameCn("签订日期");
+        dto.setDataType("DATE");
         dto.setRequired(false);
         dto.setSortNo(1);
 
@@ -110,8 +110,8 @@ class FieldDefServiceTest {
 
         FieldDefCreateDTO dto = new FieldDefCreateDTO();
         dto.setLayoutNodeId(layoutNode.getId());
-        dto.setDisplayName("付款金额");
-        dto.setComponentType("MONEY");
+        dto.setFieldNameCn("付款金额");
+        dto.setDataType("MONEY");
         dto.setRequired(false);
         dto.setSortNo(1);
 
@@ -126,8 +126,8 @@ class FieldDefServiceTest {
 
         FieldDefCreateDTO dto = new FieldDefCreateDTO();
         dto.setLayoutNodeId(layoutNode.getId());
-        dto.setDisplayName("合同类型");
-        dto.setComponentType("SELECT");
+        dto.setFieldNameCn("合同类型");
+        dto.setDataType("SELECT");
         dto.setRequired(false);
         dto.setDataSourceType("STATIC");
 
@@ -147,8 +147,8 @@ class FieldDefServiceTest {
     void testCreateFieldWithNonExistentLayoutNode() {
         FieldDefCreateDTO dto = new FieldDefCreateDTO();
         dto.setLayoutNodeId(999999L);
-        dto.setDisplayName("测试字段");
-        dto.setComponentType("INPUT");
+        dto.setFieldNameCn("测试字段");
+        dto.setDataType("INPUT");
         dto.setRequired(false);
 
         assertThrows(BizException.class, () -> service.create(100L, 905L, dto));
@@ -160,8 +160,8 @@ class FieldDefServiceTest {
 
         FieldDefCreateDTO dto = new FieldDefCreateDTO();
         dto.setLayoutNodeId(layoutNode.getId());
-        dto.setDisplayName("查询字段");
-        dto.setComponentType("INPUT");
+        dto.setFieldNameCn("查询字段");
+        dto.setDataType("INPUT");
         dto.setRequired(false);
 
         FieldDefCreateResult created = service.create(100L, 906L, dto);
@@ -181,15 +181,15 @@ class FieldDefServiceTest {
 
         FieldDefCreateDTO dto1 = new FieldDefCreateDTO();
         dto1.setLayoutNodeId(layoutNode.getId());
-        dto1.setDisplayName("列表字段1");
-        dto1.setComponentType("INPUT");
+        dto1.setFieldNameCn("列表字段1");
+        dto1.setDataType("INPUT");
         dto1.setRequired(false);
         service.create(100L, 907L, dto1);
 
         FieldDefCreateDTO dto2 = new FieldDefCreateDTO();
         dto2.setLayoutNodeId(layoutNode.getId());
-        dto2.setDisplayName("列表字段2");
-        dto2.setComponentType("INPUT");
+        dto2.setFieldNameCn("列表字段2");
+        dto2.setDataType("INPUT");
         dto2.setRequired(false);
         service.create(100L, 907L, dto2);
 
@@ -203,8 +203,8 @@ class FieldDefServiceTest {
 
         FieldDefCreateDTO dto = new FieldDefCreateDTO();
         dto.setLayoutNodeId(layoutNode.getId());
-        dto.setDisplayName("更新字段");
-        dto.setComponentType("INPUT");
+        dto.setFieldNameCn("更新字段");
+        dto.setDataType("INPUT");
         dto.setRequired(false);
 
         FieldDefCreateResult created = service.create(100L, 908L, dto);
@@ -232,8 +232,8 @@ class FieldDefServiceTest {
 
         FieldDefCreateDTO dto = new FieldDefCreateDTO();
         dto.setLayoutNodeId(layoutNode.getId());
-        dto.setDisplayName("合同编号");
-        dto.setComponentType("INPUT");
+        dto.setFieldNameCn("合同编号");
+        dto.setDataType("INPUT");
         dto.setRequired(false);
 
         FieldDefCreateResult result = service.create(100L, 909L, dto);
@@ -248,8 +248,8 @@ class FieldDefServiceTest {
 
         FieldDefCreateDTO dto = new FieldDefCreateDTO();
         dto.setLayoutNodeId(layoutNode.getId());
-        dto.setDisplayName("供应商名称");
-        dto.setComponentType("INPUT");
+        dto.setFieldNameCn("供应商名称");
+        dto.setDataType("INPUT");
         dto.setRequired(false);
 
         FieldDefCreateResult result = service.create(100L, 910L, dto);
@@ -266,22 +266,22 @@ class FieldDefServiceTest {
 
         FieldDefCreateDTO dto1 = new FieldDefCreateDTO();
         dto1.setLayoutNodeId(layoutNode.getId());
-        dto1.setDisplayName("字段A");
-        dto1.setComponentType("INPUT");
+        dto1.setFieldNameCn("字段A");
+        dto1.setDataType("INPUT");
         dto1.setRequired(false);
         dto1.setSortNo(1);
 
         FieldDefCreateDTO dto2 = new FieldDefCreateDTO();
         dto2.setLayoutNodeId(layoutNode.getId());
-        dto2.setDisplayName("字段B");
-        dto2.setComponentType("INPUT");
+        dto2.setFieldNameCn("字段B");
+        dto2.setDataType("INPUT");
         dto2.setRequired(false);
         dto2.setSortNo(2);
 
         FieldDefCreateDTO dto3 = new FieldDefCreateDTO();
         dto3.setLayoutNodeId(layoutNode.getId());
-        dto3.setDisplayName("字段C");
-        dto3.setComponentType("INPUT");
+        dto3.setFieldNameCn("字段C");
+        dto3.setDataType("INPUT");
         dto3.setRequired(false);
         dto3.setSortNo(3);
 

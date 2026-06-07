@@ -16,7 +16,7 @@ public class LayoutNodeCreateDTO {
     private String nodeType;
 
     @NotBlank(message = "节点名称不能为空")
-    private String displayName;
+    private String nodeName;
 
     private Integer sortNo;        // 默认 0
     private Integer levelNo;       // 默认 1

@@ -3,22 +3,18 @@ package com.contract.application.template.dto;
 import lombok.Data;
 import java.util.List;
 
-/**
- * 创建字段定义 DTO
- */
 @Data
 public class FieldDefCreateDTO {
     private Long layoutNodeId;
-    private String displayName;         // 业务名称: 合同名称
-    private String componentType;       // INPUT/SELECT/DATE/MONEY/NUMBER
-    private Boolean required;           // 是否必填
-    private String placeholder;         // 输入提示
-    private Integer sortNo;             // 排序号
+    private String fieldNameCn;
+    private String dataType;
+    private Boolean required;
+    private String placeholder;
+    private Integer sortNo;
 
-    // 组件配置(用于 SELECT 类型)
-    private String dataSourceType;      // STATIC/PROVIDER
-    private List<StaticOption> staticOptions;  // 静态选项
-    private Long dataProviderId;        // 数据提供方 ID
+    private String dataSourceType;
+    private List<StaticOption> staticOptions;
+    private Long dataProviderId;
 
     @Data
     public static class StaticOption {
