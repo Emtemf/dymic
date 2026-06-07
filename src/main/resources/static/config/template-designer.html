@@ -480,5 +480,22 @@
     <script src="js/property-panel.js"></script>
     <script src="js/config-api.js"></script>
     <script src="js/designer.js"></script>
+    <script src="js/detail-table.js"></script>
+
+    <!-- Detail row edit modal -->
+    <div id="detailRowModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:8px;width:480px;max-height:80vh;overflow:auto;">
+            <div style="padding:16px 20px;border-bottom:1px solid #e1e4e8;font-weight:600;font-size:16px;">
+                编辑明细行
+                <button onclick="DetailTableHelper.closeModal()" style="float:right;border:none;background:none;font-size:20px;cursor:pointer;color:#999;">&times;</button>
+            </div>
+            <div id="detailRowModalBody" style="padding:20px;">
+            </div>
+            <div style="padding:12px 20px;border-top:1px solid #e1e4e8;text-align:right;">
+                <button onclick="DetailTableHelper.closeModal()" style="padding:6px 16px;border:1px solid #d1d5da;background:white;border-radius:4px;cursor:pointer;margin-right:8px;">取消</button>
+                <button onclick="DetailTableHelper.saveModalDraft()" style="padding:6px 16px;border:none;background:#667eea;color:white;border-radius:4px;cursor:pointer;">保存</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
