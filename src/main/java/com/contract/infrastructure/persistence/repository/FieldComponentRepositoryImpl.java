@@ -67,8 +67,6 @@ public class FieldComponentRepositoryImpl implements FieldComponentRepository {
 
     @Override
     public void deleteByTemplateVersionId(Long versionId) {
-        LambdaQueryWrapper<FieldComponentEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(FieldComponentEntity::getTemplateVersionId, versionId);
-        mapper.delete(wrapper);
+        mapper.physicalDeleteByVersionId(versionId);
     }
 }

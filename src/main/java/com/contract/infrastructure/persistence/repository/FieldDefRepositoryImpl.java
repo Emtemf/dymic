@@ -63,8 +63,6 @@ public class FieldDefRepositoryImpl implements FieldDefRepository {
 
     @Override
     public void deleteByTemplateVersionId(Long versionId) {
-        LambdaQueryWrapper<FieldDefEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(FieldDefEntity::getTemplateVersionId, versionId);
-        mapper.delete(wrapper);
+        mapper.physicalDeleteByVersionId(versionId);
     }
 }

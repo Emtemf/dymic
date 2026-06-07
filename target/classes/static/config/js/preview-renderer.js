@@ -541,39 +541,44 @@ function renderDetailTableComponent(component) {
     element.className = 'component-preview';
     element.dataset.componentId = component.id;
 
-    let tableHTML = `
-        <div class="component-preview-label">
-            <i class="fas fa-table"></i> ${component.name}
-        </div>
-        <div class="component-preview-content">
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
-                <thead>
-                    <tr style="background: #f6f8fa;">
-    `;
+    const columns = component.columns || [];
+    const enableAdd = component.enableAdd !== false;
+    const maxRows = component.maxRows || 0;
 
-    if (component.columns && component.columns.length > 0) {
-        component.columns.forEach(col => {
-            tableHTML += `<th style="padding: 8px; border: 1px solid #e1e4e8; width: ${col.width}px;">${col.name}</th>`;
-        });
+    // Initialize draft data
+    if (!window.DesignerState.detailDrafts) window.DesignerState.detailDrafts = {};
+    if (!window.DesignerState.detailDrafts[component.id]) {
+        window.DesignerState.detailDrafts[component.id] = [];
     }
 
-    tableHTML += `
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="${(component.columns || []).length || 1}" style="padding: 20px; text-align: center; color: #b4b4b4;">
-                            暂无数据
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    let tableHTML = `
+        <div class="component-preview-label">
+            <i class="fas fa-table"></i> ${component.name || '明细表'}
+            <small style="color:#999;margin-left:8px;">(${columns.length}列)</small>
+        </div>
+        <div class="component-preview-content">
+            <table style="width:100%;border-collapse:collapse;margin-bottom:10px;">
+                <thead>
+                    <tr style="background:#f6f8fa;">
     `;
 
-    if (component.enableAdd) {
-        tableHTML += `<button style="padding: 4px 12px; border: 1px solid #667eea; background: white; color: #667eea; border-radius: 4px; cursor: pointer;">
-            <i class="fas fa-plus"></i> 添加行
-        </button>`;
+    columns.forEach(col => {
+        tableHTML += `<th style="padding:8px;border:1px solid #e1e4e8;width:${col.width || 100}px;text-align:left;">${col.name}</th>`;
+    });
+    tableHTML += `<th style="padding:8px;border:1px solid #e1e4e8;width:120px;text-align:center;">操作</th>`;
+    tableHTML += `</tr></thead><tbody id="detail_tbody_${component.id}">`;
+
+    tableHTML += `<tr><td colspan="${columns.length + 1}" style="padding:20px;text-align:center;color:#b4b4b4;">暂无数据</td></tr>`;
+
+    tableHTML += `</tbody></table>`;
+
+    if (enableAdd) {
+        tableHTML += `
+            <button onclick="DetailTableHelper.addRow('${component.id}', ${JSON.stringify(columns).replace(/"/g, '&quot;')}, ${maxRows})"
+                    style="padding:4px 12px;border:1px solid #667eea;background:white;color:#667eea;border-radius:4px;cursor:pointer;">
+                <i class="fas fa-plus"></i> 添加行
+            </button>
+        `;
     }
 
     tableHTML += `</div>`;
@@ -581,7 +586,7 @@ function renderDetailTableComponent(component) {
 
     element.addEventListener('click', (e) => {
         e.stopPropagation();
-        selectComponent(component.id);
+        if (typeof selectComponent === 'function') selectComponent(component.id);
     });
 
     return element;

@@ -63,8 +63,6 @@ public class ActionConfigRepositoryImpl implements ActionConfigRepository {
 
     @Override
     public void deleteByTemplateVersionId(Long versionId) {
-        LambdaQueryWrapper<ActionConfigEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ActionConfigEntity::getTemplateVersionId, versionId);
-        mapper.delete(wrapper);
+        mapper.physicalDeleteByVersionId(versionId);
     }
 }

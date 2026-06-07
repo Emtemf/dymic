@@ -72,8 +72,6 @@ public class LayoutNodeRepositoryImpl implements LayoutNodeRepository {
 
     @Override
     public void deleteByTemplateVersionId(Long versionId) {
-        LambdaQueryWrapper<LayoutNodeEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(LayoutNodeEntity::getTemplateVersionId, versionId);
-        mapper.delete(wrapper);
+        mapper.physicalDeleteByVersionId(versionId);
     }
 }
