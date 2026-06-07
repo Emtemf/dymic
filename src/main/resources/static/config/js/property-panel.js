@@ -347,55 +347,64 @@ function renderTextareaSpecificConfig(container, component) {
  * 明细表特有配置
  */
 function renderDetailTableSpecificConfig(container, component) {
-    let columnsHTML = '';
-    if (component.columns && component.columns.length > 0) {
-        component.columns.forEach((col, index) => {
-            columnsHTML += `
-                <div class="column-item" style="padding: 8px; background: white; border: 1px solid #e1e4e8; margin-bottom: 8px; border-radius: 4px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>${col.name} (${col.code})</span>
-                        <button class="btn btn-sm btn-danger" onclick="removeColumn(${index})">删除</button>
-                    </div>
-                </div>
-            `;
-        });
-    }
+    const columns = component.columns || [];
+    let columnsHtml = '';
+    columns.forEach((col, idx) => {
+        columnsHtml += `
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+                <input type="text" value="${col.name || ''}" placeholder="列名"
+                       onchange="updateDetailTableColumn(${idx}, 'name', this.value)"
+                       style="flex:1;padding:4px 8px;border:1px solid #d1d5da;border-radius:3px;">
+                <input type="text" value="${col.code || ''}" placeholder="编码"
+                       onchange="updateDetailTableColumn(${idx}, 'code', this.value)"
+                       style="flex:1;padding:4px 8px;border:1px solid #d1d5da;border-radius:3px;">
+                <input type="text" value="${col.type || 'text'}" placeholder="类型"
+                       onchange="updateDetailTableColumn(${idx}, 'type', this.value)"
+                       style="width:60px;padding:4px 8px;border:1px solid #d1d5da;border-radius:3px;">
+                <button onclick="removeDetailTableColumn(${idx})" style="border:none;background:none;color:#ef4444;cursor:pointer;font-size:16px;">&times;</button>
+            </div>
+        `;
+    });
 
     container.innerHTML = `
         <div class="form-group">
+            <label>数据路径</label>
+            <input type="text" class="form-control" value="${component.fieldPath || 'details'}"
+                   onchange="updateProperty('fieldPath', this.value)">
+        </div>
+        <div class="form-group">
             <label>列配置</label>
-            ${columnsHTML}
-            <button class="btn btn-sm btn-secondary" onclick="addColumn()">
+            <div style="margin-bottom:6px;font-size:12px;color:#666;">列名 | 编码 | 类型</div>
+            ${columnsHtml}
+            <button onclick="addDetailTableColumn()" style="padding:4px 12px;border:1px solid #667eea;background:white;color:#667eea;border-radius:3px;cursor:pointer;width:100%;">
                 <i class="fas fa-plus"></i> 添加列
             </button>
         </div>
         <div class="form-group">
-            <label>
-                <input type="checkbox" id="configEnableAdd" ${component.enableAdd ? 'checked' : ''}
-                       onchange="updateProperty('enableAdd', this.checked)">
-                允许添加行
-            </label>
+            <label>行数限制</label>
+            <div style="display:flex;gap:8px;">
+                <div style="flex:1;">
+                    <small>最小行数</small>
+                    <input type="number" class="form-control" value="${component.minRows || 0}" min="0"
+                           onchange="updateProperty('minRows', parseInt(this.value))">
+                </div>
+                <div style="flex:1;">
+                    <small>最大行数（0=不限）</small>
+                    <input type="number" class="form-control" value="${component.maxRows || 0}" min="0"
+                           onchange="updateProperty('maxRows', parseInt(this.value))">
+                </div>
+            </div>
         </div>
         <div class="form-group">
-            <label>
-                <input type="checkbox" id="configEnableDelete" ${component.enableDelete ? 'checked' : ''}
-                       onchange="updateProperty('enableDelete', this.checked)">
-                允许删除行
-            </label>
-        </div>
-        <div class="form-group">
-            <label>
-                <input type="checkbox" id="configEnableEdit" ${component.enableEdit ? 'checked' : ''}
-                       onchange="updateProperty('enableEdit', this.checked)">
-                允许编辑
-            </label>
-        </div>
-        <div class="form-group">
-            <label>
-                <input type="checkbox" id="configShowSummary" ${component.showSummary ? 'checked' : ''}
-                       onchange="updateProperty('showSummary', this.checked)">
-                显示合计行
-            </label>
+            <label>操作开关</label>
+            <div style="display:flex;gap:12px;">
+                <label><input type="checkbox" ${component.enableAdd !== false ? 'checked' : ''}
+                       onchange="updateProperty('enableAdd', this.checked)"> 允许新增</label>
+                <label><input type="checkbox" ${component.enableEdit !== false ? 'checked' : ''}
+                       onchange="updateProperty('enableEdit', this.checked)"> 允许编辑</label>
+                <label><input type="checkbox" ${component.enableDelete !== false ? 'checked' : ''}
+                       onchange="updateProperty('enableDelete', this.checked)"> 允许删除</label>
+            </div>
         </div>
     `;
 }
@@ -615,31 +624,40 @@ function clearPropertyPanel() {
  * 添加列（明细表）
  */
 function addColumn() {
-    if (!DesignerState.selectedComponent) return;
+    addDetailTableColumn();
+}
 
+function addDetailTableColumn() {
+    if (!DesignerState.selectedComponent) return;
     if (!DesignerState.selectedComponent.columns) {
         DesignerState.selectedComponent.columns = [];
     }
-
     DesignerState.selectedComponent.columns.push({
         name: '新列',
-        code: 'new_column',
+        code: 'col_' + DesignerState.selectedComponent.columns.length,
+        type: 'text',
         width: 100
     });
-
     renderComponentSpecificConfig(DesignerState.selectedComponent);
     renderPreview();
     saveState();
 }
 
-/**
- * 删除列（明细表）
- */
 function removeColumn(index) {
-    if (!DesignerState.selectedComponent) return;
+    removeDetailTableColumn(index);
+}
 
-    DesignerState.selectedComponent.columns.splice(index, 1);
+function removeDetailTableColumn(idx) {
+    if (!DesignerState.selectedComponent || !DesignerState.selectedComponent.columns) return;
+    DesignerState.selectedComponent.columns.splice(idx, 1);
     renderComponentSpecificConfig(DesignerState.selectedComponent);
+    renderPreview();
+    saveState();
+}
+
+function updateDetailTableColumn(idx, field, value) {
+    if (!DesignerState.selectedComponent || !DesignerState.selectedComponent.columns || !DesignerState.selectedComponent.columns[idx]) return;
+    DesignerState.selectedComponent.columns[idx][field] = value;
     renderPreview();
     saveState();
 }
