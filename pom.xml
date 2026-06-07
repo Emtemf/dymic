@@ -63,6 +63,13 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
 
+        <!-- PostgreSQL Driver (for openGauss) -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- Utilities -->
         <dependency>
             <groupId>cn.hutool</groupId>
