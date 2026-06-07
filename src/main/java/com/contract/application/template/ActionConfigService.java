@@ -160,4 +160,9 @@ public class ActionConfigService {
         repository.deleteById(id);
         log.info("删除动作配置成功: id={}", id);
     }
+
+    @Transactional
+    public void deleteByVersionId(Long versionId) {
+        repository.deleteByTemplateVersionId(versionId);
+    }
 }

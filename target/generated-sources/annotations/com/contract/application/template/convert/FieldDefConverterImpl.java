@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-06T23:35:17+0800",
+    date = "2026-06-08T01:27:24+0800",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.11 (Ubuntu)"
 )
 @Component
@@ -41,18 +41,18 @@ public class FieldDefConverterImpl implements FieldDefConverter {
             return null;
         }
 
-        FieldDef fieldDef = new FieldDef();
+        FieldDef.FieldDefBuilder fieldDef = FieldDef.builder();
 
-        fieldDef.setId( dto.getId() );
-        fieldDef.setTemplateId( dto.getTemplateId() );
-        fieldDef.setTemplateVersionId( dto.getTemplateVersionId() );
-        fieldDef.setFieldCode( dto.getFieldCode() );
-        fieldDef.setFieldPath( dto.getFieldPath() );
-        fieldDef.setFieldNameCn( dto.getFieldNameCn() );
-        fieldDef.setDataType( dto.getDataType() );
-        fieldDef.setRequiredDefault( dto.getRequiredDefault() );
+        fieldDef.id( dto.getId() );
+        fieldDef.templateId( dto.getTemplateId() );
+        fieldDef.templateVersionId( dto.getTemplateVersionId() );
+        fieldDef.fieldCode( dto.getFieldCode() );
+        fieldDef.fieldPath( dto.getFieldPath() );
+        fieldDef.fieldNameCn( dto.getFieldNameCn() );
+        fieldDef.dataType( dto.getDataType() );
+        fieldDef.requiredDefault( dto.getRequiredDefault() );
 
-        return fieldDef;
+        return fieldDef.build();
     }
 
     @Override

@@ -41,4 +41,6 @@ public interface LayoutNodeRepository {
      * 删除布局节点
      */
     void deleteById(Long id);
+
+    void deleteByTemplateVersionId(Long versionId);
 }

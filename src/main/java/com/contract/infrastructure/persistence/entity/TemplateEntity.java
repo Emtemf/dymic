@@ -30,7 +30,7 @@ public class TemplateEntity {
     @TableField(fill = FieldFill.INSERT)
     private Long createdBy;
 
-    @TableField(fill = FieldFill.INSERT)
+    @TableField(exist = false)
     private String createdName;
 
     @TableField(fill = FieldFill.INSERT)
@@ -39,7 +39,7 @@ public class TemplateEntity {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updatedBy;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @TableField(exist = false)
     private String updatedName;
 
     @TableField(fill = FieldFill.INSERT_UPDATE)

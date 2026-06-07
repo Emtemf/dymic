@@ -154,6 +154,7 @@ CREATE TABLE IF NOT EXISTS t_ui_data_provider (
     config_json JSON NOT NULL,
     cache_enabled SMALLINT NOT NULL DEFAULT 0,
     cache_ttl_seconds INTEGER,
+    is_temporary SMALLINT NOT NULL DEFAULT 0,  -- 是否临时数据源（0/1）
     status VARCHAR(50) NOT NULL DEFAULT 'ENABLED',
     created_by BIGINT,
     created_name VARCHAR(100),

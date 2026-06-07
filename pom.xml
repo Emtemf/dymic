@@ -52,6 +52,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- PostgreSQL Driver (for openGauss) -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- JSON Processing -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

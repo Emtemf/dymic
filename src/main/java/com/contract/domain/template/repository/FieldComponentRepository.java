@@ -14,4 +14,5 @@ public interface FieldComponentRepository {
     List<FieldComponent> findByLayoutNodeId(Long layoutNodeId);
     void update(FieldComponent component);
     void deleteById(Long id);
+    void deleteByTemplateVersionId(Long versionId);
 }

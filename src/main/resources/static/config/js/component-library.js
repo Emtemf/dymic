@@ -50,6 +50,33 @@ const ComponentLibrary = {
                 children: []
             }
         },
+        ROW: {
+            name: '行',
+            icon: 'fa-grip-lines',
+            category: 'layout',
+            isContainer: true,
+            defaultConfig: {
+                name: '行',
+                code: 'row_1',
+                description: '',
+                gutter: 16,  // 列间距
+                children: []
+            }
+        },
+        COL: {
+            name: '列',
+            icon: 'fa-grip-lines-vertical',
+            category: 'layout',
+            isContainer: true,
+            defaultConfig: {
+                name: '列',
+                code: 'col_1',
+                description: '',
+                span: 12,    // 栅格列数 (24栅格系统，12=半行)
+                offset: 0,   // 偏移量
+                children: []
+            }
+        },
         TAB: {
             name: 'Tab页签',
             icon: 'fa-folder',

@@ -143,4 +143,9 @@ public class LayoutNodeService {
         }
         repository.deleteById(id);
     }
+
+    @Transactional
+    public void deleteByVersionId(Long versionId) {
+        repository.deleteByTemplateVersionId(versionId);
+    }
 }

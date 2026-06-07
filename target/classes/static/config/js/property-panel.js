@@ -131,6 +131,12 @@ function renderComponentSpecificConfig(component) {
         case 'COLLAPSE':
             renderCollapseSpecificConfig(container, component);
             break;
+        case 'ROW':
+            renderRowSpecificConfig(container, component);
+            break;
+        case 'COL':
+            renderColSpecificConfig(container, component);
+            break;
     }
 }
 
@@ -702,4 +708,54 @@ function removePanel(index) {
     renderComponentSpecificConfig(DesignerState.selectedComponent);
     renderPreview();
     saveState();
+}
+
+/**
+ * 行特有配置
+ */
+function renderRowSpecificConfig(container, component) {
+    container.innerHTML = `
+        <div class="form-group">
+            <label>列间距(px)</label>
+            <input type="number" id="configGutter" value="${component.gutter || 16}"
+                   min="0" max="100"
+                   onchange="updateProperty('gutter', parseInt(this.value))">
+        </div>
+        <div class="form-group">
+            <label style="color: #586069; font-size: 12px;">
+                <i class="fas fa-info-circle"></i> 提示：行组件用于包含列组件，请拖拽"列"组件到此处
+            </label>
+        </div>
+    `;
+}
+
+/**
+ * 列特有配置
+ */
+function renderColSpecificConfig(container, component) {
+    container.innerHTML = `
+        <div class="form-group">
+            <label>栅格列数 (共24列)</label>
+            <select id="configSpan" onchange="updateProperty('span', parseInt(this.value))">
+                <option value="24" ${component.span === 24 ? 'selected' : ''}>24列 (整行)</option>
+                <option value="12" ${component.span === 12 ? 'selected' : ''}>12列 (半行)</option>
+                <option value="8" ${component.span === 8 ? 'selected' : ''}>8列 (1/3行)</option>
+                <option value="6" ${component.span === 6 ? 'selected' : ''}>6列 (1/4行)</option>
+                <option value="4" ${component.span === 4 ? 'selected' : ''}>4列 (1/6行)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>偏移列数</label>
+            <select id="configOffset" onchange="updateProperty('offset', parseInt(this.value))">
+                <option value="0" ${component.offset === 0 ? 'selected' : ''}>无偏移</option>
+                <option value="6" ${component.offset === 6 ? 'selected' : ''}>偏移6列</option>
+                <option value="12" ${component.offset === 12 ? 'selected' : ''}>偏移12列</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label style="color: #586069; font-size: 12px;">
+                <i class="fas fa-info-circle"></i> 当前: ${component.span || 12}/24 列 (${((component.span || 12) / 24 * 100).toFixed(0)}% 宽度)
+            </label>
+        </div>
+    `;
 }

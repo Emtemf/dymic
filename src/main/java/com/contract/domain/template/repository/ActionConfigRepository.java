@@ -13,4 +13,5 @@ public interface ActionConfigRepository {
     ActionConfig update(ActionConfig actionConfig);
     void deleteById(Long id);
     List<ActionConfig> findAll();
+    void deleteByTemplateVersionId(Long versionId);
 }

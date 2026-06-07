@@ -60,4 +60,11 @@ public class ActionConfigRepositoryImpl implements ActionConfigRepository {
         List<ActionConfigEntity> entities = mapper.selectList(null);
         return converter.toDomainList(entities);
     }
+
+    @Override
+    public void deleteByTemplateVersionId(Long versionId) {
+        LambdaQueryWrapper<ActionConfigEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ActionConfigEntity::getTemplateVersionId, versionId);
+        mapper.delete(wrapper);
+    }
 }

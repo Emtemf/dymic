@@ -179,4 +179,9 @@ public class FieldDefService {
                 return "TEXT";
         }
     }
+
+    @Transactional
+    public void deleteByVersionId(Long versionId) {
+        repository.deleteByTemplateVersionId(versionId);
+    }
 }

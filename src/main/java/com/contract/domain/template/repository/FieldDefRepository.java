@@ -13,4 +13,5 @@ public interface FieldDefRepository {
     void update(FieldDef fieldDef);
     boolean existsByFieldCode(String fieldCode);
     boolean existsByFieldPath(String fieldPath);
+    void deleteByTemplateVersionId(Long versionId);
 }

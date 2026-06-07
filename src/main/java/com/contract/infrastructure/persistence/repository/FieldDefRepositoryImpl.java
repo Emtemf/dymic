@@ -60,4 +60,11 @@ public class FieldDefRepositoryImpl implements FieldDefRepository {
         wrapper.eq(FieldDefEntity::getFieldPath, fieldPath);
         return mapper.selectCount(wrapper) > 0;
     }
+
+    @Override
+    public void deleteByTemplateVersionId(Long versionId) {
+        LambdaQueryWrapper<FieldDefEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(FieldDefEntity::getTemplateVersionId, versionId);
+        mapper.delete(wrapper);
+    }
 }

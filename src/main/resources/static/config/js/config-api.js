@@ -17,26 +17,36 @@ async function saveConfig() {
             return;
         }
 
+        // 获取模板ID和版本ID（从URL参数或状态中）
+        const urlParams = new URLSearchParams(window.location.search);
+        const templateId = urlParams.get('templateId') || DesignerState.templateId || '1001';
+        const versionId = urlParams.get('versionId') || DesignerState.versionId || '2001';
+
+        // 构建保存数据
+        const saveData = {
+            layoutNodes: extractLayoutNodes(config.rootComponent),
+            fieldDefs: extractFieldDefs(config),
+            fieldComponents: extractFieldComponents(config),
+            queryConfigs: config.queryConfigs || [],
+            actionConfigs: config.actionConfigs || []
+        };
+
         // 调用后端API保存
-        const response = await fetch('/api/template/config', {
-            method: 'POST',
+        const response = await fetch(`/api/templates/${templateId}/versions/${versionId}/schema`, {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                templateId: DesignerState.templateId,
-                version: DesignerState.templateVersion,
-                config: config
-            })
+            body: JSON.stringify(saveData)
         });
 
         if (response.ok) {
             const result = await response.json();
-            DesignerState.templateId = result.templateId;
-            DesignerState.templateVersion = result.version;
             showNotification('配置保存成功', 'success');
+            console.log('保存结果:', result);
         } else {
-            throw new Error('保存失败');
+            const errorText = await response.text();
+            throw new Error(`保存失败: ${response.status} ${errorText}`);
         }
     } catch (error) {
         console.error('保存配置失败:', error);
@@ -45,32 +55,201 @@ async function saveConfig() {
 }
 
 /**
+ * 从组件树提取布局节点
+ */
+function extractLayoutNodes(component, parentId = null, result = []) {
+    if (!component) return result;
+
+    const node = {
+        id: component.id,
+        nodeCode: component.code,
+        nodeName: component.name,
+        nodeType: component.type,
+        parentId: parentId,
+        sortNo: result.length,
+        propsJson: JSON.stringify({
+            span: component.span,
+            offset: component.offset,
+            gutter: component.gutter,
+            columns: component.columns
+        })
+    };
+    result.push(node);
+
+    // 递归处理子组件
+    if (component.children && component.children.length > 0) {
+        component.children.forEach(child => {
+            extractLayoutNodes(child, component.id, result);
+        });
+    }
+
+    return result;
+}
+
+/**
+ * 提取字段定义
+ */
+function extractFieldDefs(config) {
+    const fieldDefs = [];
+    const processedPaths = new Set();
+
+    function collectFields(component) {
+        if (!component) return;
+
+        if (component.fieldPath && !processedPaths.has(component.fieldPath)) {
+            processedPaths.add(component.fieldPath);
+            fieldDefs.push({
+                id: component.id + '_field',
+                fieldCode: component.code,
+                fieldPath: component.fieldPath,
+                fieldNameCn: component.name,
+                dataType: component.dataType || 'string'
+            });
+        }
+
+        if (component.children) {
+            component.children.forEach(collectFields);
+        }
+    }
+
+    collectFields(config.rootComponent);
+    return fieldDefs;
+}
+
+/**
+ * 提取字段组件绑定
+ */
+function extractFieldComponents(config) {
+    const components = [];
+
+    function collectComponents(component) {
+        if (!component) return;
+
+        if (component.fieldPath) {
+            components.push({
+                id: component.id + '_comp',
+                fieldDefId: component.id + '_field',
+                layoutNodeId: component.id,
+                componentType: component.type,
+                propsJson: JSON.stringify({
+                    placeholder: component.placeholder,
+                    required: component.required,
+                    readonly: component.readonly
+                })
+            });
+        }
+
+        if (component.children) {
+            component.children.forEach(collectComponents);
+        }
+    }
+
+    collectComponents(config.rootComponent);
+    return components;
+}
+
+/**
  * 加载配置
  */
-async function loadConfig(templateId) {
+async function loadConfig(templateId, versionId) {
     try {
-        const response = await fetch(`/api/template/config/${templateId}`);
+        // 如果没有传入参数，从 URL 获取
+        if (!templateId || !versionId) {
+            const urlParams = new URLSearchParams(window.location.search);
+            templateId = templateId || urlParams.get('templateId');
+            versionId = versionId || urlParams.get('versionId');
+        }
+
+        if (!templateId || !versionId) {
+            console.log('缺少 templateId 或 versionId，使用本地存储状态');
+            restoreState();
+            return;
+        }
+
+        const response = await fetch(`/api/templates/${templateId}/versions/${versionId}/schema`);
 
         if (response.ok) {
             const result = await response.json();
-            DesignerState.templateConfig = result.config || { rootComponent: null };
+
+            // 保存到状态
             DesignerState.templateId = templateId;
-            DesignerState.templateVersion = result.version;
+            DesignerState.versionId = versionId;
+
+            // 从后端数据重建组件树
+            DesignerState.templateConfig = {
+                rootComponent: buildComponentTree(result.data || result),
+                fieldDefs: result.data?.fieldDefs || [],
+                queryConfigs: result.data?.queryConfigs || [],
+                actionConfigs: result.data?.actionConfigs || []
+            };
 
             // 更新模板名称显示
-            document.getElementById('templateName').textContent = result.name || '未命名模板';
+            document.getElementById('templateName').textContent = result.data?.templateName || '已加载模板';
 
             // 渲染预览
             renderPreview();
+            saveState();
 
             showNotification('配置加载成功', 'success');
         } else {
-            throw new Error('加载失败');
+            throw new Error(`加载失败: ${response.status}`);
         }
     } catch (error) {
         console.error('加载配置失败:', error);
         showNotification('加载失败: ' + error.message, 'error');
+        // 失败时尝试恢复本地状态
+        restoreState();
     }
+}
+
+/**
+ * 从布局节点构建组件树
+ */
+function buildComponentTree(schemaData) {
+    const layoutNodes = schemaData.layoutNodes || [];
+    const fieldComponents = schemaData.fieldComponents || [];
+
+    if (layoutNodes.length === 0) return null;
+
+    // 创建节点映射
+    const nodeMap = {};
+    layoutNodes.forEach(node => {
+        const props = node.propsJson ? JSON.parse(node.propsJson) : {};
+        nodeMap[node.id] = {
+            id: node.id,
+            type: node.nodeType,
+            name: node.nodeName,
+            code: node.nodeCode,
+            ...props,
+            children: []
+        };
+    });
+
+    // 关联字段组件信息
+    fieldComponents.forEach(fc => {
+        const node = nodeMap[fc.layoutNodeId];
+        if (node) {
+            const props = fc.propsJson ? JSON.parse(fc.propsJson) : {};
+            Object.assign(node, {
+                fieldPath: node.fieldPath || fc.fieldPath,
+                dataType: node.dataType || fc.dataType,
+                ...props
+            });
+        }
+    });
+
+    // 构建树结构
+    let root = null;
+    layoutNodes.forEach(node => {
+        const component = nodeMap[node.id];
+        if (node.parentId && nodeMap[node.parentId]) {
+            nodeMap[node.parentId].children.push(component);
+        } else {
+            root = component;
+        }
+    });
+
+    return root;
 }
 
 /**
@@ -308,6 +487,20 @@ function renderComponentHTML(component) {
             return `
                 <div style="display: grid; grid-template-columns: repeat(${component.columns || 2}, ${colWidth}%); gap: ${component.gutter || 16}px; margin-bottom: 20px;">
                     ${component.children ? component.children.map(c => `<div>${renderComponentHTML(c)}</div>`).join('') : ''}
+                </div>
+            `;
+        case 'ROW':
+            return `
+                <div style="display: flex; flex-wrap: wrap; margin-bottom: 15px;">
+                    ${component.children ? component.children.map(c => renderComponentHTML(c)).join('') : ''}
+                </div>
+            `;
+        case 'COL':
+            const colSpan = component.span || 12;
+            const colWidthPercent = (colSpan / 24) * 100;
+            return `
+                <div style="flex: 0 0 ${colWidthPercent}%; padding: 0 8px;">
+                    ${component.children ? component.children.map(c => renderComponentHTML(c)).join('') : ''}
                 </div>
             `;
         case 'INPUT':

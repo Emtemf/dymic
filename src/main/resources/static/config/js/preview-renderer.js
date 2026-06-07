@@ -38,6 +38,10 @@ function renderComponent(component) {
             return renderCardComponent(component);
         case 'GRID':
             return renderGridComponent(component);
+        case 'ROW':
+            return renderRowComponent(component);
+        case 'COL':
+            return renderColComponent(component);
         case 'TAB':
             return renderTabComponent(component);
         case 'COLLAPSE':
@@ -796,6 +800,97 @@ function renderComponentPreview(component) {
         <div class="component-preview-label">${component.name}</div>
         <div class="component-preview-content">${component.fieldPath || component.description || ''}</div>
     `;
+
+    element.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectComponent(component.id);
+    });
+
+    return element;
+}
+
+/**
+ * 渲染行组件
+ */
+function renderRowComponent(component) {
+    const element = document.createElement('div');
+    element.className = 'component-preview';
+    element.dataset.componentId = component.id;
+    element.style.cssText = `
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+        margin-left: -${(component.gutter || 16) / 2}px;
+        margin-right: -${(component.gutter || 16) / 2}px;
+    `;
+
+    // 渲染子组件（COL）
+    if (component.children && component.children.length > 0) {
+        component.children.forEach(child => {
+            const childElement = renderComponent(child);
+            if (childElement) {
+                element.appendChild(childElement);
+            }
+        });
+    } else {
+        element.innerHTML = `
+            <div class="component-preview-label" style="width: 100%; padding: 10px; text-align: center; color: #b4b4b4;">
+                <i class="fas fa-grip-lines"></i> ${component.name} - 拖拽列组件到此处
+            </div>
+        `;
+    }
+
+    element.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectComponent(component.id);
+    });
+
+    return element;
+}
+
+/**
+ * 渲染列组件
+ */
+function renderColComponent(component) {
+    const element = document.createElement('div');
+    element.className = 'component-preview';
+    element.dataset.componentId = component.id;
+
+    const span = component.span || 12;
+    const offset = component.offset || 0;
+    const widthPercent = (span / 24) * 100;
+    const offsetPercent = (offset / 24) * 100;
+
+    element.style.cssText = `
+        flex: 0 0 ${widthPercent}%;
+        margin-left: ${offsetPercent}%;
+        padding-left: 8px;
+        padding-right: 8px;
+        min-height: 60px;
+        border: 1px dashed #d1d5da;
+        background: #fafbfc;
+        box-sizing: border-box;
+    `;
+
+    // 渲染子组件
+    if (component.children && component.children.length > 0) {
+        const childrenContainer = document.createElement('div');
+        childrenContainer.className = 'component-children';
+        component.children.forEach(child => {
+            const childElement = renderComponent(child);
+            if (childElement) {
+                childrenContainer.appendChild(childElement);
+            }
+        });
+        element.appendChild(childrenContainer);
+    } else {
+        element.innerHTML = `
+            <div class="component-preview-label" style="padding: 10px; text-align: center; color: #b4b4b4;">
+                <i class="fas fa-grip-lines-vertical"></i> ${component.name} (${span}/24列)
+            </div>
+            <div class="component-children"></div>
+        `;
+    }
 
     element.addEventListener('click', (e) => {
         e.stopPropagation();

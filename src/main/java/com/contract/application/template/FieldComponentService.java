@@ -263,4 +263,9 @@ public class FieldComponentService {
         repository.deleteById(id);
         log.info("删除字段组件绑定成功: id={}", id);
     }
+
+    @Transactional
+    public void deleteByVersionId(Long versionId) {
+        repository.deleteByTemplateVersionId(versionId);
+    }
 }
