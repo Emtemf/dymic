@@ -64,7 +64,7 @@ public class SchemaService {
             .bizType(template.getBizType())
             .versionNo(version.getVersionNo())
             .versionName(version.getVersionName())
-            .versionStatus(version.getVersionStatus())
+            .versionStatus(version.getVersionStatus() != null ? version.getVersionStatus().name() : null)
             .layoutNodes(nodeTree)
             .fieldDefs(fieldDefs)
             .fieldComponents(components)

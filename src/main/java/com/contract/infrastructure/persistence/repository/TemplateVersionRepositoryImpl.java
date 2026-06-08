@@ -4,11 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.contract.infrastructure.persistence.entity.TemplateVersionEntity;
 import com.contract.infrastructure.persistence.mapper.TemplateVersionMapper;
 import com.contract.domain.template.TemplateVersion;
+import com.contract.domain.template.TemplateVersion.VersionStatus;
 import com.contract.domain.template.repository.TemplateVersionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -83,23 +86,25 @@ public class TemplateVersionRepositoryImpl implements TemplateVersionRepository 
      * Entity 转 Domain
      */
     private TemplateVersion toDomain(TemplateVersionEntity entity) {
-        TemplateVersion version = new TemplateVersion();
-        version.setId(entity.getId());
-        version.setTemplateId(entity.getTemplateId());
-        version.setVersionNo(entity.getVersionNo());
-        version.setVersionName(entity.getVersionName());
-        version.setVersionStatus(entity.getVersionStatus());
-        version.setPublishTime(entity.getPublishTime());
-        version.setPublishBy(entity.getPublishBy());
-        version.setSchemaHash(entity.getSchemaHash());
-        version.setRemark(entity.getRemark());
-        version.setCreatedBy(entity.getCreatedBy());
-        version.setCreatedName(entity.getCreatedName());
-        version.setCreatedAt(entity.getCreatedAt());
-        version.setUpdatedBy(entity.getUpdatedBy());
-        version.setUpdatedName(entity.getUpdatedName());
-        version.setUpdatedAt(entity.getUpdatedAt());
-        return version;
+        VersionStatus status = entity.getVersionStatus() != null
+            ? VersionStatus.valueOf(entity.getVersionStatus()) : null;
+        return TemplateVersion.reconstitute(
+            entity.getId(),
+            entity.getTemplateId(),
+            entity.getVersionNo(),
+            entity.getVersionName(),
+            status,
+            toOffsetDateTime(entity.getPublishTime()),
+            entity.getPublishBy(),
+            entity.getSchemaHash(),
+            entity.getRemark(),
+            entity.getCreatedBy(),
+            entity.getCreatedName(),
+            toOffsetDateTime(entity.getCreatedAt()),
+            entity.getUpdatedBy(),
+            entity.getUpdatedName(),
+            toOffsetDateTime(entity.getUpdatedAt())
+        );
     }
 
     /**
@@ -111,17 +116,28 @@ public class TemplateVersionRepositoryImpl implements TemplateVersionRepository 
         entity.setTemplateId(version.getTemplateId());
         entity.setVersionNo(version.getVersionNo());
         entity.setVersionName(version.getVersionName());
-        entity.setVersionStatus(version.getVersionStatus());
-        entity.setPublishTime(version.getPublishTime());
+        entity.setPublishTime(toLocalDateTime(version.getPublishTime()));
         entity.setPublishBy(version.getPublishBy());
         entity.setSchemaHash(version.getSchemaHash());
         entity.setRemark(version.getRemark());
         entity.setCreatedBy(version.getCreatedBy());
         entity.setCreatedName(version.getCreatedName());
-        entity.setCreatedAt(version.getCreatedAt());
+        entity.setCreatedAt(toLocalDateTime(version.getCreatedAt()));
         entity.setUpdatedBy(version.getUpdatedBy());
         entity.setUpdatedName(version.getUpdatedName());
-        entity.setUpdatedAt(version.getUpdatedAt());
+        entity.setUpdatedAt(toLocalDateTime(version.getUpdatedAt()));
+        // VersionStatus: Enum -> String
+        if (version.getVersionStatus() != null) {
+            entity.setVersionStatus(version.getVersionStatus().name());
+        }
         return entity;
+    }
+
+    private static OffsetDateTime toOffsetDateTime(LocalDateTime ldt) {
+        return ldt != null ? ldt.atZone(ZoneId.systemDefault()).toOffsetDateTime() : null;
+    }
+
+    private static LocalDateTime toLocalDateTime(OffsetDateTime odt) {
+        return odt != null ? odt.toLocalDateTime() : null;
     }
 }

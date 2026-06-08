@@ -4,11 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.contract.infrastructure.persistence.entity.TemplateEntity;
 import com.contract.infrastructure.persistence.mapper.TemplateMapper;
 import com.contract.domain.template.Template;
+import com.contract.domain.template.Template.TemplateStatus;
 import com.contract.domain.template.repository.TemplateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,21 +75,23 @@ public class TemplateRepositoryImpl implements TemplateRepository {
      * Entity 转 Domain
      */
     private Template toDomain(TemplateEntity entity) {
-        Template template = new Template();
-        template.setId(entity.getId());
-        template.setTemplateCode(entity.getTemplateCode());
-        template.setTemplateName(entity.getTemplateName());
-        template.setTemplateDesc(entity.getTemplateDesc());
-        template.setBizType(entity.getBizType());
-        template.setStatus(entity.getStatus());
-        template.setCurrentVersionId(entity.getCurrentVersionId());
-        template.setCreatedBy(entity.getCreatedBy());
-        template.setCreatedName(entity.getCreatedName());
-        template.setCreatedAt(entity.getCreatedAt());
-        template.setUpdatedBy(entity.getUpdatedBy());
-        template.setUpdatedName(entity.getUpdatedName());
-        template.setUpdatedAt(entity.getUpdatedAt());
-        return template;
+        TemplateStatus status = entity.getStatus() != null
+            ? TemplateStatus.valueOf(entity.getStatus()) : null;
+        return Template.reconstitute(
+            entity.getId(),
+            entity.getTemplateCode(),
+            entity.getTemplateName(),
+            entity.getTemplateDesc(),
+            entity.getBizType(),
+            status,
+            entity.getCurrentVersionId(),
+            entity.getCreatedBy(),
+            entity.getCreatedName(),
+            toOffsetDateTime(entity.getCreatedAt()),
+            entity.getUpdatedBy(),
+            entity.getUpdatedName(),
+            toOffsetDateTime(entity.getUpdatedAt())
+        );
     }
 
     /**
@@ -99,14 +104,25 @@ public class TemplateRepositoryImpl implements TemplateRepository {
         entity.setTemplateName(template.getTemplateName());
         entity.setTemplateDesc(template.getTemplateDesc());
         entity.setBizType(template.getBizType());
-        entity.setStatus(template.getStatus());
         entity.setCurrentVersionId(template.getCurrentVersionId());
         entity.setCreatedBy(template.getCreatedBy());
         entity.setCreatedName(template.getCreatedName());
-        entity.setCreatedAt(template.getCreatedAt());
+        entity.setCreatedAt(toLocalDateTime(template.getCreatedAt()));
         entity.setUpdatedBy(template.getUpdatedBy());
         entity.setUpdatedName(template.getUpdatedName());
-        entity.setUpdatedAt(template.getUpdatedAt());
+        entity.setUpdatedAt(toLocalDateTime(template.getUpdatedAt()));
+        // Status: Enum -> String
+        if (template.getStatus() != null) {
+            entity.setStatus(template.getStatus().name());
+        }
         return entity;
+    }
+
+    private static OffsetDateTime toOffsetDateTime(LocalDateTime ldt) {
+        return ldt != null ? ldt.atZone(ZoneId.systemDefault()).toOffsetDateTime() : null;
+    }
+
+    private static LocalDateTime toLocalDateTime(OffsetDateTime odt) {
+        return odt != null ? odt.toLocalDateTime() : null;
     }
 }

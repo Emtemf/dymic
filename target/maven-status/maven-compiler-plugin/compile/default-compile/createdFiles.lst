@@ -33,6 +33,7 @@ com/contract/infrastructure/persistence/repository/ActionConfigRepositoryImpl.cl
 com/contract/application/template/dto/ActionConfigCreateRequest.class
 com/contract/common/util/PinyinUtils.class
 com/contract/adapter/controller/TemplateController$CreateTemplateRequest.class
+com/contract/infrastructure/json/JsonbHelper.class
 com/contract/infrastructure/persistence/entity/ActionConfigEntity.class
 com/contract/infrastructure/persistence/convert/EntityFieldDefConverter.class
 com/contract/application/template/dto/SchemaSaveDTO$FieldComponentSaveItem.class
@@ -69,6 +70,7 @@ com/contract/infrastructure/persistence/entity/TemplateEntity.class
 com/contract/adapter/controller/TemplateVersionController.class
 com/contract/application/template/dto/ActionConfigDTO$ActionConfigDTOBuilder.class
 com/contract/application/template/convert/DataProviderConverter.class
+com/contract/domain/shared/types/LayoutProps$TabDef.class
 com/contract/infrastructure/persistence/convert/EntityDataProviderConverter.class
 com/contract/infrastructure/persistence/repository/QueryParamRepositoryImpl.class
 com/contract/domain/template/ActionConfig$ActionConfigBuilder.class
@@ -78,6 +80,7 @@ com/contract/application/template/dto/QueryFillRuleDTO.class
 com/contract/application/template/QueryConfigService.class
 com/contract/infrastructure/persistence/mapper/TemplateMapper.class
 com/contract/infrastructure/persistence/mapper/TemplateVersionMapper.class
+com/contract/domain/shared/types/ComponentProps.class
 com/contract/application/template/TemplateService.class
 com/contract/application/template/dto/LayoutNodeCreateDTO.class
 com/contract/application/template/convert/FieldComponentConverter.class
@@ -142,6 +145,7 @@ com/contract/application/template/dto/FieldDefDTO.class
 com/contract/infrastructure/persistence/mapper/QueryConfigMapper.class
 com/contract/application/template/TemplateVersionService.class
 com/contract/infrastructure/persistence/entity/QueryConfigEntity$QueryConfigEntityBuilder.class
+com/contract/domain/shared/types/ProviderConfig.class
 com/contract/application/template/dto/DataProviderUpdateDTO.class
 com/contract/adapter/controller/SchemaController.class
 com/contract/application/template/dto/FieldDefCreateDTO$StaticOption.class
@@ -151,11 +155,14 @@ com/contract/application/template/convert/LayoutNodeConverterImpl.class
 com/contract/application/template/dto/FieldComponentCreateRequest.class
 com/contract/domain/template/QueryFillRule$QueryFillRuleBuilder.class
 com/contract/infrastructure/persistence/repository/TemplateRepositoryImpl.class
+com/contract/domain/template/Template$TemplateStatus.class
 com/contract/infrastructure/persistence/convert/EntityFieldComponentConverter.class
 com/contract/application/template/dto/ActionConfigUpdateRequest$ActionConfigUpdateRequestBuilder.class
 com/contract/application/template/FieldDefService.class
+com/contract/infrastructure/cxf/CxfConfig.class
 com/contract/application/template/dto/FieldDefCreateDTO.class
 com/contract/common/exception/GlobalExceptionHandler.class
+com/contract/domain/shared/types/LayoutProps$PanelDef.class
 com/contract/infrastructure/persistence/convert/EntityLayoutNodeConverter.class
 com/contract/application/template/convert/FieldComponentConverterImpl.class
 com/contract/infrastructure/persistence/mapper/LayoutNodeMapper.class
@@ -164,13 +171,17 @@ com/contract/application/template/dto/FieldComponentUpdateDTO.class
 com/contract/application/template/dto/SchemaDTO.class
 com/contract/domain/template/repository/DataProviderRepository.class
 com/contract/infrastructure/persistence/convert/EntityQueryFillRuleConverter.class
+com/contract/adapter/jaxrs/HealthResource.class
 com/contract/application/template/dto/FieldDefUpdateDTO.class
 com/contract/domain/template/LayoutNode$LayoutNodeBuilder.class
 com/contract/common/enums/VersionStatusEnum.class
+com/contract/domain/shared/types/ProviderConfig$StaticOption.class
 com/contract/infrastructure/persistence/repository/FieldComponentRepositoryImpl.class
 com/contract/application/template/dto/QueryParamDTO.class
 com/contract/infrastructure/persistence/entity/DataProviderEntity.class
 com/contract/infrastructure/persistence/mapper/QueryParamMapper.class
 com/contract/application/template/ActionConfigService.class
 com/contract/application/template/dto/QueryParamDTO$QueryParamDTOBuilder.class
+com/contract/domain/template/TemplateVersion$VersionStatus.class
 com/contract/application/template/dto/QueryConfigUpdateRequest$QueryConfigUpdateRequestBuilder.class
+com/contract/domain/shared/types/LayoutProps.class

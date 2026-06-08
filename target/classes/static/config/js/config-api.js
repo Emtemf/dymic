@@ -57,29 +57,72 @@ async function saveConfig() {
 /**
  * 从组件树提取布局节点
  */
-function extractLayoutNodes(component, parentId = null, result = []) {
+function extractLayoutNodes(component, parentId = null, result = [], usedCodes = {}) {
     if (!component) return result;
+
+    let code = component.code || component.type.toLowerCase();
+    if (usedCodes[code] !== undefined) {
+        usedCodes[code]++;
+        code = code + '_' + usedCodes[code];
+    } else {
+        usedCodes[code] = 0;
+    }
+
+    // Build props object with only defined values
+    const propsObj = {};
+    if (component.span !== undefined) propsObj.span = component.span;
+    if (component.offset !== undefined) propsObj.offset = component.offset;
+    if (component.gutter !== undefined) propsObj.gutter = component.gutter;
+    if (component.type === 'GRID' && component.columns !== undefined) {
+        propsObj.columns = component.columns;
+    }
+    if (component.type === 'DETAIL_TABLE' && component.columns !== undefined) {
+        propsObj.columns = component.columns;
+    }
+    if (component.panels !== undefined) propsObj.panels = component.panels;
+    if (component.tabs !== undefined) propsObj.tabs = component.tabs;
+    if (component.gridColumn !== undefined) propsObj.gridColumn = component.gridColumn;
+    if (component.gridRow !== undefined) propsObj.gridRow = component.gridRow;
 
     const node = {
         id: component.id,
-        nodeCode: component.code,
+        nodeCode: code,
         nodeName: component.name,
         nodeType: component.type,
         parentId: parentId,
         sortNo: result.length,
-        propsJson: JSON.stringify({
-            span: component.span,
-            offset: component.offset,
-            gutter: component.gutter,
-            columns: component.columns
-        })
+        propsJson: Object.keys(propsObj).length > 0 ? JSON.stringify(propsObj) : '{}'
     };
     result.push(node);
 
     // 递归处理子组件
     if (component.children && component.children.length > 0) {
         component.children.forEach(child => {
-            extractLayoutNodes(child, component.id, result);
+            extractLayoutNodes(child, component.id, result, usedCodes);
+        });
+    }
+
+    // 递归处理 panels 子组件（COLLAPSE）
+    if (component.panels && component.panels.length > 0) {
+        component.panels.forEach(panel => {
+            if (panel.children && panel.children.length > 0) {
+                panel.children.forEach(child => {
+                    const c = typeof child === 'string' ? null : child;
+                    if (c) extractLayoutNodes(c, component.id, result, usedCodes);
+                });
+            }
+        });
+    }
+
+    // 递归处理 tabs 子组件（TAB）
+    if (component.tabs && component.tabs.length > 0) {
+        component.tabs.forEach(tab => {
+            if (tab.children && tab.children.length > 0) {
+                tab.children.forEach(child => {
+                    const c = typeof child === 'string' ? null : child;
+                    if (c) extractLayoutNodes(c, component.id, result, usedCodes);
+                });
+            }
         });
     }
 
@@ -100,6 +143,7 @@ function extractFieldDefs(config) {
             processedPaths.add(component.fieldPath);
             fieldDefs.push({
                 id: component.id + '_field',
+                layoutNodeId: component.id,
                 fieldCode: component.code,
                 fieldPath: component.fieldPath,
                 fieldNameCn: component.name,
@@ -207,49 +251,117 @@ async function loadConfig(templateId, versionId) {
  */
 function buildComponentTree(schemaData) {
     const layoutNodes = schemaData.layoutNodes || [];
-    const fieldComponents = schemaData.fieldComponents || [];
 
     if (layoutNodes.length === 0) return null;
 
-    // 创建节点映射
-    const nodeMap = {};
-    layoutNodes.forEach(node => {
-        const props = node.propsJson ? JSON.parse(node.propsJson) : {};
-        nodeMap[node.id] = {
-            id: node.id,
+    const componentMap = {};
+
+    function convertNode(node) {
+        let props = parsePropsJson(node.propsJson);
+
+        const component = {
+            id: String(node.id),
             type: node.nodeType,
             name: node.nodeName,
             code: node.nodeCode,
+            parentId: node.parentId,
             ...props,
-            children: []
+            children: (node.children || []).map(c => convertNode(c))
         };
-    });
 
-    // 关联字段组件信息
-    fieldComponents.forEach(fc => {
-        const node = nodeMap[fc.layoutNodeId];
-        if (node) {
-            const props = fc.propsJson ? JSON.parse(fc.propsJson) : {};
-            Object.assign(node, {
-                fieldPath: node.fieldPath || fc.fieldPath,
-                dataType: node.dataType || fc.dataType,
-                ...props
+        componentMap[String(node.id)] = component;
+        return component;
+    }
+
+    layoutNodes.forEach(node => convertNode(node));
+
+    // 合并 ID 引用：panels[i].children 从 ID 字符串替换为完整对象
+    // 如果 panels/tabs 子项为空但 component.children 有数据，将 children 分配到第一个面板/页签
+    Object.values(componentMap).forEach(component => {
+        if (component.panels && component.panels.length > 0) {
+            component.panels.forEach(panel => {
+                if (panel.children && panel.children.length > 0 && typeof panel.children[0] === 'string') {
+                    panel.children = panel.children.map(id => componentMap[id]).filter(Boolean);
+                }
             });
+            // 兜底：panels 全空但 children 有数据 → 放入第一个面板
+            const hasAnyPanelChild = component.panels.some(p => p.children && p.children.length > 0);
+            if (!hasAnyPanelChild && component.children && component.children.length > 0) {
+                component.panels[0].children = [...component.children];
+            }
+        }
+        if (component.tabs && component.tabs.length > 0) {
+            component.tabs.forEach(tab => {
+                if (tab.children && tab.children.length > 0 && typeof tab.children[0] === 'string') {
+                    tab.children = tab.children.map(id => componentMap[id]).filter(Boolean);
+                }
+            });
+            const hasAnyTabChild = component.tabs.some(t => t.children && t.children.length > 0);
+            if (!hasAnyTabChild && component.children && component.children.length > 0) {
+                component.tabs[0].children = [...component.children];
+            }
         }
     });
 
-    // 构建树结构
-    let root = null;
-    layoutNodes.forEach(node => {
-        const component = nodeMap[node.id];
-        if (node.parentId && nodeMap[node.parentId]) {
-            nodeMap[node.parentId].children.push(component);
-        } else {
-            root = component;
-        }
-    });
+    return layoutNodes[0] ? componentMap[String(layoutNodes[0].id)] : null;
+}
 
-    return root;
+/**
+ * Parse propsJson handling multi-encoding and malformed JSON
+ */
+function parsePropsJson(raw) {
+    if (!raw) return {};
+
+    let parsed = raw;
+    let iterations = 0;
+    const maxIterations = 5;
+
+    // Keep parsing until we get a non-string object
+    while (typeof parsed === 'string' && iterations < maxIterations) {
+        iterations++;
+        try {
+            parsed = JSON.parse(parsed);
+        } catch(e) {
+            // Try to fix common malformations:
+            // 1. Extra trailing braces: {"columns":[...]}}
+            // 2. Extra quotes wrapping
+
+            let fixed = parsed.trim();
+
+            // Remove trailing extra closing braces/brackets
+            // Count opening vs closing and remove excess
+            let openBraces = (fixed.match(/\{/g) || []).length;
+            let closeBraces = (fixed.match(/\}/g) || []).length;
+            let openBrackets = (fixed.match(/\[/g) || []).length;
+            let closeBrackets = (fixed.match(/\]/g) || []).length;
+
+            // Remove excess closing braces
+            while (closeBraces > openBraces && fixed.endsWith('}')) {
+                fixed = fixed.slice(0, -1);
+                closeBraces--;
+            }
+            // Remove excess closing brackets
+            while (closeBrackets > openBrackets && fixed.endsWith(']')) {
+                fixed = fixed.slice(0, -1);
+                closeBrackets--;
+            }
+
+            try {
+                parsed = JSON.parse(fixed);
+                break;
+            } catch(e2) {
+                // If still failing, return empty object
+                console.warn('propsJson parse failed after fix attempt:', e2.message, 'raw:', raw.substring(0, 100));
+                return {};
+            }
+        }
+    }
+
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed;
+    }
+
+    return {};
 }
 
 /**
@@ -354,7 +466,8 @@ function validateComponent(component) {
     }
 
     if (!component.code || !component.code.trim()) {
-        return { valid: false, message: '组件编码不能为空' };
+        // Auto-generate code from type + timestamp instead of blocking
+        component.code = (component.type || 'comp').toLowerCase() + '_' + Date.now();
     }
 
     // 验证子组件
@@ -402,170 +515,24 @@ function validateComponent(component) {
 function previewTemplate() {
     const config = DesignerState.templateConfig;
 
-    // 验证配置
     const validation = validateConfig(config);
     if (!validation.valid) {
         showNotification(validation.message, 'error');
         return;
     }
 
-    // 打开预览窗口
     const modal = document.getElementById('previewModal');
-    const frame = document.getElementById('previewFrame');
+    const content = document.getElementById('previewModalContent');
+    content.innerHTML = '';
+
+    if (config.rootComponent) {
+        const rootElement = renderComponent(config.rootComponent, 'preview');
+        if (rootElement) {
+            content.appendChild(rootElement);
+        }
+    }
 
     modal.classList.add('active');
-
-    // 生成预览HTML
-    const previewHTML = generatePreviewHTML(config);
-    frame.srcdoc = previewHTML;
-}
-
-/**
- * 生成预览HTML
- */
-function generatePreviewHTML(config) {
-    return `
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>模板预览</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background: #f5f7fa; }
-        .preview-container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #24292e; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #d1d5da; border-radius: 4px; font-size: 14px; }
-        .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .card { border: 1px solid #e1e4e8; border-radius: 8px; margin-bottom: 20px; }
-        .card-header { padding: 15px 20px; background: #f6f8fa; border-bottom: 1px solid #e1e4e8; font-weight: 600; }
-        .card-body { padding: 20px; }
-        button { padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #5568d3; }
-    </style>
-</head>
-<body>
-    <div class="preview-container">
-        ${renderComponentHTML(config.rootComponent)}
-    </div>
-    <script>
-        // 模拟数据
-        const formData = {};
-
-        // 数据绑定
-        function bindData(fieldPath, value) {
-            formData[fieldPath] = value;
-        }
-    </script>
-</body>
-</html>
-    `;
-}
-
-/**
- * 渲染组件HTML
- */
-function renderComponentHTML(component) {
-    if (!component) return '';
-
-    switch (component.type) {
-        case 'PAGE':
-            return component.children ? component.children.map(c => renderComponentHTML(c)).join('') : '';
-        case 'CARD':
-            return `
-                <div class="card">
-                    ${component.title ? `<div class="card-header">${component.title}</div>` : ''}
-                    <div class="card-body">
-                        ${component.children ? component.children.map(c => renderComponentHTML(c)).join('') : ''}
-                    </div>
-                </div>
-            `;
-        case 'GRID':
-            const colWidth = 100 / (component.columns || 2);
-            return `
-                <div style="display: grid; grid-template-columns: repeat(${component.columns || 2}, ${colWidth}%); gap: ${component.gutter || 16}px; margin-bottom: 20px;">
-                    ${component.children ? component.children.map(c => `<div>${renderComponentHTML(c)}</div>`).join('') : ''}
-                </div>
-            `;
-        case 'ROW':
-            return `
-                <div style="display: flex; flex-wrap: wrap; margin-bottom: 15px;">
-                    ${component.children ? component.children.map(c => renderComponentHTML(c)).join('') : ''}
-                </div>
-            `;
-        case 'COL':
-            const colSpan = component.span || 12;
-            const colWidthPercent = (colSpan / 24) * 100;
-            return `
-                <div style="flex: 0 0 ${colWidthPercent}%; padding: 0 8px;">
-                    ${component.children ? component.children.map(c => renderComponentHTML(c)).join('') : ''}
-                </div>
-            `;
-        case 'INPUT':
-            return `
-                <div class="form-group">
-                    <label>${component.name}</label>
-                    <input type="text" placeholder="${component.placeholder || ''}"
-                           onchange="bindData('${component.fieldPath}', this.value)">
-                </div>
-            `;
-        case 'SELECT':
-            return `
-                <div class="form-group">
-                    <label>${component.name}</label>
-                    <select onchange="bindData('${component.fieldPath}', this.value)">
-                        <option value="">${component.placeholder || '请选择'}</option>
-                    </select>
-                </div>
-            `;
-        case 'DATE':
-            return `
-                <div class="form-group">
-                    <label>${component.name}</label>
-                    <input type="date" onchange="bindData('${component.fieldPath}', this.value)">
-                </div>
-            `;
-        case 'NUMBER':
-            return `
-                <div class="form-group">
-                    <label>${component.name}</label>
-                    <input type="number" placeholder="${component.placeholder || ''}"
-                           min="${component.min || 0}" max="${component.max || 999999}"
-                           onchange="bindData('${component.fieldPath}', this.value)">
-                </div>
-            `;
-        case 'MONEY':
-            return `
-                <div class="form-group">
-                    <label>${component.name}</label>
-                    <div style="display: flex; align-items: center;">
-                        <span style="padding: 8px 12px; background: #f6f8fa; border: 1px solid #d1d5da; border-right: none; border-radius: 4px 0 0 4px;">
-                            ${component.currency || 'CNY'}
-                        </span>
-                        <input type="number" style="flex: 1; border-radius: 0 4px 4px 0;"
-                               onchange="bindData('${component.fieldPath}', this.value)">
-                    </div>
-                </div>
-            `;
-        case 'TEXTAREA':
-            return `
-                <div class="form-group">
-                    <label>${component.name}</label>
-                    <textarea rows="${component.rows || 4}" placeholder="${component.placeholder || ''}"
-                              onchange="bindData('${component.fieldPath}', this.value)"></textarea>
-                </div>
-            `;
-        case 'BUTTON':
-            return `<button>${component.text || '按钮'}</button>`;
-        case 'SAVE_BUTTON':
-            return `<button style="background: #10b981;">${component.text || '保存'}</button>`;
-        case 'SUBMIT_BUTTON':
-            return `<button style="background: #f59e0b;">${component.text || '提交'}</button>`;
-        default:
-            return '';
-    }
 }
 
 /**
@@ -647,7 +614,10 @@ function restoreState() {
         if (stateStr) {
             const state = JSON.parse(stateStr);
             DesignerState.templateConfig = state.templateConfig || { rootComponent: null };
-            DesignerState.templateId = state.templateId || null;
+            // Only restore templateId from localStorage if not already set from URL params
+            if (!DesignerState.templateId && state.templateId) {
+                DesignerState.templateId = state.templateId;
+            }
             DesignerState.templateVersion = state.templateVersion || '1.0.0';
         }
     } catch (error) {

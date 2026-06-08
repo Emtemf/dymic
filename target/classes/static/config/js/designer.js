@@ -3,9 +3,13 @@
  * 管理设计器状态、事件处理、功能协调
  */
 
+// 从 URL 参数初始化
+const _urlParams = new URLSearchParams(window.location.search);
+
 // 设计器状态
-const DesignerState = {
-    templateId: null,
+const DesignerState = window.DesignerState = {
+    templateId: _urlParams.get('templateId') || null,
+    versionId: _urlParams.get('versionId') || null,
     templateVersion: '1.0.0',
     templateConfig: {
         rootComponent: null,
@@ -549,5 +553,6 @@ function applyZoom() {
     previewCanvas.style.transformOrigin = 'top center';
 }
 
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', initDesigner);
+// Auto-init disabled when TemplateSelector handles the flow
+// TemplateSelector.init() calls initDesigner() when entering designer (step 3)
+// document.addEventListener('DOMContentLoaded', initDesigner);

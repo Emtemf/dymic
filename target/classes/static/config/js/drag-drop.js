@@ -60,6 +60,19 @@ function handleDragOver(event) {
     if (dropHint) {
         dropHint.classList.add('hidden');
     }
+
+    // 清除之前的 grid-cell 高亮
+    document.querySelectorAll('.grid-cell').forEach(el => {
+        el.style.background = 'white';
+        el.style.border = '1px dashed #d1d5da';
+    });
+
+    // 高亮当前悬停的 grid-cell
+    const dropTarget = getDropTarget(event);
+    if (dropTarget && dropTarget.type === 'grid-cell') {
+        dropTarget.element.style.background = 'rgba(102,126,234,0.1)';
+        dropTarget.element.style.border = '2px dashed #667eea';
+    }
 }
 
 /**
@@ -125,13 +138,78 @@ function getDropTarget(event) {
     for (const element of elements) {
         if (element === previewContent) continue;
 
+        // 优先级1：grid-cell（GRID 的网格单元格）
+        const gridCell = element.closest('.grid-cell');
+        if (gridCell) {
+            const gridColumn = gridCell.dataset.gridColumn;
+            const gridContainer = gridCell.closest('.component-preview');
+
+            if (gridContainer) {
+                const gridId = gridContainer.dataset.componentId;
+                const gridComponent = findComponentById(gridId);
+
+                if (gridComponent) {
+                    return {
+                        type: 'grid-cell',
+                        component: gridComponent,
+                        gridColumn: parseInt(gridColumn),
+                        element: gridCell
+                    };
+                }
+            }
+        }
+
+        // 优先级2：collapse-panel（COLLAPSE 的面板）
+        const collapsePanel = element.closest('.collapse-panel');
+        if (collapsePanel) {
+            const panelIndex = collapsePanel.dataset.panelIndex;
+            const collapseContainer = collapsePanel.closest('.component-preview');
+
+            if (collapseContainer) {
+                const collapseId = collapseContainer.dataset.componentId;
+                const collapseComponent = findComponentById(collapseId);
+
+                if (collapseComponent) {
+                    return {
+                        type: 'collapse-panel',
+                        component: collapseComponent,
+                        panelIndex: parseInt(panelIndex),
+                        element: collapsePanel
+                    };
+                }
+            }
+        }
+
+        // 优先级3：tab-content（TAB 的页签）
+        const tabContent = element.closest('.tab-content');
+        if (tabContent) {
+            const tabContainer = tabContent.closest('.component-preview');
+
+            if (tabContainer) {
+                const tabId = tabContainer.dataset.componentId;
+                const tabComponent = findComponentById(tabId);
+
+                if (tabComponent) {
+                    const activeTab = tabContainer.querySelector('.tab-item.active');
+                    const tabIndex = activeTab ? parseInt(activeTab.dataset.tabIndex || 0) : 0;
+
+                    return {
+                        type: 'tab-panel',
+                        component: tabComponent,
+                        tabIndex: tabIndex,
+                        element: tabContent
+                    };
+                }
+            }
+        }
+
+        // 优先级4：普通容器
         const componentPreview = element.closest('.component-preview');
         if (componentPreview) {
             const componentId = componentPreview.dataset.componentId;
             const component = findComponentById(componentId);
 
-            // 检查是否可以嵌套
-            if (component && ComponentLibrary.types[component.type].isContainer) {
+            if (component && ComponentLibrary.types[component.type]?.isContainer) {
                 return {
                     type: 'append',
                     component: component,
@@ -148,17 +226,62 @@ function getDropTarget(event) {
  * 添加组件到目标容器
  */
 function addComponentToTarget(component, target) {
-    if (target.type === 'append') {
+    if (target.type === 'grid-cell') {
+        component.gridColumn = target.gridColumn;
+        component.gridRow = 0;
+        component.parentId = target.component.id;
+
         if (!target.component.children) {
             target.component.children = [];
         }
         target.component.children.push(component);
 
-        // 刷新预览
         renderPreview();
         selectComponent(component.id);
+        saveState();
 
-        // 保存状态
+    } else if (target.type === 'collapse-panel') {
+        if (!target.component.panels[target.panelIndex].children) {
+            target.component.panels[target.panelIndex].children = [];
+        }
+        target.component.panels[target.panelIndex].children.push(component.id);
+
+        component.parentId = target.component.id;
+
+        if (!target.component.children) {
+            target.component.children = [];
+        }
+        target.component.children.push(component);
+
+        renderPreview();
+        selectComponent(component.id);
+        saveState();
+
+    } else if (target.type === 'tab-panel') {
+        if (!target.component.tabs[target.tabIndex].children) {
+            target.component.tabs[target.tabIndex].children = [];
+        }
+        target.component.tabs[target.tabIndex].children.push(component.id);
+
+        component.parentId = target.component.id;
+
+        if (!target.component.children) {
+            target.component.children = [];
+        }
+        target.component.children.push(component);
+
+        renderPreview();
+        selectComponent(component.id);
+        saveState();
+
+    } else if (target.type === 'append') {
+        if (!target.component.children) {
+            target.component.children = [];
+        }
+        target.component.children.push(component);
+
+        renderPreview();
+        selectComponent(component.id);
         saveState();
     }
 }

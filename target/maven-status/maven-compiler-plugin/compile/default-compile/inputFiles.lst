@@ -5,6 +5,7 @@
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/application/template/convert/FieldComponentConverter.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/application/template/dto/SchemaDTO.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/persistence/repository/TemplateVersionRepositoryImpl.java
+/home/wula/IdeaProjects/dymic/src/main/java/com/contract/domain/shared/types/LayoutProps.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/persistence/mapper/FieldDefMapper.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/domain/template/repository/ActionConfigRepository.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/persistence/mapper/QueryFillRuleMapper.java
@@ -28,6 +29,7 @@
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/adapter/controller/FieldComponentController.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/domain/template/Template.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/persistence/entity/LayoutNodeEntity.java
+/home/wula/IdeaProjects/dymic/src/main/java/com/contract/domain/shared/types/ComponentProps.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/persistence/convert/EntityDataProviderConverter.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/persistence/repository/ActionConfigRepositoryImpl.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/application/template/dto/QueryConfigDTO.java
@@ -42,6 +44,7 @@
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/application/template/dto/SchemaSaveDTO.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/application/template/convert/QueryParamConverter.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/persistence/convert/EntityFieldComponentConverter.java
+/home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/json/JsonbHelper.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/application/template/convert/ActionConfigConverter.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/common/exception/ConcurrentModificationException.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/id/SnowflakeIdGenerator.java
@@ -102,6 +105,7 @@
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/persistence/entity/QueryFillRuleEntity.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/adapter/controller/DataProviderController.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/common/result/PageResult.java
+/home/wula/IdeaProjects/dymic/src/main/java/com/contract/adapter/jaxrs/HealthResource.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/application/template/FieldDefService.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/domain/template/repository/QueryConfigRepository.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/domain/template/FieldDef.java
@@ -115,9 +119,11 @@
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/application/template/convert/DataProviderConverter.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/domain/template/repository/LayoutNodeRepository.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/persistence/entity/FieldDefEntity.java
+/home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/cxf/CxfConfig.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/adapter/controller/TemplateController.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/application/template/dto/LayoutNodeCreateDTO.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/persistence/repository/FieldComponentRepositoryImpl.java
+/home/wula/IdeaProjects/dymic/src/main/java/com/contract/domain/shared/types/ProviderConfig.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/application/template/LayoutNodeService.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/domain/template/repository/TemplateVersionRepository.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/application/template/dto/FieldComponentDTO.java

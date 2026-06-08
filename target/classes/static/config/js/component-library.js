@@ -341,7 +341,7 @@ const ComponentLibrary = {
                 span: 6,
                 offset: 0,
                 text: '按钮',
-                type: 'primary', // primary, secondary, success, danger, warning
+                buttonType: 'primary', // primary, secondary, success, danger, warning
                 icon: '',
                 actionType: 'custom', // custom, submit, reset
                 actionScript: ''
@@ -453,9 +453,11 @@ const ComponentLibrary = {
             return { valid: false, message: `未知的组件类型: ${component.type}` };
         }
 
-        // 检查必填字段
-        if (!component.name || !component.code) {
-            return { valid: false, message: '组件名称和编码不能为空' };
+        if (!component.name) {
+            return { valid: false, message: '组件名称不能为空' };
+        }
+        if (!component.code) {
+            component.code = (component.type || 'comp').toLowerCase() + '_' + Date.now();
         }
 
         // 检查字段路径（如果有）
