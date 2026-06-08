@@ -79,7 +79,7 @@ const TemplateSelector = {
             const isActive = String(this.state.templateId) === String(t.id);
             const statusClass = t.status === 'ENABLED' ? 'sel-badge-green' : 'sel-badge-gray';
             const statusText = t.status === 'ENABLED' ? '启用' : '停用';
-            return '<div class="sel-item' + (isActive ? ' sel-active' : '') + '" onclick="TemplateSelector.selectTemplate(' + t.id + ')">' +
+            return '<div class="sel-item' + (isActive ? ' sel-active' : '') + '" onclick="TemplateSelector.selectTemplate(\'' + t.id + '\')">' +
                 '<div class="sel-item-title">' + t.templateName + '</div>' +
                 '<div class="sel-item-sub">' + t.templateCode + '</div>' +
                 '<div class="sel-item-badge ' + statusClass + '">' + statusText + '</div>' +
@@ -107,7 +107,7 @@ const TemplateSelector = {
             '<div class="sel-detail-card"><div class="sel-detail-label">状态</div><div class="sel-detail-value"><span class="sel-item-badge ' + statusClass + '">' + statusText + '</span></div></div>' +
             '</div>' +
             '<div style="margin-top:20px;display:flex;gap:8px">' +
-            '<button class="btn btn-primary" onclick="TemplateSelector.goToVersions(' + tpl.id + ')">选择版本 →</button>' +
+            '<button class="btn btn-primary" onclick="TemplateSelector.goToVersions(\'' + tpl.id + '\')">选择版本 →</button>' +
             '</div>';
     },
 
@@ -121,7 +121,7 @@ const TemplateSelector = {
             const isActive = String(this.state.versionId) === String(v.id);
             const statusClass = v.versionStatus === 'PUBLISHED' ? 'sel-badge-green' : 'sel-badge-orange';
             const statusText = v.versionStatus === 'PUBLISHED' ? '已发布' : '草稿';
-            return '<div class="sel-item' + (isActive ? ' sel-active' : '') + '" onclick="TemplateSelector.selectVersion(' + v.id + ')">' +
+            return '<div class="sel-item' + (isActive ? ' sel-active' : '') + '" onclick="TemplateSelector.selectVersion(\'' + v.id + '\')">' +
                 '<div class="sel-item-title">' + (v.versionName || 'V' + v.versionNo) + '</div>' +
                 '<div class="sel-item-sub">版本号: ' + v.versionNo + '</div>' +
                 '<div class="sel-item-badge ' + statusClass + '">' + statusText + '</div>' +
@@ -155,7 +155,7 @@ const TemplateSelector = {
             '</div>' +
             '<div style="margin-top:24px;display:flex;gap:8px">' +
             '<button class="btn btn-primary" onclick="TemplateSelector.enterDesigner()">' + (isDraft ? '编辑配置 →' : '查看配置 →') + '</button>' +
-            (isDraft ? '<button class="btn btn-success" onclick="TemplateSelector.publishVersion(' + ver.id + ')">发布此版本</button>' : '') +
+            (isDraft ? '<button class="btn btn-success" onclick="TemplateSelector.publishVersion(\'' + ver.id + '\')">发布此版本</button>' : '') +
             '</div>';
     },
 
