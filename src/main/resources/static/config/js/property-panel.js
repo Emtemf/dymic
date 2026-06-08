@@ -481,12 +481,12 @@ function renderButtonSpecificConfig(container, component) {
         </div>
         <div class="form-group">
             <label>按钮类型</label>
-            <select id="configType" onchange="updateProperty('type', this.value)">
-                <option value="primary" ${component.type === 'primary' ? 'selected' : ''}>主要按钮</option>
-                <option value="secondary" ${component.type === 'secondary' ? 'selected' : ''}>次要按钮</option>
-                <option value="success" ${component.type === 'success' ? 'selected' : ''}>成功按钮</option>
-                <option value="danger" ${component.type === 'danger' ? 'selected' : ''}>危险按钮</option>
-                <option value="warning" ${component.type === 'warning' ? 'selected' : ''}>警告按钮</option>
+            <select id="configType" onchange="updateProperty('buttonType', this.value)">
+                <option value="primary" ${component.buttonType === 'primary' ? 'selected' : ''}>主要按钮</option>
+                <option value="secondary" ${component.buttonType === 'secondary' ? 'selected' : ''}>次要按钮</option>
+                <option value="success" ${component.buttonType === 'success' ? 'selected' : ''}>成功按钮</option>
+                <option value="danger" ${component.buttonType === 'danger' ? 'selected' : ''}>危险按钮</option>
+                <option value="warning" ${component.buttonType === 'warning' ? 'selected' : ''}>警告按钮</option>
             </select>
         </div>
         <div class="form-group">

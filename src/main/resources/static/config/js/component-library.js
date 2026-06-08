@@ -341,7 +341,7 @@ const ComponentLibrary = {
                 span: 6,
                 offset: 0,
                 text: '按钮',
-                type: 'primary', // primary, secondary, success, danger, warning
+                buttonType: 'primary', // primary, secondary, success, danger, warning
                 icon: '',
                 actionType: 'custom', // custom, submit, reset
                 actionScript: ''

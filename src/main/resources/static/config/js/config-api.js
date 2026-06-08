@@ -57,12 +57,20 @@ async function saveConfig() {
 /**
  * 从组件树提取布局节点
  */
-function extractLayoutNodes(component, parentId = null, result = []) {
+function extractLayoutNodes(component, parentId = null, result = [], usedCodes = {}) {
     if (!component) return result;
+
+    let code = component.code || component.type.toLowerCase();
+    if (usedCodes[code] !== undefined) {
+        usedCodes[code]++;
+        code = code + '_' + usedCodes[code];
+    } else {
+        usedCodes[code] = 0;
+    }
 
     const node = {
         id: component.id,
-        nodeCode: component.code,
+        nodeCode: code,
         nodeName: component.name,
         nodeType: component.type,
         parentId: parentId,
@@ -79,7 +87,7 @@ function extractLayoutNodes(component, parentId = null, result = []) {
     // 递归处理子组件
     if (component.children && component.children.length > 0) {
         component.children.forEach(child => {
-            extractLayoutNodes(child, component.id, result);
+            extractLayoutNodes(child, component.id, result, usedCodes);
         });
     }
 

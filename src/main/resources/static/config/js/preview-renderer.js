@@ -199,7 +199,7 @@ function renderGridComponent(component) {
     // 渲染子组件
     if (component.children && component.children.length > 0) {
         component.children.forEach(child => {
-            gridHTML += `<div class="grid-item">${renderComponentPreview(child)}</div>`;
+            gridHTML += `<div class="grid-item">${renderComponentPreview(child).outerHTML}</div>`;
         });
     } else {
         gridHTML += `<div class="grid-item" style="padding: 20px; text-align: center; color: #b4b4b4;">
@@ -669,7 +669,7 @@ function renderButtonComponent(component) {
         <div class="component-preview-content">
             <button style="
                 padding: 8px 16px;
-                background: ${buttonColors[component.type] || buttonColors.primary};
+                background: ${buttonColors[component.buttonType] || buttonColors.primary};
                 color: white;
                 border: none;
                 border-radius: 4px;

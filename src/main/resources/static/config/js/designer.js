@@ -3,9 +3,13 @@
  * 管理设计器状态、事件处理、功能协调
  */
 
+// 从 URL 参数初始化
+const _urlParams = new URLSearchParams(window.location.search);
+
 // 设计器状态
 const DesignerState = {
-    templateId: null,
+    templateId: _urlParams.get('templateId') ? parseInt(_urlParams.get('templateId')) : null,
+    versionId: _urlParams.get('versionId') ? parseInt(_urlParams.get('versionId')) : null,
     templateVersion: '1.0.0',
     templateConfig: {
         rootComponent: null,
