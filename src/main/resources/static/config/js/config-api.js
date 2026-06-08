@@ -108,6 +108,7 @@ function extractFieldDefs(config) {
             processedPaths.add(component.fieldPath);
             fieldDefs.push({
                 id: component.id + '_field',
+                layoutNodeId: component.id,
                 fieldCode: component.code,
                 fieldPath: component.fieldPath,
                 fieldNameCn: component.name,

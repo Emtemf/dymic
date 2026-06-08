@@ -41,10 +41,13 @@ public class FieldDefService {
      */
     @Transactional
     public FieldDefCreateResult create(Long templateId, Long versionId, FieldDefCreateDTO dto) {
-        // 1. 获取布局节点
-        LayoutNode layoutNode = layoutNodeRepository.findById(dto.getLayoutNodeId());
-        if (layoutNode == null) {
-            throw new BizException("布局节点不存在：" + dto.getLayoutNodeId());
+        // 1. 获取布局节点（可选，用于生成 fieldPath）
+        LayoutNode layoutNode = null;
+        if (dto.getLayoutNodeId() != null) {
+            layoutNode = layoutNodeRepository.findById(dto.getLayoutNodeId());
+            if (layoutNode == null) {
+                throw new BizException("布局节点不存在：" + dto.getLayoutNodeId());
+            }
         }
 
         // 2. 创建字段定义
@@ -55,7 +58,9 @@ public class FieldDefService {
 
         // 自动生成 fieldCode 和 fieldPath
         fieldDef.setFieldCode(generateFieldCode(dto.getFieldNameCn()));
-        fieldDef.setFieldPath(generateFieldPath(layoutNode.getNodePath(), dto.getFieldNameCn()));
+        fieldDef.setFieldPath(layoutNode != null
+            ? generateFieldPath(layoutNode.getNodePath(), dto.getFieldNameCn())
+            : generateFieldCode(dto.getFieldNameCn()));
 
         // 自动检测数据类型
         if (dto.getDataType() != null) {
