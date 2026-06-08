@@ -219,45 +219,21 @@ function buildComponentTree(schemaData) {
 
     if (layoutNodes.length === 0) return null;
 
-    // 创建节点映射
-    const nodeMap = {};
-    layoutNodes.forEach(node => {
-        const props = node.propsJson ? JSON.parse(node.propsJson) : {};
-        nodeMap[node.id] = {
-            id: node.id,
+    // API returns a tree structure — convert directly to component format
+    function convertNode(node) {
+        const props = node.propsJson ? (typeof node.propsJson === 'string' ? JSON.parse(node.propsJson) : node.propsJson) : {};
+        return {
+            id: String(node.id),
             type: node.nodeType,
             name: node.nodeName,
             code: node.nodeCode,
             ...props,
-            children: []
+            children: (node.children || []).map(c => convertNode(c))
         };
-    });
+    }
 
-    // 关联字段组件信息
-    fieldComponents.forEach(fc => {
-        const node = nodeMap[fc.layoutNodeId];
-        if (node) {
-            const props = fc.propsJson ? JSON.parse(fc.propsJson) : {};
-            Object.assign(node, {
-                fieldPath: node.fieldPath || fc.fieldPath,
-                dataType: node.dataType || fc.dataType,
-                ...props
-            });
-        }
-    });
-
-    // 构建树结构
-    let root = null;
-    layoutNodes.forEach(node => {
-        const component = nodeMap[node.id];
-        if (node.parentId && nodeMap[node.parentId]) {
-            nodeMap[node.parentId].children.push(component);
-        } else {
-            root = component;
-        }
-    });
-
-    return root;
+    // Use the first root node
+    return convertNode(layoutNodes[0]);
 }
 
 /**

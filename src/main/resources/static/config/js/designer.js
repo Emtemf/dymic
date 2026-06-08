@@ -7,7 +7,7 @@
 const _urlParams = new URLSearchParams(window.location.search);
 
 // 设计器状态
-const DesignerState = {
+const DesignerState = window.DesignerState = {
     templateId: _urlParams.get('templateId') || null,
     versionId: _urlParams.get('versionId') || null,
     templateVersion: '1.0.0',
