@@ -505,187 +505,24 @@ function validateComponent(component) {
 function previewTemplate() {
     const config = DesignerState.templateConfig;
 
-    // 验证配置
     const validation = validateConfig(config);
     if (!validation.valid) {
         showNotification(validation.message, 'error');
         return;
     }
 
-    // 打开预览窗口
     const modal = document.getElementById('previewModal');
-    const frame = document.getElementById('previewFrame');
+    const content = document.getElementById('previewModalContent');
+    content.innerHTML = '';
+
+    if (config.rootComponent) {
+        const rootElement = renderComponent(config.rootComponent, 'preview');
+        if (rootElement) {
+            content.appendChild(rootElement);
+        }
+    }
 
     modal.classList.add('active');
-
-    // 生成预览HTML
-    const previewHTML = generatePreviewHTML(config);
-    frame.srcdoc = previewHTML;
-}
-
-/**
- * 生成预览HTML
- */
-function generatePreviewHTML(config) {
-    return `
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>模板预览</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background: #f5f7fa; }
-        .preview-container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #24292e; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #d1d5da; border-radius: 4px; font-size: 14px; }
-        .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .card { border: 1px solid #e1e4e8; border-radius: 8px; margin-bottom: 20px; }
-        .card-header { padding: 15px 20px; background: #f6f8fa; border-bottom: 1px solid #e1e4e8; font-weight: 600; }
-        .card-body { padding: 20px; }
-        button { padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #5568d3; }
-    </style>
-</head>
-<body>
-    <div class="preview-container">
-        ${renderComponentHTML(config.rootComponent)}
-    </div>
-    <script>
-        // 模拟数据
-        const formData = {};
-
-        // 数据绑定
-        function bindData(fieldPath, value) {
-            formData[fieldPath] = value;
-        }
-    </script>
-</body>
-</html>
-    `;
-}
-
-/**
- * 渲染组件HTML
- */
-function renderComponentHTML(component) {
-    if (!component) return '';
-
-    switch (component.type) {
-        case 'PAGE':
-            return component.children ? component.children.map(c => renderComponentHTML(c)).join('') : '';
-        case 'CARD':
-            return `
-                <div class="card">
-                    ${component.title ? `<div class="card-header">${component.title}</div>` : ''}
-                    <div class="card-body">
-                        ${component.children ? component.children.map(c => renderComponentHTML(c)).join('') : ''}
-                    </div>
-                </div>
-            `;
-        case 'GRID':
-            const colWidth = 100 / (component.columns || 2);
-            return `
-                <div style="display: grid; grid-template-columns: repeat(${component.columns || 2}, ${colWidth}%); gap: ${component.gutter || 16}px; margin-bottom: 20px;">
-                    ${component.children ? component.children.map(c => `<div>${renderComponentHTML(c)}</div>`).join('') : ''}
-                </div>
-            `;
-        case 'ROW':
-            return `
-                <div style="display: flex; flex-wrap: wrap; margin-bottom: 15px;">
-                    ${component.children ? component.children.map(c => renderComponentHTML(c)).join('') : ''}
-                </div>
-            `;
-        case 'COL':
-            const colSpan = component.span || 12;
-            const colWidthPercent = (colSpan / 24) * 100;
-            return `
-                <div style="flex: 0 0 ${colWidthPercent}%; padding: 0 8px;">
-                    ${component.children ? component.children.map(c => renderComponentHTML(c)).join('') : ''}
-                </div>
-            `;
-        case 'INPUT':
-            return `
-                <div class="form-group">
-                    <label>${component.name}</label>
-                    <input type="text" placeholder="${component.placeholder || ''}"
-                           onchange="bindData('${component.fieldPath}', this.value)">
-                </div>
-            `;
-        case 'SELECT':
-            return `
-                <div class="form-group">
-                    <label>${component.name}</label>
-                    <select onchange="bindData('${component.fieldPath}', this.value)">
-                        <option value="">${component.placeholder || '请选择'}</option>
-                    </select>
-                </div>
-            `;
-        case 'DATE':
-            return `
-                <div class="form-group">
-                    <label>${component.name}</label>
-                    <input type="date" onchange="bindData('${component.fieldPath}', this.value)">
-                </div>
-            `;
-        case 'NUMBER':
-            return `
-                <div class="form-group">
-                    <label>${component.name}</label>
-                    <input type="number" placeholder="${component.placeholder || ''}"
-                           min="${component.min || 0}" max="${component.max || 999999}"
-                           onchange="bindData('${component.fieldPath}', this.value)">
-                </div>
-            `;
-        case 'MONEY':
-            return `
-                <div class="form-group">
-                    <label>${component.name}</label>
-                    <div style="display: flex; align-items: center;">
-                        <span style="padding: 8px 12px; background: #f6f8fa; border: 1px solid #d1d5da; border-right: none; border-radius: 4px 0 0 4px;">
-                            ${component.currency || 'CNY'}
-                        </span>
-                        <input type="number" style="flex: 1; border-radius: 0 4px 4px 0;"
-                               onchange="bindData('${component.fieldPath}', this.value)">
-                    </div>
-                </div>
-            `;
-        case 'TEXTAREA':
-            return `
-                <div class="form-group">
-                    <label>${component.name}</label>
-                    <textarea rows="${component.rows || 4}" placeholder="${component.placeholder || ''}"
-                              onchange="bindData('${component.fieldPath}', this.value)"></textarea>
-                </div>
-            `;
-        case 'BUTTON':
-            return `<button>${component.text || component.name || '按钮'}</button>`;
-        case 'SAVE_BUTTON':
-            return `<button style="background: #10b981;">${component.text || '保存'}</button>`;
-        case 'SUBMIT_BUTTON':
-            return `<button style="background: #f59e0b;">${component.text || '提交'}</button>`;
-        case 'DETAIL_TABLE': {
-            const columns = component.columns || [];
-            const colHeaders = columns.map(c => `<th style="border:1px solid #ddd;padding:8px;">${c.name}</th>`).join('');
-            const colCells = columns.map(c => `<td style="border:1px solid #ddd;padding:8px;">{{${c.code}}}</td>`).join('');
-            return `
-                <div class="form-group">
-                    <label style="font-weight:600;margin-bottom:8px;">${component.name || '明细表'}</label>
-                    <table style="width:100%;border-collapse:collapse;margin-bottom:8px;">
-                        <thead><tr style="background:#f6f8fa;">${colHeaders}</tr></thead>
-                        <tbody>
-                            <tr>${colCells}</tr>
-                        </tbody>
-                    </table>
-                    ${component.enableAdd !== false ? '<button style="font-size:12px;padding:4px 12px;">+ 增加行</button>' : ''}
-                </div>
-            `;
-        }
-        default:
-            return '';
-    }
 }
 
 /**
