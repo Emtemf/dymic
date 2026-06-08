@@ -221,7 +221,17 @@ function buildComponentTree(schemaData) {
 
     // API returns a tree structure — convert directly to component format
     function convertNode(node) {
-        const props = node.propsJson ? (typeof node.propsJson === 'string' ? JSON.parse(node.propsJson) : node.propsJson) : {};
+        let props = {};
+        if (node.propsJson) {
+            let parsed = typeof node.propsJson === 'string' ? JSON.parse(node.propsJson) : node.propsJson;
+            // Handle double-encoded JSON: if still a string, parse again
+            if (typeof parsed === 'string') {
+                try { parsed = JSON.parse(parsed); } catch(e) { parsed = {}; }
+            }
+            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                props = parsed;
+            }
+        }
         return {
             id: String(node.id),
             type: node.nodeType,
@@ -338,7 +348,8 @@ function validateComponent(component) {
     }
 
     if (!component.code || !component.code.trim()) {
-        return { valid: false, message: '组件编码不能为空' };
+        // Auto-generate code from type + timestamp instead of blocking
+        component.code = (component.type || 'comp').toLowerCase() + '_' + Date.now();
     }
 
     // 验证子组件
