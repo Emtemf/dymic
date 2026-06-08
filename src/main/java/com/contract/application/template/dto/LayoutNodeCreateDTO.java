@@ -12,6 +12,8 @@ import java.util.Map;
 public class LayoutNodeCreateDTO {
     private Long parentId;
 
+    private String nodeCode;
+
     @NotBlank(message = "节点类型不能为空")
     private String nodeType;
 

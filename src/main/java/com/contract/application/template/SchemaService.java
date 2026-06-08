@@ -110,6 +110,7 @@ public class SchemaService {
                 if (item.getParentId() != null && nodeIdMap.containsKey(item.getParentId())) {
                     createDTO.setParentId(nodeIdMap.get(item.getParentId()));
                 }
+                createDTO.setNodeCode(item.getNodeCode());
                 createDTO.setNodeType(item.getNodeType());
                 createDTO.setNodeName(item.getNodeName() != null ? item.getNodeName() : item.getNodeType());
                 createDTO.setSortNo(item.getSortNo() != null ? item.getSortNo() : 0);

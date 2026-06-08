@@ -37,8 +37,12 @@ public class LayoutNodeService {
         node.setTemplateVersionId(versionId);
         node.setNodeName(dto.getNodeName());
 
-        // 自动生成 nodeCode 和 nodePath
-        node.setNodeCode(generateNodeCode(dto.getNodeType(), dto.getNodeName()));
+        // 使用前端提供的 nodeCode，或自动生成
+        if (dto.getNodeCode() != null && !dto.getNodeCode().isBlank()) {
+            node.setNodeCode(dto.getNodeCode());
+        } else {
+            node.setNodeCode(generateNodeCode(dto.getNodeType(), dto.getNodeName()));
+        }
         node.setNodePath(generateNodePath(dto.getParentId(), dto.getNodeName()));
 
         // 处理 JSONB 字段
