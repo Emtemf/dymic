@@ -36,3 +36,7 @@ server:
 logging:
   level:
     com.contract: DEBUG
+cxf:
+  path: /api/v2
+  jaxrs:
+    component-scan: true
