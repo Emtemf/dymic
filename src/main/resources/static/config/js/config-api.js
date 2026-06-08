@@ -73,7 +73,16 @@ function extractLayoutNodes(component, parentId = null, result = [], usedCodes =
     if (component.span !== undefined) propsObj.span = component.span;
     if (component.offset !== undefined) propsObj.offset = component.offset;
     if (component.gutter !== undefined) propsObj.gutter = component.gutter;
-    if (component.columns !== undefined && component.columns !== null) propsObj.columns = component.columns;
+    if (component.type === 'GRID' && component.columns !== undefined) {
+        propsObj.columns = component.columns;
+    }
+    if (component.type === 'DETAIL_TABLE' && component.columns !== undefined) {
+        propsObj.columns = component.columns;
+    }
+    if (component.panels !== undefined) propsObj.panels = component.panels;
+    if (component.tabs !== undefined) propsObj.tabs = component.tabs;
+    if (component.gridColumn !== undefined) propsObj.gridColumn = component.gridColumn;
+    if (component.gridRow !== undefined) propsObj.gridRow = component.gridRow;
 
     const node = {
         id: component.id,
@@ -90,6 +99,30 @@ function extractLayoutNodes(component, parentId = null, result = [], usedCodes =
     if (component.children && component.children.length > 0) {
         component.children.forEach(child => {
             extractLayoutNodes(child, component.id, result, usedCodes);
+        });
+    }
+
+    // 递归处理 panels 子组件（COLLAPSE）
+    if (component.panels && component.panels.length > 0) {
+        component.panels.forEach(panel => {
+            if (panel.children && panel.children.length > 0) {
+                panel.children.forEach(child => {
+                    const c = typeof child === 'string' ? null : child;
+                    if (c) extractLayoutNodes(c, component.id, result, usedCodes);
+                });
+            }
+        });
+    }
+
+    // 递归处理 tabs 子组件（TAB）
+    if (component.tabs && component.tabs.length > 0) {
+        component.tabs.forEach(tab => {
+            if (tab.children && tab.children.length > 0) {
+                tab.children.forEach(child => {
+                    const c = typeof child === 'string' ? null : child;
+                    if (c) extractLayoutNodes(c, component.id, result, usedCodes);
+                });
+            }
         });
     }
 
