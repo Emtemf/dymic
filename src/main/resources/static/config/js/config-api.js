@@ -68,6 +68,13 @@ function extractLayoutNodes(component, parentId = null, result = [], usedCodes =
         usedCodes[code] = 0;
     }
 
+    // Build props object with only defined values
+    const propsObj = {};
+    if (component.span !== undefined) propsObj.span = component.span;
+    if (component.offset !== undefined) propsObj.offset = component.offset;
+    if (component.gutter !== undefined) propsObj.gutter = component.gutter;
+    if (component.columns !== undefined && component.columns !== null) propsObj.columns = component.columns;
+
     const node = {
         id: component.id,
         nodeCode: code,
@@ -75,12 +82,7 @@ function extractLayoutNodes(component, parentId = null, result = [], usedCodes =
         nodeType: component.type,
         parentId: parentId,
         sortNo: result.length,
-        propsJson: JSON.stringify({
-            span: component.span,
-            offset: component.offset,
-            gutter: component.gutter,
-            columns: component.columns
-        })
+        propsJson: Object.keys(propsObj).length > 0 ? JSON.stringify(propsObj) : '{}'
     };
     result.push(node);
 
@@ -224,14 +226,7 @@ function buildComponentTree(schemaData) {
     function convertNode(node) {
         let props = {};
         if (node.propsJson) {
-            let parsed = typeof node.propsJson === 'string' ? JSON.parse(node.propsJson) : node.propsJson;
-            // Handle double-encoded JSON: if still a string, parse again
-            if (typeof parsed === 'string') {
-                try { parsed = JSON.parse(parsed); } catch(e) { parsed = {}; }
-            }
-            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-                props = parsed;
-            }
+            props = parsePropsJson(node.propsJson);
         }
         return {
             id: String(node.id),
@@ -245,6 +240,64 @@ function buildComponentTree(schemaData) {
 
     // Use the first root node
     return convertNode(layoutNodes[0]);
+}
+
+/**
+ * Parse propsJson handling multi-encoding and malformed JSON
+ */
+function parsePropsJson(raw) {
+    if (!raw) return {};
+
+    let parsed = raw;
+    let iterations = 0;
+    const maxIterations = 5;
+
+    // Keep parsing until we get a non-string object
+    while (typeof parsed === 'string' && iterations < maxIterations) {
+        iterations++;
+        try {
+            parsed = JSON.parse(parsed);
+        } catch(e) {
+            // Try to fix common malformations:
+            // 1. Extra trailing braces: {"columns":[...]}}
+            // 2. Extra quotes wrapping
+
+            let fixed = parsed.trim();
+
+            // Remove trailing extra closing braces/brackets
+            // Count opening vs closing and remove excess
+            let openBraces = (fixed.match(/\{/g) || []).length;
+            let closeBraces = (fixed.match(/\}/g) || []).length;
+            let openBrackets = (fixed.match(/\[/g) || []).length;
+            let closeBrackets = (fixed.match(/\]/g) || []).length;
+
+            // Remove excess closing braces
+            while (closeBraces > openBraces && fixed.endsWith('}')) {
+                fixed = fixed.slice(0, -1);
+                closeBraces--;
+            }
+            // Remove excess closing brackets
+            while (closeBrackets > openBrackets && fixed.endsWith(']')) {
+                fixed = fixed.slice(0, -1);
+                closeBrackets--;
+            }
+
+            try {
+                parsed = JSON.parse(fixed);
+                break;
+            } catch(e2) {
+                // If still failing, return empty object
+                console.warn('propsJson parse failed after fix attempt:', e2.message, 'raw:', raw.substring(0, 100));
+                return {};
+            }
+        }
+    }
+
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed;
+    }
+
+    return {};
 }
 
 /**
@@ -554,11 +607,28 @@ function renderComponentHTML(component) {
                 </div>
             `;
         case 'BUTTON':
-            return `<button>${component.text || '按钮'}</button>`;
+            return `<button>${component.text || component.name || '按钮'}</button>`;
         case 'SAVE_BUTTON':
             return `<button style="background: #10b981;">${component.text || '保存'}</button>`;
         case 'SUBMIT_BUTTON':
             return `<button style="background: #f59e0b;">${component.text || '提交'}</button>`;
+        case 'DETAIL_TABLE': {
+            const columns = component.columns || [];
+            const colHeaders = columns.map(c => `<th style="border:1px solid #ddd;padding:8px;">${c.name}</th>`).join('');
+            const colCells = columns.map(c => `<td style="border:1px solid #ddd;padding:8px;">{{${c.code}}}</td>`).join('');
+            return `
+                <div class="form-group">
+                    <label style="font-weight:600;margin-bottom:8px;">${component.name || '明细表'}</label>
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:8px;">
+                        <thead><tr style="background:#f6f8fa;">${colHeaders}</tr></thead>
+                        <tbody>
+                            <tr>${colCells}</tr>
+                        </tbody>
+                    </table>
+                    ${component.enableAdd !== false ? '<button style="font-size:12px;padding:4px 12px;">+ 增加行</button>' : ''}
+                </div>
+            `;
+        }
         default:
             return '';
     }
