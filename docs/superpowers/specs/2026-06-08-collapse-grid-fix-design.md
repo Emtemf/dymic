@@ -680,70 +680,405 @@ function handleDragOver(event) {
 
 ---
 
-## 第5部分：E2E验证方案
+## 第5部分：E2E验证方案（完整闭环）
 
-### 验证流程
+### 5.1 E2E验证流程（COLLAPSE场景）
 
-| 步骤 | 操作 | 验证点 |
-|-----|------|--------|
-| **1** | 用户创建版本草稿 | 模板选择器 → 版本选择 → 进入设计器 |
-| **2** | Claude拖拽COLLAPSE到画布 | Chrome DevTools: `mcp__chrome-devtools__drag` |
-| **3** | Claude拖拽INPUT到COLLAPSE面板 | DevTools: 定位到第1个面板，拖拽子组件 |
-| **4** | Claude点击保存按钮 | DevTools: `click` 保存按钮，等待API响应 |
-| **5** | Claude刷新页面 | DevTools: `navigate_page` reload |
-| **6** | Claude验证COLLAPSE渲染 | DevTools: `take_screenshot`，验证面板展开/折叠交互 |
-| **7** | Claude查询数据库 | SQL: `SELECT propsJson FROM t_ui_layout_node WHERE nodeType='COLLAPSE'` |
-| **8** | Claude验证openGauss JSONB特性 | SQL: `propsJson @> '{"panels":[{"name":"面板1"}]}'` + GIN索引命中 |
+**验证目标**：拖拽COLLAPSE → 拖拽子组件到面板 → 保存 → 刷新加载 → 验证渲染 → 数据库持久化 → openGauss JSONB特性
+
+| 阶段 | 步骤 | 操作 | 验证点 | 工具 |
+|-----|-----|------|--------|------|
+| **准备** | 1 | 用户在界面创建版本草稿 | 进入设计器 | 用户操作 |
+| **拖拽COLLAPSE** | 2 | Claude拖拽COLLAPSE到画布 | COLLAPSE渲染成功，显示1个面板 | Chrome DevTools: drag |
+| **拖拽子组件** | 3 | Claude拖拽INPUT到面板1 | INPUT出现在面板内容区 | Chrome DevTools: drag + take_screenshot |
+| **保存** | 4 | Claude点击保存按钮 | API调用成功，返回200 | Chrome DevTools: click + list_network_requests |
+| **刷新加载** | 5 | Claude刷新页面 | 页面重新加载，COLLAPSE和INPUT都渲染 | Chrome DevTools: navigate_page reload |
+| **渲染验证** | 6 | Claude点击面板标题 | 面板展开/折叠有动画 | Chrome DevTools: click + take_screenshot |
+| **数据库验证** | 7 | Claude查询数据库 | propsJson包含panels，children是ID引用 | SQL查询 |
+| **JSONB特性** | 8 | Claude执行JSONB查询 | GIN索引命中 | EXPLAIN ANALYZE |
 
 ---
 
-### SQL验证脚本
+### 5.2 Chrome DevTools操作脚本（COLLAPSE）
 
-**查询COLLAPSE数据**：
+**Step 1-2: 拖拽COLLAPSE组件**
+```javascript
+// 导航到设计器
+mcp__chrome-devtools__navigate_page({
+    url: "http://localhost:8888/config/template-designer.html?templateId=xxx&versionId=xxx"
+})
+
+// 等待页面加载
+mcp__chrome-devtools__wait_for({
+    selector: "#previewContent",
+    timeout: 5000
+})
+
+// 拖拽COLLAPSE组件
+mcp__chrome-devtools__drag({
+    fromSelector: "#component-library .component-item[data-type='COLLAPSE']",
+    toSelector: "#previewContent"
+})
+
+// 截图验证
+mcp__chrome-devtools__take_screenshot({
+    format: "png"
+})
+// 预期：预览区显示COLLAPSE组件，有1个面板
+```
+
+**Step 3: 拖拽INPUT到面板**
+```javascript
+// 获取面板元素
+mcp__chrome-devtools__take_snapshot()
+
+// 找到面板内容区（panel-content）
+// 拖拽INPUT到面板
+mcp__chrome-devtools__drag({
+    fromSelector: "#component-library .component-item[data-type='INPUT']",
+    toSelector: ".collapse-panel:first-child .panel-content"
+})
+
+// 截图验证
+mcp__chrome-devtools__take_screenshot()
+// 预期：面板内有INPUT组件，显示"输入框"
+```
+
+**Step 4: 保存配置**
+```javascript
+// 点击保存按钮
+mcp__chrome-devtools__click({
+    uid: "save-button-uid"  // 从snapshot获取
+})
+
+// 等待API响应
+mcp__chrome-devtools__wait_for({
+    text: ["保存成功", "配置保存成功"],
+    timeout: 5000
+})
+
+// 验证网络请求
+mcp__chrome-devtools__list_network_requests({
+    filter: {
+        urlPattern: "/api/templates/*/versions/*/schema",
+        method: "PUT"
+    }
+})
+
+// 获取请求详情
+mcp__chrome-devtools__get_network_request({
+    requestId: "xxx"  // 从list获取
+})
+// 验证：请求体包含layoutNodes，其中COLLAPSE的propsJson包含panels配置
+```
+
+**Step 5-6: 刷新验证**
+```javascript
+// 刷新页面
+mcp__chrome-devtools__navigate_page({
+    type: "reload"
+})
+
+// 等待加载完成
+mcp__chrome-devtools__wait_for({
+    selector: ".collapse-panel",
+    timeout: 5000
+})
+
+// 截图验证COLLAPSE渲染
+mcp__chrome-devtools__take_screenshot()
+// 预期：COLLAPSE面板和INPUT都正确渲染
+
+// 点击面板标题，测试展开/折叠
+mcp__chrome-devtools__click({
+    uid: "panel-header-uid"
+})
+
+// 截图验证折叠状态
+mcp__chrome-devtools__take_screenshot()
+// 预期：面板内容消失，图标变成chevron-right
+```
+
+---
+
+### 5.3 SQL数据库验证脚本
+
+**Step 7: 查询数据库持久化**
+
 ```sql
--- 查询propsJson是否包含panels
+-- 查询COLLAPSE节点（验证propsJson包含panels）
 SELECT 
     id,
+    parent_id,
     node_code,
     node_name,
+    node_type,
     props_json
 FROM t_ui_layout_node
 WHERE node_type = 'COLLAPSE'
-AND template_version_id = {versionId};
+AND template_version_id = {versionId}
+ORDER BY id;
+
+-- 预期结果：
+-- props_json = '{"panels":[{"name":"面板1","code":"panel1","children":["INPUT_ID"]}]}'
+-- parent_id = NULL（根节点）
 ```
 
-**openGauss JSONB特性验证**：
 ```sql
--- 1. JSONB包含查询
-SELECT * FROM t_ui_layout_node 
-WHERE props_json::jsonb @> '{"panels":[{"name":"面板1"}]}'::jsonb;
-
--- 2. JSONB路径查询
+-- 查询INPUT节点（验证parent_id关联）
 SELECT 
     id,
-    props_json::jsonb->'panels'->0->>'name' as first_panel_name
-FROM t_ui_layout_node 
-WHERE node_type = 'COLLAPSE';
+    parent_id,
+    node_type,
+    props_json
+FROM t_ui_layout_node
+WHERE node_type = 'INPUT'
+AND template_version_id = {versionId}
+ORDER BY id;
 
--- 3. GIN索引命中验证
-EXPLAIN ANALYZE
-SELECT * FROM t_ui_layout_node 
-WHERE props_json::jsonb @> '{"panels":[]}'::jsonb;
--- 预期结果：Bitmap Index Scan on idx_layout_props_gin
+-- 预期结果：
+-- parent_id = COLLAPSE_ID（关联到COLLAPSE）
+-- props_json包含INPUT的配置（placeholder等）
+```
+
+```sql
+-- 验证树形结构完整性
+-- 查询所有节点，按parent_id排序
+SELECT 
+    id,
+    parent_id,
+    node_type,
+    node_name
+FROM t_ui_layout_node
+WHERE template_version_id = {versionId}
+ORDER BY parent_id NULLS FIRST, sort_no;
+
+-- 预期结果：
+-- COLLAPSE (parent_id=NULL) → root
+-- INPUT (parent_id=COLLAPSE_ID) → child
+-- 通过parent_id能重建完整的树形结构
 ```
 
 ---
 
-### 验证GRID流程
+**Step 8: openGauss JSONB特性验证**
 
-| 步骤 | 操作 | 验证点 |
-|-----|------|--------|
-| **1** | 拖拽GRID（2列）到画布 | DevTools: drag GRID组件 |
-| **2** | 拖拽INPUT到第1列 | DevTools: 定位grid-cell gridColumn=0 |
-| **3** | 拖拽SELECT到第2列 | DevTools: 定位grid-cell gridColumn=1 |
-| **4** | 保存 + 刷新 | 同COLLAPSE流程 |
-| **5** | 验证子组件分配 | DevTools: screenshot验证左列INPUT右列SELECT |
-| **6** | 查询数据库 | SQL验证propsJson包含gridColumn=0/1 |
+```sql
+-- 1. JSONB包含查询（验证panels数据）
+SELECT 
+    id,
+    node_name,
+    props_json::jsonb->'panels' as panels_data
+FROM t_ui_layout_node
+WHERE props_json::jsonb @> '{"panels":[{"name":"面板1"}]}'::jsonb
+AND template_version_id = {versionId};
+
+-- 预期：返回COLLAPSE节点，panels_data包含完整面板数组
+```
+
+```sql
+-- 2. JSONB路径查询（提取children ID）
+SELECT 
+    id,
+    node_name,
+    props_json::jsonb->'panels'->0->'children'->0 as first_child_id
+FROM t_ui_layout_node
+WHERE node_type = 'COLLAPSE'
+AND template_version_id = {versionId};
+
+-- 预期：返回INPUT的ID（字符串）
+```
+
+```sql
+-- 3. GIN索引命中验证（关键：证明openGauss JSONB特性生效）
+EXPLAIN ANALYZE
+SELECT * FROM t_ui_layout_node
+WHERE props_json::jsonb @> '{"panels":[]}'::jsonb
+AND template_version_id = {versionId};
+
+-- 预期结果（关键）：
+-- "Bitmap Index Scan on idx_layout_props_gin"
+-- "Index Cond: (props_json::jsonb @> '{"panels":[]}'::jsonb)"
+-- "Rows Removed by Index Filter: 0"
+-- 
+-- 如果看到上述结果，证明：
+-- 1. GIN索引命中（不是全表扫描）
+-- 2. openGauss JSONB @> 操作符生效
+-- 3. propsJson作为JSONB类型存储，不是普通TEXT
+```
+
+```sql
+-- 4. JSONB数组长度查询（验证children数量）
+SELECT 
+    id,
+    node_name,
+    jsonb_array_length(props_json::jsonb->'panels'->0->'children') as child_count
+FROM t_ui_layout_node
+WHERE node_type = 'COLLAPSE'
+AND template_version_id = {versionId};
+
+-- 预期：child_count = 1（面板内有1个子组件）
+```
+
+---
+
+### 5.4 E2E验证流程（GRID场景）
+
+| 阶段 | 步骤 | 操作 | 验证点 | 工具 |
+|-----|-----|------|--------|------|
+| **拖拽GRID** | 1 | 拖拽GRID（2列）到画布 | GRID渲染，显示2列网格 | Chrome DevTools: drag |
+| **拖拽子组件** | 2 | 拖拽INPUT到第1列（grid-cell-0） | INPUT出现在左列 | Chrome DevTools: drag |
+| **拖拽子组件** | 3 | 拖拽SELECT到第2列（grid-cell-1） | SELECT出现在右列 | Chrome DevTools: drag |
+| **保存** | 4 | 点击保存 | API返回200 | Chrome DevTools: click |
+| **刷新** | 5 | 刷新页面 | GRID和子组件都渲染 | Chrome DevTools: reload |
+| **验证布局** | 6 | 截图验证 | INPUT在左列，SELECT在右列 | Chrome DevTools: screenshot |
+| **数据库** | 7 | 查询GRID和子组件 | propsJson包含gridColumn | SQL查询 |
+| **JSONB** | 8 | 验证gridColumn查询 | GIN索引命中 | EXPLAIN ANALYZE |
+
+---
+
+### 5.5 GRID数据库验证
+
+```sql
+-- 查询GRID节点
+SELECT 
+    id,
+    parent_id,
+    node_type,
+    props_json
+FROM t_ui_layout_node
+WHERE node_type = 'GRID'
+AND template_version_id = {versionId};
+
+-- 预期：props_json = '{"columns":2}'
+```
+
+```sql
+-- 查询GRID子组件（INPUT和SELECT）
+SELECT 
+    id,
+    parent_id,
+    node_type,
+    props_json
+FROM t_ui_layout_node
+WHERE node_type IN ('INPUT', 'SELECT')
+AND parent_id = {GRID_ID}
+AND template_version_id = {versionId};
+
+-- 预期：
+-- INPUT: props_json包含 '{"gridColumn":0}'
+-- SELECT: props_json包含 '{"gridColumn":1}'
+-- parent_id都指向GRID_ID
+```
+
+```sql
+-- JSONB查询gridColumn=0的子组件
+SELECT 
+    id,
+    node_type,
+    props_json::jsonb->>'gridColumn' as grid_column
+FROM t_ui_layout_node
+WHERE props_json::jsonb @> '{"gridColumn":0}'::jsonb
+AND template_version_id = {versionId};
+
+-- 预期：返回INPUT节点，grid_column='0'
+```
+
+```sql
+-- GIN索引命中验证（gridColumn查询）
+EXPLAIN ANALYZE
+SELECT * FROM t_ui_layout_node
+WHERE props_json::jsonb @> '{"gridColumn":0}'::jsonb
+AND template_version_id = {versionId};
+
+-- 预期：Bitmap Index Scan on idx_layout_props_gin
+```
+
+---
+
+### 5.6 后端API验证（网络请求分析）
+
+**验证保存API调用**：
+
+```javascript
+// 从Chrome DevTools获取网络请求
+mcp__chrome-devtools__get_network_request({
+    requestId: "xxx"
+})
+
+// 验证请求体结构
+{
+    "layoutNodes": [
+        {
+            "id": "COLLAPSE_ID",
+            "nodeCode": "collapse_1",
+            "nodeName": "折叠面板",
+            "nodeType": "COLLAPSE",
+            "parentId": null,
+            "propsJson": "{\"panels\":[{\"name\":\"面板1\",\"children\":[\"INPUT_ID\"]}]}"
+        },
+        {
+            "id": "INPUT_ID",
+            "nodeCode": "input_1",
+            "nodeName": "输入框",
+            "nodeType": "INPUT",
+            "parentId": "COLLAPSE_ID",
+            "propsJson": "{\"placeholder\":\"请输入\"}"
+        }
+    ]
+}
+
+// 验证点：
+// 1. layoutNodes包含所有节点
+// 2. COLLAPSE.propsJson包含panels，children是ID引用
+// 3. INPUT.parentId指向COLLAPSE_ID
+// 4. INPUT.propsJson不包含panels，只有INPUT自己的属性
+```
+
+**验证加载API响应**：
+
+```javascript
+// GET /api/templates/{templateId}/versions/{versionId}/schema
+// 验证响应体结构
+{
+    "success": true,
+    "data": {
+        "layoutNodes": [{
+            "id": "COLLAPSE_ID",
+            "nodeType": "COLLAPSE",
+            "propsJson": "{\"panels\":[{\"name\":\"面板1\",\"children\":[\"INPUT_ID\"]}]}",
+            "children": [{  // ← 后端通过parent_id组装的树形children
+                "id": "INPUT_ID",
+                "nodeType": "INPUT",
+                "parentId": "COLLAPSE_ID",
+                "propsJson": "{\"placeholder\":\"请输入\"}",
+                "children": []
+            }]
+        }]
+    }
+}
+
+// 验证点：
+// 1. API返回树形结构（通过parent_id组装）
+// 2. layoutNodes[0].children是完整对象数组（后端组装）
+// 3. propsJson.panels[0].children是ID数组（["INPUT_ID"]）
+// 4. 前端需要合并这两个children（见第2部分加载逻辑）
+```
+
+---
+
+### 5.7 E2E成功标准
+
+| 验证维度 | 成功标准 | 验证方式 |
+|---------|---------|---------|
+| **前端渲染** | COLLAPSE面板展开/折叠动画流畅，INPUT正确显示 | DevTools截图 |
+| **拖拽定位** | 子组件拖拽到指定网格列（gridColumn=0/1） | DevTools截图验证位置 |
+| **API调用** | 保存API返回200，请求体结构正确 | DevTools list_network_requests |
+| **数据库持久化** | propsJson包含panels/tabs/gridColumn数据 | SQL SELECT查询 |
+| **树形结构** | parent_id正确关联，能重建完整树 | SQL查询所有节点 |
+| **ID引用** | panels[i].children只存ID字符串 | SQL查询propsJson |
+| **openGauss JSONB** | GIN索引命中，@> 查询生效 | EXPLAIN ANALYZE显示Bitmap Index Scan |
+| **刷新加载** | 页面刷新后组件正确渲染，交互正常 | DevTools reload + screenshot |
 
 ---
 
