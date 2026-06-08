@@ -1,0 +1,16 @@
+com/contract/application/template/TemplateVersionServiceTest.class
+com/contract/FieldComponentServiceTest$FieldComponentConverterImpl.class
+com/contract/FieldDefServiceTest.class
+com/contract/FieldComponentServiceTest.class
+com/contract/adapter/controller/TemplateControllerTest.class
+com/contract/application/template/TemplateServiceTest.class
+com/contract/ActionConfigServiceTest.class
+com/contract/LayoutNodeServiceTest.class
+com/contract/adapter/controller/TemplateVersionControllerTest.class
+com/contract/LayoutNodeControllerTest.class
+com/contract/DataProviderControllerTest.class
+com/contract/infrastructure/id/SnowflakeIdGeneratorTest.class
+com/contract/ActionConfigServiceTest$ActionConfigConverterImpl.class
+com/contract/DataProviderServiceTest.class
+com/contract/SchemaServiceTest.class
+com/contract/common/util/PinyinUtilsTest.class

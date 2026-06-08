@@ -16,7 +16,9 @@
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/adapter/rsp/TemplateCreateRsp.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/persistence/convert/EntityQueryParamConverter.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/persistence/entity/TemplateEntity.java
+/home/wula/IdeaProjects/dymic/src/main/java/com/contract/adapter/jaxrs/TemplateResource.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/persistence/convert/EntityActionConfigConverter.java
+/home/wula/IdeaProjects/dymic/src/main/java/com/contract/adapter/jaxrs/SchemaResource.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/persistence/mapper/QueryConfigMapper.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/adapter/controller/SchemaController.java
 /home/wula/IdeaProjects/dymic/src/main/java/com/contract/infrastructure/persistence/convert/EntityLayoutNodeConverter.java

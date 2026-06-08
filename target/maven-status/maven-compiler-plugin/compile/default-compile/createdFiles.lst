@@ -112,6 +112,7 @@ com/contract/infrastructure/persistence/repository/QueryConfigRepositoryImpl.cla
 com/contract/application/template/convert/TemplateVersionConverterImpl.class
 com/contract/infrastructure/persistence/repository/FieldDefRepositoryImpl.class
 com/contract/domain/template/repository/LayoutNodeRepository.class
+com/contract/adapter/jaxrs/TemplateResource.class
 com/contract/application/template/FieldComponentService.class
 com/contract/infrastructure/persistence/convert/EntityActionConfigConverterImpl.class
 com/contract/application/template/dto/TemplateVersionDTO.class
@@ -142,6 +143,7 @@ com/contract/infrastructure/persistence/mapper/QueryFillRuleMapper.class
 com/contract/application/template/convert/FieldDefConverterImpl.class
 com/contract/common/exception/ConcurrentModificationException.class
 com/contract/domain/template/QueryFillRule.class
+com/contract/adapter/jaxrs/SchemaResource.class
 com/contract/application/template/dto/SchemaSaveDTO$FieldDefSaveItem.class
 com/contract/infrastructure/persistence/entity/QueryConfigEntity.class
 com/contract/application/template/dto/ActionConfigDTO.class

@@ -1,0 +1,14 @@
+/home/wula/IdeaProjects/dymic/src/test/java/com/contract/application/template/TemplateServiceTest.java
+/home/wula/IdeaProjects/dymic/src/test/java/com/contract/infrastructure/id/SnowflakeIdGeneratorTest.java
+/home/wula/IdeaProjects/dymic/src/test/java/com/contract/adapter/controller/TemplateVersionControllerTest.java
+/home/wula/IdeaProjects/dymic/src/test/java/com/contract/LayoutNodeServiceTest.java
+/home/wula/IdeaProjects/dymic/src/test/java/com/contract/adapter/controller/TemplateControllerTest.java
+/home/wula/IdeaProjects/dymic/src/test/java/com/contract/application/template/TemplateVersionServiceTest.java
+/home/wula/IdeaProjects/dymic/src/test/java/com/contract/common/util/PinyinUtilsTest.java
+/home/wula/IdeaProjects/dymic/src/test/java/com/contract/SchemaServiceTest.java
+/home/wula/IdeaProjects/dymic/src/test/java/com/contract/ActionConfigServiceTest.java
+/home/wula/IdeaProjects/dymic/src/test/java/com/contract/LayoutNodeControllerTest.java
+/home/wula/IdeaProjects/dymic/src/test/java/com/contract/DataProviderControllerTest.java
+/home/wula/IdeaProjects/dymic/src/test/java/com/contract/FieldComponentServiceTest.java
+/home/wula/IdeaProjects/dymic/src/test/java/com/contract/FieldDefServiceTest.java
+/home/wula/IdeaProjects/dymic/src/test/java/com/contract/DataProviderServiceTest.java

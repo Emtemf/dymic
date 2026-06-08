@@ -61,21 +61,17 @@ class SchemaServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Setup template
-        template = new Template();
-        template.setId(1L);
-        template.setTemplateCode("TPL001");
-        template.setTemplateName("测试模板");
-        template.setTemplateDesc("测试模板描述");
-        template.setBizType("SALE");
+        // Setup template (use reconstitute for test data)
+        template = Template.reconstitute(1L, "TPL001", "测试模板", "测试模板描述",
+            "SALE", Template.TemplateStatus.ENABLED, null,
+            null, null, null, null, null, null);
 
-        // Setup version
-        version = new TemplateVersion();
-        version.setId(1L);
-        version.setTemplateId(1L);
-        version.setVersionNo(1);
-        version.setVersionName("V1.0");
-        version.setVersionStatus("PUBLISHED");
+        // Setup version (use reconstitute for test data)
+        version = TemplateVersion.reconstitute(1L, 1L, 1, "V1.0",
+            TemplateVersion.VersionStatus.PUBLISHED, null, null,
+            null, null,
+            null, null, null,
+            null, null, null);
 
         // Setup parent layout node
         parentNode = LayoutNodeDTO.builder()
