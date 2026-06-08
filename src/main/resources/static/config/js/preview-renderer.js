@@ -412,19 +412,22 @@ function renderCollapseComponent(component, mode = 'designer') {
             `;
 
             const contentDiv = document.createElement('div');
+            contentDiv.className = 'collapse-panel';
+            contentDiv.dataset.panelIndex = index;
             contentDiv.style.cssText = `padding:15px;display:${isExpanded ? 'block' : 'none'};`;
 
-            if (panel.children && panel.children.length > 0) {
-                panel.children.forEach(child => {
-                    const childComponent = typeof child === 'string' ? findComponentById(child) : child;
-                    if (childComponent) {
-                        const childElement = renderComponent(childComponent, mode);
-                        if (childElement) {
-                            contentDiv.appendChild(childElement);
-                        }
+            const panelChildren = (panel.children && panel.children.length > 0)
+                ? panel.children
+                : (component.children || []);
+            panelChildren.forEach(child => {
+                const childComponent = typeof child === 'string' ? findComponentById(child) : child;
+                if (childComponent) {
+                    const childElement = renderComponent(childComponent, mode);
+                    if (childElement) {
+                        contentDiv.appendChild(childElement);
                     }
-                });
-            }
+                }
+            });
 
             headerDiv.addEventListener('click', (e) => {
                 e.stopPropagation();

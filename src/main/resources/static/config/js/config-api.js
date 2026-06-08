@@ -276,20 +276,30 @@ function buildComponentTree(schemaData) {
     layoutNodes.forEach(node => convertNode(node));
 
     // 合并 ID 引用：panels[i].children 从 ID 字符串替换为完整对象
+    // 如果 panels/tabs 子项为空但 component.children 有数据，将 children 分配到第一个面板/页签
     Object.values(componentMap).forEach(component => {
-        if (component.panels) {
+        if (component.panels && component.panels.length > 0) {
             component.panels.forEach(panel => {
                 if (panel.children && panel.children.length > 0 && typeof panel.children[0] === 'string') {
                     panel.children = panel.children.map(id => componentMap[id]).filter(Boolean);
                 }
             });
+            // 兜底：panels 全空但 children 有数据 → 放入第一个面板
+            const hasAnyPanelChild = component.panels.some(p => p.children && p.children.length > 0);
+            if (!hasAnyPanelChild && component.children && component.children.length > 0) {
+                component.panels[0].children = [...component.children];
+            }
         }
-        if (component.tabs) {
+        if (component.tabs && component.tabs.length > 0) {
             component.tabs.forEach(tab => {
                 if (tab.children && tab.children.length > 0 && typeof tab.children[0] === 'string') {
                     tab.children = tab.children.map(id => componentMap[id]).filter(Boolean);
                 }
             });
+            const hasAnyTabChild = component.tabs.some(t => t.children && t.children.length > 0);
+            if (!hasAnyTabChild && component.children && component.children.length > 0) {
+                component.tabs[0].children = [...component.children];
+            }
         }
     });
 
