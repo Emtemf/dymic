@@ -183,34 +183,51 @@ function renderGridComponent(component) {
     `;
 
     const columns = component.columns || 2;
-    const colWidth = 100 / columns;
+    const gutter = component.gutter || 16;
 
-    let gridHTML = `
-        <div class="component-preview-label" style="margin-bottom: 10px;">
-            <i class="fas fa-th"></i> ${component.name} (${columns}列)
-        </div>
-        <div class="grid-container" style="
-            display: grid;
-            grid-template-columns: repeat(${columns}, ${colWidth}%);
-            gap: ${component.gutter || 16}px;
-        ">
+    const labelDiv = document.createElement('div');
+    labelDiv.className = 'component-preview-label';
+    labelDiv.style.marginBottom = '10px';
+    labelDiv.innerHTML = `<i class="fas fa-th"></i> ${component.name} (${columns}列)`;
+    element.appendChild(labelDiv);
+
+    const gridContainer = document.createElement('div');
+    gridContainer.style.cssText = `
+        display: grid;
+        grid-template-columns: repeat(${columns}, 1fr);
+        gap: ${gutter}px;
     `;
 
-    // 渲染子组件
-    if (component.children && component.children.length > 0) {
-        component.children.forEach(child => {
-            gridHTML += `<div class="grid-item">${renderComponentPreview(child).outerHTML}</div>`;
-        });
-    } else {
-        gridHTML += `<div class="grid-item" style="padding: 20px; text-align: center; color: #b4b4b4;">
-            拖拽组件到此处
-        </div>`;
+    for (let i = 0; i < columns; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'grid-cell';
+        cell.dataset.gridColumn = i;
+        cell.style.cssText = `
+            min-height: 80px;
+            border: 1px dashed #d1d5da;
+            background: white;
+            padding: 10px;
+        `;
+
+        const columnChildren = (component.children || []).filter(c => c.gridColumn === i);
+        if (columnChildren.length > 0) {
+            columnChildren.forEach(child => {
+                const childElement = renderComponent(child);
+                if (childElement) {
+                    cell.appendChild(childElement);
+                }
+            });
+        } else {
+            cell.innerHTML = `<div style="padding:20px;text-align:center;color:#b4b4b4;">
+                拖拽组件到第${i + 1}列
+            </div>`;
+        }
+
+        gridContainer.appendChild(cell);
     }
 
-    gridHTML += `</div>`;
-    element.innerHTML = gridHTML;
+    element.appendChild(gridContainer);
 
-    // 绑定事件
     element.addEventListener('click', (e) => {
         e.stopPropagation();
         selectComponent(component.id);
@@ -281,6 +298,11 @@ function renderCollapseComponent(component) {
     const element = document.createElement('div');
     element.className = 'component-preview';
     element.dataset.componentId = component.id;
+    element.style.cssText = `
+        background: #f6f8fa;
+        padding: 10px;
+        margin-bottom: 10px;
+    `;
 
     let collapseHTML = `
         <div class="component-preview-label" style="margin-bottom: 10px;">
@@ -290,8 +312,9 @@ function renderCollapseComponent(component) {
 
     if (component.panels && component.panels.length > 0) {
         component.panels.forEach((panel, index) => {
+            const isExpanded = panel.expanded !== false;
             collapseHTML += `
-                <div class="collapse-panel" style="
+                <div class="collapse-panel" data-panel-index="${index}" style="
                     border: 1px solid #e1e4e8;
                     margin-bottom: -1px;
                 ">
@@ -299,10 +322,17 @@ function renderCollapseComponent(component) {
                         padding: 10px 15px;
                         background: #f6f8fa;
                         cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
                     ">
-                        <i class="fas fa-chevron-right"></i> ${panel.name}
+                        <i class="fas fa-chevron-${isExpanded ? 'down' : 'right'}"></i>
+                        <span>${panel.name}</span>
                     </div>
-                    <div class="panel-content" style="padding: 15px;"></div>
+                    <div class="panel-content" style="
+                        padding: 15px;
+                        display: ${isExpanded ? 'block' : 'none'};
+                    "></div>
                 </div>
             `;
         });
@@ -310,18 +340,40 @@ function renderCollapseComponent(component) {
 
     element.innerHTML = collapseHTML;
 
-    // 渲染第一个面板的内容
-    if (component.panels && component.panels.length > 0 && component.panels[0].children) {
-        const contentContainer = element.querySelector('.panel-content');
-        component.panels[0].children.forEach(child => {
-            const childElement = renderComponent(child);
-            if (childElement) {
-                contentContainer.appendChild(childElement);
+    // 渲染每个面板的子组件
+    if (component.panels && component.panels.length > 0) {
+        component.panels.forEach((panel, index) => {
+            if (panel.children && panel.children.length > 0) {
+                const contentContainer = element.querySelectorAll('.panel-content')[index];
+                panel.children.forEach(child => {
+                    const childComponent = typeof child === 'string'
+                        ? findComponentById(child)
+                        : child;
+                    if (childComponent) {
+                        const childElement = renderComponent(childComponent);
+                        if (childElement) {
+                            contentContainer.appendChild(childElement);
+                        }
+                    }
+                });
             }
         });
     }
 
-    // 绑定事件
+    // 绑定点击事件（独立模式：每个面板单独控制）
+    element.querySelectorAll('.panel-header').forEach(header => {
+        header.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const panel = header.parentElement;
+            const content = panel.querySelector('.panel-content');
+            const icon = header.querySelector('i');
+
+            const isExpanded = content.style.display !== 'none';
+            content.style.display = isExpanded ? 'none' : 'block';
+            icon.className = `fas fa-chevron-${isExpanded ? 'right' : 'down'}`;
+        });
+    });
+
     element.addEventListener('click', (e) => {
         e.stopPropagation();
         selectComponent(component.id);
