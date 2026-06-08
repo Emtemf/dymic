@@ -28,18 +28,151 @@
 
 ## 设计方案
 
-### 方案选择
+### 方案B：纯树形结构（req.md设计意图）
 
-**方案B：纯propsJson存储**
+**核心设计**（来自req.md第28行、第1088行）：
 
-- 所有GRID/COLLAPSE配置存储在 `propsJson` 字段
-- 使用openGauss JSONB查询语法（`@>` 包含查询）
-- GIN索引命中验证
+```
+布局节点树化：通过parent_id构建树形结构
+```
 
-**理由**：
-- 符合req设计，灵活扩展
-- 展示openGauss JSONB特性
-- 后端零改动，Entity已有 `propsJson` String字段
+**数据库设计**（req.md第1101-1131行）：
+```sql
+CREATE TABLE t_ui_layout_node (
+    id BIGINT PRIMARY KEY,
+    parent_id BIGINT,      -- 父节点ID，构建树形结构
+    ...
+    props_json JSONB       -- 扩展属性（不存嵌套对象）
+);
+```
+
+**关键原则**：
+1. **树形构建**：每个节点通过 `parent_id` 关联父节点
+2. **propsJson只存扩展属性**：span/offset/panels名称等配置，**不存嵌套组件对象**
+3. **panels/tabs的children只存ID引用**：`["comp_123"]` 而非 `[完整组件对象]`
+4. **后端API组装树**：通过 `parent_id` 查询，递归组装 `children` 数组返回
+
+**优势**：
+- 无数据冗余：每个组件只存一次，无嵌套对象重复
+- 符合数据库设计规范：通过外键关系构建树
+- openGauss JSONB查询高效：GIN索引命中
+- 后端零改动：Entity已有 `propsJson` String字段
+
+---
+
+## 后端API组装树形结构（方案B核心）
+
+**当前后端逻辑**（SchemaService.java）：
+
+后端查询所有LayoutNode记录，通过 `parent_id` 字段在**前端**构建树形结构。
+
+**改进方案**：后端组装树形结构返回
+
+**Service层逻辑**：
+```java
+public SchemaDTO getSchema(Long templateId, Long versionId) {
+    // 1. 查询所有布局节点（按versionId）
+    List<LayoutNode> allNodes = layoutNodeRepository.findByVersionId(versionId);
+    
+    // 2. 构建节点Map（用于快速查找）
+    Map<Long, LayoutNodeDTO> nodeMap = new HashMap<>();
+    for (LayoutNode node : allNodes) {
+        nodeMap.put(node.getId(), layoutNodeConverter.toDTO(node));
+    }
+    
+    // 3. 构建树形结构（根据parent_id）
+    LayoutNodeDTO root = null;
+    for (LayoutNodeDTO node : nodeMap.values()) {
+        Long parentId = node.getParentId();
+        if (parentId == null) {
+            root = node;  // 根节点
+        } else {
+            LayoutNodeDTO parent = nodeMap.get(parentId);
+            if (parent != null) {
+                if (parent.getChildren() == null) {
+                    parent.setChildren(new ArrayList<>());
+                }
+                parent.getChildren().add(node);  // 加入父节点的children数组
+            }
+        }
+    }
+    
+    // 4. 构建返回结果
+    SchemaDTO schema = new SchemaDTO();
+    schema.setLayoutNodes(Arrays.asList(root));  // 返回树形结构
+    schema.setFieldDefs(fieldDefRepository.findByVersionId(versionId));
+    schema.setFieldComponents(fieldComponentRepository.findByVersionId(versionId));
+    
+    return schema;
+}
+```
+
+**API返回结构**：
+```json
+{
+  "success": true,
+  "data": {
+    "layoutNodes": [{
+      "id": "100",
+      "parentId": null,
+      "nodeType": "COLLAPSE",
+      "propsJson": "{\"panels\":[{\"name\":\"面板1\",\"children\":[\"200\"]}]}",
+      "children": [{                    // ← 后端通过parent_id组装的树形children
+        "id": "200",
+        "parentId": "100",
+        "nodeType": "GRID",
+        "propsJson": "{\"columns\":2}",
+        "children": [
+          {
+            "id": "300",
+            "parentId": "200",
+            "nodeType": "INPUT",
+            "propsJson": "{\"gridColumn\":0}"
+          }
+        ]
+      }]
+    }]
+  }
+}
+```
+
+**关键点**：
+- `layoutNodes[0].children` 是后端组装的树形结构
+- `propsJson` 中的 `panels[i].children` 只存ID引用 `["200"]`
+- 前端需要合并这两个数据源（见第2部分加载逻辑）
+
+---
+
+## 数据结构对比
+
+### 方案A（冗余）vs 方案B（纯树形）
+
+| 数据位置 | 方案A | 方案B（req设计） |
+|---------|-------|-----------------|
+| **数据库存储** | propsJson嵌套完整组件对象 | propsJson只存ID引用 |
+| **树形构建** | propsJson里的嵌套对象 | 通过parent_id查询组装 |
+| **数据冗余** | 有冗余（组件存两遍） | 无冗余（每个组件唯一记录） |
+| **API返回** | propsJson包含嵌套children | API组装树形children + propsJson存ID |
+
+**方案B示例**：
+
+COLLAPSE节点（id=100）：
+```sql
+props_json = '{"panels":[{"name":"面板1","children":["200"]}]}'
+parent_id = NULL
+```
+
+GRID节点（id=200）：
+```sql
+props_json = '{"columns":2}'
+parent_id = 100   -- 关联到COLLAPSE
+```
+
+INPUT节点（id=300）：
+```sql
+props_json = '{"gridColumn":0}'
+parent_id = 200   -- 关联到GRID
+```
 
 ---
 
@@ -85,19 +218,19 @@ if (component.type === 'DETAIL_TABLE' && component.columns !== undefined) {
 
 **数据结构示例**：
 
-COLLAPSE的propsJson：
+COLLAPSE的propsJson（方案B：ID引用）：
 ```json
 {
   "panels": [
     {
       "name": "面板1",
       "code": "panel1",
-      "children": ["comp_123", "comp_456"]
+      "children": ["200", "201"]   // ← 只存ID引用，不存完整对象
     },
     {
       "name": "面板2",
       "code": "panel2",
-      "children": ["comp_789"]
+      "children": ["300"]
     }
   ]
 }
@@ -112,17 +245,37 @@ GRID子组件的propsJson：
 }
 ```
 
+TAB的propsJson（遗漏补充）：
+```json
+{
+  "tabs": [
+    {
+      "name": "页签1",
+      "code": "tab1",
+      "children": ["400", "401"]   // ← 只存ID引用
+    },
+    {
+      "name": "页签2",
+      "code": "tab2",
+      "children": ["500"]
+    }
+  ]
+}
+```
+
+**关键原则**：`panels[i].children` 和 `tabs[i].children` 只存ID字符串数组，完整组件对象通过 `parent_id` 关联。
+
 ---
 
-## 第2部分：前端加载逻辑
+## 第2部分：前端加载逻辑（方案B：合并ID引用和树形children）
 
 **文件**: `src/main/resources/static/config/js/config-api.js`  
 **函数**: `buildComponentTree` (第219-243行)
 
 **当前问题**：
-- `parsePropsJson` 正确解析
-- 但只映射span/offset/gutter到组件属性
-- panels/tabs/gridColumn丢失
+- `parsePropsJson` 正确解析propsJson
+- 但propsJson.panels[i].children是ID数组，API返回的children是对象数组
+- 需要合并这两个数据源
 
 **修复代码**：
 ```javascript
@@ -131,25 +284,61 @@ function buildComponentTree(schemaData) {
     
     if (layoutNodes.length === 0) return null;
     
+    // 1. 构建组件Map（用于ID查找）
+    const componentMap = {};
+    
     function convertNode(node) {
         let props = parsePropsJson(node.propsJson);
         
-        return {
+        const component = {
             id: String(node.id),
             type: node.nodeType,
             name: node.nodeName,
             code: node.nodeCode,
-            // 关键：展开所有props属性
-            ...props,
+            parentId: node.parentId,
+            ...props,  // 展开props属性（panels/tabs/gridColumn等）
+            // API返回的children是对象数组（后端通过parent_id组装）
             children: (node.children || []).map(c => convertNode(c))
         };
+        
+        componentMap[String(node.id)] = component;
+        return component;
     }
     
-    return convertNode(layoutNodes[0]);
+    // 先遍历所有节点构建Map
+    layoutNodes.forEach(node => convertNode(node));
+    
+    // 2. 合并ID引用和树形children
+    Object.values(componentMap).forEach(component => {
+        // 处理panels中的ID引用
+        if (component.panels) {
+            component.panels.forEach(panel => {
+                if (panel.children && typeof panel.children[0] === 'string') {
+                    // ID引用 → 从componentMap查找完整对象
+                    panel.children = panel.children.map(id => componentMap[id]);
+                }
+            });
+        }
+        
+        // 处理tabs中的ID引用
+        if (component.tabs) {
+            component.tabs.forEach(tab => {
+                if (tab.children && typeof tab.children[0] === 'string') {
+                    tab.children = tab.children.map(id => componentMap[id]);
+                }
+            });
+        }
+    });
+    
+    // 返回根节点
+    return layoutNodes[0] ? componentMap[String(layoutNodes[0].id)] : null;
 }
 ```
 
-**关键改动**：用 `...props` 展开运算符，所有propsJson属性映射到组件。
+**关键改动**：
+1. **构建componentMap**：所有节点转换为组件对象，存入Map供ID查找
+2. **合并ID引用**：如果 `panels[i].children[0]` 是字符串（ID），从Map查找完整对象替换
+3. **保留树形children**：API返回的 `children` 数组（后端通过parent_id组装）保留
 
 ---
 
@@ -369,9 +558,11 @@ function getDropTarget(event) {
 
 ---
 
-### 4.2 处理GRID网格列拖拽
+### 4.2 处理GRID网格列拖拽（方案B：存ID引用）
 
 **改动函数**: `addComponentToTarget` (第150-164行)
+
+**方案B关键改动**：push ID而非完整对象
 
 **新增逻辑**：
 ```javascript
@@ -379,7 +570,53 @@ function addComponentToTarget(component, target) {
     if (target.type === 'grid-cell') {
         // GRID网格列拖拽
         component.gridColumn = target.gridColumn;
-        component.gridRow = 0; // 单行GRID
+        component.gridRow = 0;
+        component.parentId = target.component.id;  // ← 设置parent_id
+        
+        // 加入target.component.children（用于renderPreview）
+        if (!target.component.children) {
+            target.component.children = [];
+        }
+        target.component.children.push(component);  // 完整对象（渲染用）
+        
+        // 同时更新propsJson（用于保存）
+        const propsObj = parsePropsJson(target.component.propsJson) || {};
+        if (!propsObj.gridChildren) propsObj.gridChildren = [];
+        propsObj.gridChildren.push(component.id);  // ← 只存ID引用
+        target.component.propsJson = JSON.stringify(propsObj);
+        
+        renderPreview();
+        selectComponent(component.id);
+        saveState();
+        
+    } else if (target.type === 'collapse-panel') {
+        // COLLAPSE面板拖拽（方案B：存ID引用）
+        if (!target.component.panels[target.panelIndex].children) {
+            target.component.panels[target.panelIndex].children = [];
+        }
+        // 只存ID引用（用于保存到propsJson）
+        target.component.panels[target.panelIndex].children.push(component.id);
+        
+        component.parentId = target.component.id;  // ← 设置parent_id
+        
+        // 同时加入target.component.children（用于renderPreview）
+        if (!target.component.children) {
+            target.component.children = [];
+        }
+        target.component.children.push(component);  // 完整对象（渲染用）
+        
+        renderPreview();
+        selectComponent(component.id);
+        saveState();
+        
+    } else if (target.type === 'tab-panel') {
+        // TAB页签拖拽（方案B：存ID引用）
+        if (!target.component.tabs[target.tabIndex].children) {
+            target.component.tabs[target.tabIndex].children = [];
+        }
+        target.component.tabs[target.tabIndex].children.push(component.id);  // ← 只存ID
+        
+        component.parentId = target.component.id;
         
         if (!target.component.children) {
             target.component.children = [];
@@ -390,19 +627,10 @@ function addComponentToTarget(component, target) {
         selectComponent(component.id);
         saveState();
         
-    } else if (target.type === 'collapse-panel') {
-        // COLLAPSE面板拖拽
-        if (!target.component.panels[target.panelIndex].children) {
-            target.component.panels[target.panelIndex].children = [];
-        }
-        target.component.panels[target.panelIndex].children.push(component);
-        
-        renderPreview();
-        selectComponent(component.id);
-        saveState();
-        
     } else if (target.type === 'append') {
         // 普通容器拖拽
+        component.parentId = target.component.id;
+        
         if (!target.component.children) {
             target.component.children = [];
         }
@@ -414,6 +642,11 @@ function addComponentToTarget(component, target) {
     }
 }
 ```
+
+**关键点**：
+- `panels[i].children.push(component.id)`：只存ID字符串
+- `component.parentId = target.component.id`：设置父节点ID（后端通过parent_id构建树）
+- `target.component.children.push(component)`：同时加入完整对象数组（前端渲染用）
 
 ---
 
