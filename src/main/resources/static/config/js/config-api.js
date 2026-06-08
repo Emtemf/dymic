@@ -655,7 +655,10 @@ function restoreState() {
         if (stateStr) {
             const state = JSON.parse(stateStr);
             DesignerState.templateConfig = state.templateConfig || { rootComponent: null };
-            DesignerState.templateId = state.templateId || null;
+            // Only restore templateId from localStorage if not already set from URL params
+            if (!DesignerState.templateId && state.templateId) {
+                DesignerState.templateId = state.templateId;
+            }
             DesignerState.templateVersion = state.templateVersion || '1.0.0';
         }
     } catch (error) {

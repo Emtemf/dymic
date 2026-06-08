@@ -15,8 +15,8 @@ const TemplateSelector = {
         const tid = params.get('templateId');
         const vid = params.get('versionId');
         if (tid && vid) {
-            this.state.templateId = parseInt(tid);
-            this.state.versionId = parseInt(vid);
+            this.state.templateId = tid;
+            this.state.versionId = vid;
             this.state.step = 3;
             this.showDesigner();
             return;
@@ -76,7 +76,7 @@ const TemplateSelector = {
         document.getElementById('selectorPanelTitle').textContent = '模板列表';
 
         const listHtml = this.state.templates.map(t => {
-            const isActive = this.state.templateId === t.id;
+            const isActive = String(this.state.templateId) === String(t.id);
             const statusClass = t.status === 'ENABLED' ? 'sel-badge-green' : 'sel-badge-gray';
             const statusText = t.status === 'ENABLED' ? '启用' : '停用';
             return '<div class="sel-item' + (isActive ? ' sel-active' : '') + '" onclick="TemplateSelector.selectTemplate(' + t.id + ')">' +
@@ -88,7 +88,7 @@ const TemplateSelector = {
 
         document.getElementById('selectorList').innerHTML = listHtml || '<div class="sel-empty">暂无模板</div>';
 
-        const tpl = this.state.templateId ? this.state.templates.find(t => t.id === this.state.templateId) : null;
+        const tpl = this.state.templateId ? this.state.templates.find(t => String(t.id) === String(this.state.templateId)) : null;
         if (tpl) {
             this.renderTemplateDetail(tpl);
         } else {
@@ -112,13 +112,13 @@ const TemplateSelector = {
     },
 
     renderVersionList() {
-        const tpl = this.state.templates.find(t => t.id === this.state.templateId);
+        const tpl = this.state.templates.find(t => String(t.id) === String(this.state.templateId));
         document.getElementById('selectorBreadcrumb').innerHTML =
             '<span style="cursor:pointer" onclick="TemplateSelector.goToStep(1)">模板管理</span> / ' + (tpl ? tpl.templateName : '');
         document.getElementById('selectorPanelTitle').textContent = '版本列表';
 
         const listHtml = this.state.versions.map(v => {
-            const isActive = this.state.versionId === v.id;
+            const isActive = String(this.state.versionId) === String(v.id);
             const statusClass = v.versionStatus === 'PUBLISHED' ? 'sel-badge-green' : 'sel-badge-orange';
             const statusText = v.versionStatus === 'PUBLISHED' ? '已发布' : '草稿';
             return '<div class="sel-item' + (isActive ? ' sel-active' : '') + '" onclick="TemplateSelector.selectVersion(' + v.id + ')">' +
@@ -134,7 +134,7 @@ const TemplateSelector = {
             '<span style="font-size:14px;font-weight:600">' + (tpl ? tpl.templateName : '') + ' - 选择版本</span>' +
             '<button class="btn btn-sm" onclick="TemplateSelector.goToStep(1)">← 返回模板列表</button>';
 
-        const ver = this.state.versionId ? this.state.versions.find(v => v.id === this.state.versionId) : null;
+        const ver = this.state.versionId ? this.state.versions.find(v => String(v.id) === String(this.state.versionId)) : null;
         if (ver) {
             this.renderVersionDetail(ver);
         } else {
