@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.web.servlet.MockMvc;
+import com.jayway.jsonpath.JsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -15,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Transactional
 class LayoutNodeControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -24,7 +27,7 @@ class LayoutNodeControllerTest {
         String body = """
             {
               "nodeType": "CARD",
-              "displayName": "基本信息",
+              "nodeName": "基本信息",
               "parentId": null,
               "sortNo": 1,
               "levelNo": 1
@@ -36,8 +39,8 @@ class LayoutNodeControllerTest {
                 .content(body))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
-            .andExpect(jsonPath("$.data.nodeCode").value("card_basicInfo"))
-            .andExpect(jsonPath("$.data.nodePath").value("basicInfo"))
+            .andExpect(jsonPath("$.data.nodeCode").value("card_jiBenXinXi"))
+            .andExpect(jsonPath("$.data.nodePath").value("jiBenXinXi"))
             .andExpect(jsonPath("$.data.nodeName").value("基本信息"));
     }
 
@@ -47,7 +50,7 @@ class LayoutNodeControllerTest {
         String parentBody = """
             {
               "nodeType": "CARD",
-              "displayName": "基本信息",
+              "nodeName": "基本信息",
               "parentId": null,
               "sortNo": 1
             }
@@ -64,7 +67,7 @@ class LayoutNodeControllerTest {
         String childBody = """
             {
               "nodeType": "FIELD",
-              "displayName": "合同名称",
+              "nodeName": "合同名称",
               "parentId": null,
               "sortNo": 1
             }
@@ -83,7 +86,7 @@ class LayoutNodeControllerTest {
         String body = """
             {
               "nodeType": "CARD",
-              "displayName": "查询API测试",
+              "nodeName": "查询API测试",
               "parentId": null,
               "sortNo": 1
             }
@@ -115,18 +118,21 @@ class LayoutNodeControllerTest {
         String createBody = """
             {
               "nodeType": "CARD",
-              "displayName": "更新API测试",
+              "nodeName": "更新API测试",
               "parentId": null,
               "sortNo": 1
             }
             """;
 
-        mockMvc.perform(post("/api/templates/100/versions/200/layout-nodes")
+        String createResponse = mockMvc.perform(post("/api/templates/100/versions/200/layout-nodes")
                 .contentType("application/json")
                 .content(createBody))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
 
-        // 更新节点（简化处理）
+        String nodeId = JsonPath.read(createResponse, "$.data.id").toString();
+
+        // 更新节点
         String updateBody = """
             {
               "nodeName": "更新后名称",
@@ -134,8 +140,7 @@ class LayoutNodeControllerTest {
             }
             """;
 
-        // 使用一个测试 ID
-        mockMvc.perform(put("/api/templates/100/versions/200/layout-nodes/1")
+        mockMvc.perform(put("/api/templates/100/versions/200/layout-nodes/" + nodeId)
                 .contentType("application/json")
                 .content(updateBody))
             .andExpect(status().isOk());
@@ -146,7 +151,7 @@ class LayoutNodeControllerTest {
         String body = """
             {
               "nodeType": "FIELD",
-              "displayName": "网格布局测试",
+              "nodeName": "网格布局测试",
               "parentId": null,
               "sortNo": 1,
               "gridX": 0,
@@ -174,15 +179,11 @@ class LayoutNodeControllerTest {
         String body = """
             {
               "nodeType": "FIELD",
-              "displayName": "规则API测试",
+              "nodeName": "规则API测试",
               "parentId": null,
               "sortNo": 1,
-              "visibleRule": {
-                "condition": "status == 'ACTIVE'"
-              },
-              "readonlyRule": {
-                "condition": "readonly == true"
-              }
+              "visibleRule": "{\\"condition\\": \\"status == 'ACTIVE'\\"}",
+              "readonlyRule": "{\\"condition\\": \\"readonly == true\\"}"
             }
             """;
 

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -13,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Transactional
 class TemplateVersionControllerTest {
 
     @Autowired
@@ -23,7 +25,7 @@ class TemplateVersionControllerTest {
         // 先创建模板
         String templateRequest = """
             {
-              "templateCode": "VERSION_TEST",
+              "templateCode": "VERSION_CTRL_TEST",
               "templateName": "版本测试",
               "templateDesc": "测试版本",
               "bizType": "TEST"
@@ -38,17 +40,17 @@ class TemplateVersionControllerTest {
         // 通过模板编码创建版本
         String versionRequest = """
             {
-              "versionNo": 1,
-              "versionName": "V1.0"
+              "versionNo": 2,
+              "versionName": "V2.0"
             }
             """;
 
-        mockMvc.perform(post("/api/templates/code/VERSION_TEST/versions")
+        mockMvc.perform(post("/api/templates/code/VERSION_CTRL_TEST/versions")
                 .contentType("application/json")
                 .content(versionRequest))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
-            .andExpect(jsonPath("$.data.versionNo").value(1))
+            .andExpect(jsonPath("$.data.versionNo").value(2))
             .andExpect(jsonPath("$.data.versionStatus").value("DRAFT"));
     }
 
@@ -69,11 +71,11 @@ class TemplateVersionControllerTest {
                 .content(templateRequest))
             .andExpect(status().isOk());
 
-        // 创建版本
+        // createTemplate auto-creates version_no=1, create version_no=2
         String versionRequest = """
             {
-              "versionNo": 1,
-              "versionName": "V1.0"
+              "versionNo": 2,
+              "versionName": "V2.0"
             }
             """;
 
@@ -131,11 +133,11 @@ class TemplateVersionControllerTest {
                 .content(templateRequest))
             .andExpect(status().isOk());
 
-        // 创建版本
+        // createTemplate auto-creates version_no=1, create version_no=2
         String versionRequest = """
             {
-              "versionNo": 1,
-              "versionName": "V1.0"
+              "versionNo": 2,
+              "versionName": "V2.0"
             }
             """;
 
@@ -166,17 +168,24 @@ class TemplateVersionControllerTest {
      * 这是一个简化的实现，实际应该使用JSON解析库
      */
     private Long extractIdFromResponse(String response) {
-        // 简化处理：寻找 "id":数字 的模式
         int idIndex = response.indexOf("\"id\":");
         if (idIndex == -1) {
             throw new RuntimeException("Cannot find id in response");
         }
         int startIndex = idIndex + 5;
+        // Skip opening quote if present (Snowflake IDs may be quoted as strings)
+        if (response.charAt(startIndex) == '"') {
+            startIndex++;
+        }
         int endIndex = response.indexOf(",", startIndex);
         if (endIndex == -1) {
             endIndex = response.indexOf("}", startIndex);
         }
         String idStr = response.substring(startIndex, endIndex).trim();
+        // Remove trailing quote if present
+        if (idStr.endsWith("\"")) {
+            idStr = idStr.substring(0, idStr.length() - 1);
+        }
         return Long.parseLong(idStr);
     }
 }

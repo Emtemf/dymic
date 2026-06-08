@@ -43,7 +43,7 @@ class TemplateServiceTest {
     @Test
     void testDisableTemplate() {
         Template template = templateService.createTemplate(
-            "DISABLE_TEST",
+            "DISABLE_TEST_" + System.nanoTime(),
             "停用测试",
             "测试停用",
             "TEST"
@@ -58,7 +58,7 @@ class TemplateServiceTest {
     @Test
     void testEnableTemplate() {
         Template template = templateService.createTemplate(
-            "ENABLE_TEST",
+            "ENABLE_TEST_" + System.nanoTime(),
             "启用测试",
             "测试启用",
             "TEST"

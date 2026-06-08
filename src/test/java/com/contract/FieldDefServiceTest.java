@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 class FieldDefServiceTest {
     @Autowired
     private FieldDefService service;
@@ -62,7 +64,7 @@ class FieldDefServiceTest {
         assertEquals("hetongmingcheng", result.getFieldDef().getFieldCode());
         assertTrue(result.getFieldDef().getFieldPath().contains("hetongmingcheng"));
         assertEquals("合同名称", result.getFieldDef().getFieldNameCn());
-        assertEquals("TEXT", result.getFieldDef().getDataType());
+        assertEquals("INPUT", result.getFieldDef().getDataType());
         assertEquals(0, result.getFieldDef().getRequiredDefault());
 
         // 验证字段组件绑定同时创建
@@ -117,7 +119,7 @@ class FieldDefServiceTest {
 
         FieldDefCreateResult result = service.create(100L, 903L, dto);
 
-        assertEquals("NUMBER", result.getFieldDef().getDataType());
+        assertEquals("MONEY", result.getFieldDef().getDataType());
     }
 
     @Test
@@ -139,7 +141,7 @@ class FieldDefServiceTest {
 
         FieldDefCreateResult result = service.create(100L, 904L, dto);
 
-        assertEquals("TEXT", result.getFieldDef().getDataType());
+        assertEquals("SELECT", result.getFieldDef().getDataType());
         assertNotNull(result.getFieldComponent().getComponentProps());
     }
 

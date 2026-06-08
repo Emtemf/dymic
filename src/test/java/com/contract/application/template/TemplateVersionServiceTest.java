@@ -20,23 +20,26 @@ class TemplateVersionServiceTest {
     @Autowired
     private TemplateVersionService versionService;
 
+    private static String suffix() {
+        return "_" + System.nanoTime();
+    }
+
     @Test
     void testCreateDraftVersion() {
-        // 先创建模板
         Long templateId = templateService.createTemplate(
-            "VERSION_TEST",
+            "VERSION_TEST" + suffix(),
             "版本测试",
             "测试版本",
             "TEST"
         ).getId();
 
-        // 创建草稿版本
-        TemplateVersion version = versionService.createDraft(templateId, 1, "V1.0");
+        // createTemplate auto-creates version_no=1, so create version_no=2
+        TemplateVersion version = versionService.createDraft(templateId, 2, "V2.0");
 
         assertNotNull(version.getId());
         assertEquals(templateId, version.getTemplateId());
-        assertEquals(1, version.getVersionNo());
-        assertEquals("V1.0", version.getVersionName());
+        assertEquals(2, version.getVersionNo());
+        assertEquals("V2.0", version.getVersionName());
         assertEquals("DRAFT", version.getVersionStatus());
         assertNull(version.getPublishTime());
         assertNull(version.getPublishBy());
@@ -44,18 +47,14 @@ class TemplateVersionServiceTest {
 
     @Test
     void testCreateDraftVersionWithDuplicateVersionNo() {
-        // 先创建模板
         Long templateId = templateService.createTemplate(
-            "DUP_VERSION_TEST",
+            "DUP_VERSION_TEST" + suffix(),
             "重复版本测试",
             "测试重复版本号",
             "TEST"
         ).getId();
 
-        // 创建第一个版本
-        versionService.createDraft(templateId, 1, "V1.0");
-
-        // 尝试创建相同版本号的版本，应该抛出异常
+        // createTemplate auto-creates version_no=1, so trying to create another is duplicate
         assertThrows(Exception.class, () -> {
             versionService.createDraft(templateId, 1, "V1.0-Duplicate");
         });
@@ -63,15 +62,15 @@ class TemplateVersionServiceTest {
 
     @Test
     void testPublishVersion() {
-        // 创建模板和草稿版本
         Long templateId = templateService.createTemplate(
-            "PUBLISH_TEST",
+            "PUBLISH_TEST" + suffix(),
             "发布测试",
             "测试发布",
             "TEST"
         ).getId();
 
-        Long versionId = versionService.createDraft(templateId, 1, "V1.0").getId();
+        // createTemplate auto-creates version_no=1, publish that one
+        Long versionId = versionService.createDraft(templateId, 2, "V2.0").getId();
 
         // 发布版本
         versionService.publish(versionId, 1001L);
@@ -85,15 +84,14 @@ class TemplateVersionServiceTest {
 
     @Test
     void testPublishNonDraftVersion() {
-        // 创建模板和版本
         Long templateId = templateService.createTemplate(
-            "PUBLISH_FAIL_TEST",
+            "PUBLISH_FAIL_TEST" + suffix(),
             "发布失败测试",
             "测试非草稿发布",
             "TEST"
         ).getId();
 
-        Long versionId = versionService.createDraft(templateId, 1, "V1.0").getId();
+        Long versionId = versionService.createDraft(templateId, 2, "V2.0").getId();
 
         // 先发布一次
         versionService.publish(versionId, 1001L);
@@ -106,22 +104,21 @@ class TemplateVersionServiceTest {
 
     @Test
     void testGetById() {
-        // 创建模板和版本
         Long templateId = templateService.createTemplate(
-            "GET_VERSION_TEST",
+            "GET_VERSION_TEST" + suffix(),
             "查询版本测试",
             "测试查询",
             "TEST"
         ).getId();
 
-        Long versionId = versionService.createDraft(templateId, 1, "V1.0").getId();
+        Long versionId = versionService.createDraft(templateId, 2, "V2.0").getId();
 
         // 查询版本
         TemplateVersion version = versionService.getById(versionId);
 
         assertNotNull(version);
         assertEquals(versionId, version.getId());
-        assertEquals("V1.0", version.getVersionName());
+        assertEquals("V2.0", version.getVersionName());
     }
 
     @Test
@@ -136,27 +133,27 @@ class TemplateVersionServiceTest {
     void testFindCurrentVersion() {
         // 创建模板和多个版本
         Long templateId = templateService.createTemplate(
-            "CURRENT_VERSION_TEST",
+            "CURRENT_VERSION_TEST" + suffix(),
             "当前版本测试",
             "测试查找当前版本",
             "TEST"
         ).getId();
 
-        // 创建并发布版本1
-        Long version1Id = versionService.createDraft(templateId, 1, "V1.0").getId();
+        // createTemplate auto-creates version_no=1, publish it
+        Long version1Id = versionService.createDraft(templateId, 2, "V2.0").getId();
         versionService.publish(version1Id, 1001L);
 
-        // 创建但不发布版本2
-        versionService.createDraft(templateId, 2, "V2.0");
+        // create but don't publish version3
+        versionService.createDraft(templateId, 3, "V3.0");
 
-        // 创建并发布版本3
-        Long version3Id = versionService.createDraft(templateId, 3, "V3.0").getId();
-        versionService.publish(version3Id, 1001L);
+        // create and publish version4
+        Long version4Id = versionService.createDraft(templateId, 4, "V4.0").getId();
+        versionService.publish(version4Id, 1001L);
 
-        // 查找当前发布版本，应该是版本3
+        // find current published version — should be version4
         TemplateVersion currentVersion = versionService.findCurrentVersion(templateId);
         assertNotNull(currentVersion);
-        assertEquals(3, currentVersion.getVersionNo());
+        assertEquals(4, currentVersion.getVersionNo());
         assertEquals("PUBLISHED", currentVersion.getVersionStatus());
     }
 
@@ -164,13 +161,13 @@ class TemplateVersionServiceTest {
     void testFindCurrentVersionNoPublished() {
         // 创建模板和草稿版本（不发布）
         Long templateId = templateService.createTemplate(
-            "NO_PUBLISHED_TEST",
+            "NO_PUBLISHED_TEST" + suffix(),
             "无发布版本测试",
             "测试没有发布版本",
             "TEST"
         ).getId();
 
-        versionService.createDraft(templateId, 1, "V1.0");
+        // createTemplate auto-creates version_no=1 (DRAFT), don't publish it
 
         // 查找当前发布版本，应该返回null
         TemplateVersion currentVersion = versionService.findCurrentVersion(templateId);
