@@ -251,28 +251,49 @@ async function loadConfig(templateId, versionId) {
  */
 function buildComponentTree(schemaData) {
     const layoutNodes = schemaData.layoutNodes || [];
-    const fieldComponents = schemaData.fieldComponents || [];
 
     if (layoutNodes.length === 0) return null;
 
-    // API returns a tree structure — convert directly to component format
+    const componentMap = {};
+
     function convertNode(node) {
-        let props = {};
-        if (node.propsJson) {
-            props = parsePropsJson(node.propsJson);
-        }
-        return {
+        let props = parsePropsJson(node.propsJson);
+
+        const component = {
             id: String(node.id),
             type: node.nodeType,
             name: node.nodeName,
             code: node.nodeCode,
+            parentId: node.parentId,
             ...props,
             children: (node.children || []).map(c => convertNode(c))
         };
+
+        componentMap[String(node.id)] = component;
+        return component;
     }
 
-    // Use the first root node
-    return convertNode(layoutNodes[0]);
+    layoutNodes.forEach(node => convertNode(node));
+
+    // 合并 ID 引用：panels[i].children 从 ID 字符串替换为完整对象
+    Object.values(componentMap).forEach(component => {
+        if (component.panels) {
+            component.panels.forEach(panel => {
+                if (panel.children && panel.children.length > 0 && typeof panel.children[0] === 'string') {
+                    panel.children = panel.children.map(id => componentMap[id]).filter(Boolean);
+                }
+            });
+        }
+        if (component.tabs) {
+            component.tabs.forEach(tab => {
+                if (tab.children && tab.children.length > 0 && typeof tab.children[0] === 'string') {
+                    tab.children = tab.children.map(id => componentMap[id]).filter(Boolean);
+                }
+            });
+        }
+    });
+
+    return layoutNodes[0] ? componentMap[String(layoutNodes[0].id)] : null;
 }
 
 /**
