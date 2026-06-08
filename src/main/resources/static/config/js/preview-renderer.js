@@ -234,7 +234,7 @@ function renderGridComponent(component, mode = 'designer') {
         const cell = document.createElement('div');
 
         if (mode === 'preview') {
-            cell.style.cssText = 'min-height:1px;';
+            cell.style.cssText = 'min-height:40px;padding:8px;';
         } else {
             cell.className = 'grid-cell';
             cell.dataset.gridColumn = i;
