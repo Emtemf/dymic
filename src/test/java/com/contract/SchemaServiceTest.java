@@ -10,6 +10,10 @@ import com.contract.application.template.TemplateService;
 import com.contract.application.template.dto.*;
 import com.contract.domain.template.Template;
 import com.contract.domain.template.TemplateVersion;
+import com.contract.domain.template.types.TemplateStatus;
+import com.contract.domain.template.types.VersionStatus;
+import com.contract.domain.shared.types.AuditInfo;
+import com.contract.domain.template.types.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,16 +66,23 @@ class SchemaServiceTest {
     @BeforeEach
     void setUp() {
         // Setup template (use reconstitute for test data)
-        template = Template.reconstitute(1L, "TPL001", "测试模板", "测试模板描述",
-            "SALE", Template.TemplateStatus.ENABLED, null,
-            null, null, null, null, null, null);
+        template = Template.reconstitute(
+            new TemplateId(1L),
+            new TemplateCode("TPL001"),
+            new TemplateName("测试模板"),
+            new TemplateDesc("测试模板描述"),
+            new BizType("SALE"),
+            TemplateStatus.ENABLED,
+            null,
+            AuditInfo.of(1L, "系统", null, null, null, null)
+        );
 
         // Setup version (use reconstitute for test data)
-        version = TemplateVersion.reconstitute(1L, 1L, 1, "V1.0",
-            TemplateVersion.VersionStatus.PUBLISHED, null, null,
-            null, null,
-            null, null, null,
-            null, null, null);
+        version = TemplateVersion.reconstitute(
+            1L, 1L, 1, "V1.0",
+            VersionStatus.PUBLISHED, null, null,
+            null, null, AuditInfo.of(1L, "系统", null, null, null, null)
+        );
 
         // Setup parent layout node
         parentNode = LayoutNodeDTO.builder()

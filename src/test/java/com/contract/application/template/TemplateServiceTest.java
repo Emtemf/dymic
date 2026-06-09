@@ -27,8 +27,8 @@ class TemplateServiceTest {
         );
 
         assertNotNull(template.getId());
-        assertEquals("PURCHASE_CONTRACT", template.getTemplateCode());
-        assertEquals("ENABLED", template.getStatus());
+        assertEquals("PURCHASE_CONTRACT", template.getTemplateCodeValue());
+        assertEquals("ENABLED", template.getStatus().name());
     }
 
     @Test
@@ -37,7 +37,7 @@ class TemplateServiceTest {
 
         Template template = templateService.getByCode("TEST_CONTRACT");
         assertNotNull(template);
-        assertEquals("测试合同", template.getTemplateName());
+        assertEquals("测试合同", template.getTemplateNameValue());
     }
 
     @Test
@@ -49,10 +49,10 @@ class TemplateServiceTest {
             "TEST"
         );
 
-        templateService.disable(template.getId());
+        templateService.disable(template.getIdValue());
 
-        Template disabled = templateService.getById(template.getId());
-        assertEquals("DISABLED", disabled.getStatus());
+        Template disabled = templateService.getById(template.getIdValue());
+        assertEquals("DISABLED", disabled.getStatus().name());
     }
 
     @Test
@@ -64,13 +64,13 @@ class TemplateServiceTest {
             "TEST"
         );
 
-        templateService.disable(template.getId());
-        Template disabled = templateService.getById(template.getId());
-        assertEquals("DISABLED", disabled.getStatus());
+        templateService.disable(template.getIdValue());
+        Template disabled = templateService.getById(template.getIdValue());
+        assertEquals("DISABLED", disabled.getStatus().name());
 
-        templateService.enable(template.getId());
-        Template enabled = templateService.getById(template.getId());
-        assertEquals("ENABLED", enabled.getStatus());
+        templateService.enable(template.getIdValue());
+        Template enabled = templateService.getById(template.getIdValue());
+        assertEquals("ENABLED", enabled.getStatus().name());
     }
 
     @Test

@@ -31,7 +31,7 @@ class TemplateVersionServiceTest {
             "版本测试",
             "测试版本",
             "TEST"
-        ).getId();
+        ).getIdValue();
 
         // createTemplate auto-creates version_no=1, so create version_no=2
         TemplateVersion version = versionService.createDraft(templateId, 2, "V2.0");
@@ -40,7 +40,7 @@ class TemplateVersionServiceTest {
         assertEquals(templateId, version.getTemplateId());
         assertEquals(2, version.getVersionNo());
         assertEquals("V2.0", version.getVersionName());
-        assertEquals("DRAFT", version.getVersionStatus());
+        assertEquals("DRAFT", version.getVersionStatus().name());
         assertNull(version.getPublishTime());
         assertNull(version.getPublishBy());
     }
@@ -52,7 +52,7 @@ class TemplateVersionServiceTest {
             "重复版本测试",
             "测试重复版本号",
             "TEST"
-        ).getId();
+        ).getIdValue();
 
         // createTemplate auto-creates version_no=1, so trying to create another is duplicate
         assertThrows(Exception.class, () -> {
@@ -67,7 +67,7 @@ class TemplateVersionServiceTest {
             "发布测试",
             "测试发布",
             "TEST"
-        ).getId();
+        ).getIdValue();
 
         // createTemplate auto-creates version_no=1, publish that one
         Long versionId = versionService.createDraft(templateId, 2, "V2.0").getId();
@@ -77,7 +77,7 @@ class TemplateVersionServiceTest {
 
         // 验证发布后的状态
         TemplateVersion published = versionService.getById(versionId);
-        assertEquals("PUBLISHED", published.getVersionStatus());
+        assertEquals("PUBLISHED", published.getVersionStatus().name());
         assertNotNull(published.getPublishTime());
         assertEquals(1001L, published.getPublishBy());
     }
@@ -89,7 +89,7 @@ class TemplateVersionServiceTest {
             "发布失败测试",
             "测试非草稿发布",
             "TEST"
-        ).getId();
+        ).getIdValue();
 
         Long versionId = versionService.createDraft(templateId, 2, "V2.0").getId();
 
@@ -109,7 +109,7 @@ class TemplateVersionServiceTest {
             "查询版本测试",
             "测试查询",
             "TEST"
-        ).getId();
+        ).getIdValue();
 
         Long versionId = versionService.createDraft(templateId, 2, "V2.0").getId();
 
@@ -137,7 +137,7 @@ class TemplateVersionServiceTest {
             "当前版本测试",
             "测试查找当前版本",
             "TEST"
-        ).getId();
+        ).getIdValue();
 
         // createTemplate auto-creates version_no=1, publish it
         Long version1Id = versionService.createDraft(templateId, 2, "V2.0").getId();
@@ -154,7 +154,7 @@ class TemplateVersionServiceTest {
         TemplateVersion currentVersion = versionService.findCurrentVersion(templateId);
         assertNotNull(currentVersion);
         assertEquals(4, currentVersion.getVersionNo());
-        assertEquals("PUBLISHED", currentVersion.getVersionStatus());
+        assertEquals("PUBLISHED", currentVersion.getVersionStatus().name());
     }
 
     @Test
@@ -165,7 +165,7 @@ class TemplateVersionServiceTest {
             "无发布版本测试",
             "测试没有发布版本",
             "TEST"
-        ).getId();
+        ).getIdValue();
 
         // createTemplate auto-creates version_no=1 (DRAFT), don't publish it
 
