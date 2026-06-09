@@ -1,16 +1,21 @@
 package com.contract.domain.template.types;
 
+import com.contract.common.exception.BizException;
 import java.util.Objects;
 
 /**
  * 模板ID值对象
+ *
+ * 【业务规则】
+ * - 不能为空
+ * - 必须大于0
  */
 public final class TemplateId {
     private final Long value;
 
     public TemplateId(Long value) {
         if (value == null || value <= 0) {
-            throw new IllegalArgumentException("模板ID无效");
+            throw new BizException("模板ID无效");
         }
         this.value = value;
     }

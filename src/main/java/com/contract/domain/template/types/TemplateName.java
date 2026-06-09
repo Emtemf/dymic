@@ -5,6 +5,10 @@ import java.util.Objects;
 
 /**
  * 模板名称值对象
+ *
+ * 【业务规则】
+ * - 不能为空
+ * - 长度1-100
  */
 public final class TemplateName {
     private final String value;

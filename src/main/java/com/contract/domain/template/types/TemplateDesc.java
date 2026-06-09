@@ -1,16 +1,21 @@
 package com.contract.domain.template.types;
 
+import com.contract.common.exception.BizException;
 import java.util.Objects;
 
 /**
  * 模板描述值对象
+ *
+ * 【业务规则】
+ * - 可为空
+ * - 长度不超过500
  */
 public final class TemplateDesc {
     private final String value;
 
     public TemplateDesc(String value) {
         if (value != null && value.length() > 500) {
-            throw new IllegalArgumentException("模板描述长度不能超过500");
+            throw new BizException("模板描述长度不能超过500");
         }
         this.value = value;
     }
