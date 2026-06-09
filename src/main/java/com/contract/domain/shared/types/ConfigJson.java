@@ -1,6 +1,7 @@
 package com.contract.domain.shared.types;
 
 import com.contract.common.exception.BizException;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Objects;
@@ -25,6 +26,7 @@ public final class ConfigJson {
         }
     }
 
+    @JsonValue
     public String getValue() { return value; }
 
     public <T> T parse(Class<T> clazz) {

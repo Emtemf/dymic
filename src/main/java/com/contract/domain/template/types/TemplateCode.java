@@ -1,6 +1,7 @@
 package com.contract.domain.template.types;
 
 import com.contract.common.exception.BizException;
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Objects;
 
 /**
@@ -27,6 +28,7 @@ public final class TemplateCode {
         this.value = value;
     }
 
+    @JsonValue
     public String getValue() {
         return value;
     }

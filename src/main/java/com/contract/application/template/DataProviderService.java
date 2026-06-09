@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -78,12 +78,12 @@ public class DataProviderService {
             request.getStaticOptionsJson()
         );
 
-        repository.save(provider);
+        DataProvider savedProvider = repository.save(provider);
 
         log.info("创建静态选项DataProvider成功: id={}, name={}, isTemporary={}",
-            provider.getId(), provider.getProviderName(), provider.isTemporary());
+            savedProvider.getId(), savedProvider.getProviderName(), savedProvider.isTemporary());
 
-        return converter.toDTO(provider);
+        return converter.toDTO(savedProvider);
     }
 
     /**
@@ -109,12 +109,12 @@ public class DataProviderService {
             request.getDisplayName()
         );
 
-        repository.save(provider);
+        DataProvider savedProvider = repository.save(provider);
 
         log.info("创建字典DataProvider成功: id={}, dictType={}",
-            provider.getId(), request.getDictType());
+            savedProvider.getId(), request.getDictType());
 
-        return converter.toDTO(provider);
+        return converter.toDTO(savedProvider);
     }
 
     /**
@@ -168,8 +168,8 @@ public class DataProviderService {
         }
 
         DataProvider provider = converter.toDomain(dto);
-        repository.save(provider);
-        return converter.toDTO(provider);
+        DataProvider savedProvider = repository.save(provider);
+        return converter.toDTO(savedProvider);
     }
 
     public DataProviderDTO getById(Long id) {
@@ -192,10 +192,35 @@ public class DataProviderService {
             throw new BizException("数据提供方不存在：" + id);
         }
 
-        // 由于DataProvider是不可变的，需要重新创建
-        // TODO: 实现基于UpdateDTO的重建逻辑
-        // 暂时抛出异常，等待实现
-        throw new BizException("更新功能暂未实现");
+        Integer cacheEnabled = dto.getCacheEnabled() != null ? dto.getCacheEnabled() : existing.getCacheEnabled();
+        Integer cacheTtlSeconds = dto.getCacheTtlSeconds() != null ? dto.getCacheTtlSeconds() : existing.getCacheTtlSeconds();
+        if (cacheEnabled != null && cacheEnabled == 1 && (cacheTtlSeconds == null || cacheTtlSeconds <= 0)) {
+            cacheTtlSeconds = 300;
+        }
+
+        OffsetDateTime createdAt = existing.getAuditInfo() != null ? existing.getAuditInfo().getCreatedAt() : null;
+        OffsetDateTime updatedAt = OffsetDateTime.now();
+
+        DataProvider updated = DataProvider.rebuild(
+            existing.getId(),
+            existing.getProviderCode(),
+            dto.getProviderName() != null ? dto.getProviderName() : existing.getProviderName(),
+            existing.getProviderType(),
+            dto.getConfigJson() != null ? dto.getConfigJson() : existing.getConfigJson(),
+            cacheEnabled,
+            cacheTtlSeconds,
+            existing.getIsTemporary(),
+            existing.getStatus(),
+            existing.getCreatedBy(),
+            existing.getCreatedName(),
+            createdAt,
+            existing.getUpdatedBy(),
+            existing.getUpdatedName(),
+            updatedAt
+        );
+
+        repository.update(updated);
+        return getById(id);
     }
 
     // ============ 验证方法 ============

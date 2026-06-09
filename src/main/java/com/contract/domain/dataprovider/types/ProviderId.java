@@ -1,6 +1,7 @@
 package com.contract.domain.dataprovider.types;
 
 import com.contract.common.exception.BizException;
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Objects;
 
 /**
@@ -16,6 +17,7 @@ public final class ProviderId {
         this.value = value;
     }
 
+    @JsonValue
     public Long getValue() { return value; }
 
     @Override

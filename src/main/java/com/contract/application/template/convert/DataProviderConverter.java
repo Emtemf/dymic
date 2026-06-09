@@ -51,6 +51,17 @@ public interface DataProviderConverter {
             return null;
         }
         String providerType = dto.getProviderType();
+
+        // 如果提供了 providerCode，使用基础 create 方法
+        if (dto.getProviderCode() != null && !dto.getProviderCode().isBlank()) {
+            return DataProvider.create(
+                dto.getProviderCode(),
+                dto.getProviderName(),
+                providerType
+            );
+        }
+
+        // 否则根据类型使用专门的工厂方法
         if ("STATIC".equals(providerType)) {
             return DataProvider.createStaticOptions(
                 dto.getProviderName(),
