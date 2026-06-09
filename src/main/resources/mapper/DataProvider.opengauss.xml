@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.contract.infrastructure.persistence.mapper.DataProviderMapper">
+
+    <resultMap id="DataProviderResultMap" type="com.contract.infrastructure.persistence.entity.DataProviderEntity">
+        <id column="id" property="id"/>
+        <result column="provider_code" property="providerCode"/>
+        <result column="provider_name" property="providerName"/>
+        <result column="provider_type" property="providerType"/>
+        <result column="data_source_category" property="dataSourceCategory"/>
+        <result column="config_json" property="configJson"/>
+        <result column="cache_enabled" property="cacheEnabled"/>
+        <result column="cache_ttl_seconds" property="cacheTtlSeconds"/>
+        <result column="is_temporary" property="isTemporary"/>
+        <result column="status" property="status"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, provider_code, provider_name, provider_type, data_source_category, config_json,
+        cache_enabled, cache_ttl_seconds, is_temporary, status,
+        created_by, created_at, updated_by, updated_at, is_deleted
+    </sql>
+
+    <insert id="insertDataProvider" parameterType="com.contract.infrastructure.persistence.entity.DataProviderEntity">
+        INSERT INTO t_ui_data_provider (
+            id, provider_code, provider_name, provider_type, data_source_category, config_json,
+            cache_enabled, cache_ttl_seconds, is_temporary, status,
+            created_by, created_at, updated_by, updated_at, is_deleted
+        ) VALUES (
+            #{id}, #{providerCode}, #{providerName}, #{providerType}, #{dataSourceCategory}, #{configJson},
+            #{cacheEnabled}, #{cacheTtlSeconds}, #{isTemporary}, #{status},
+            #{createdBy}, #{createdAt}, #{updatedBy}, #{updatedAt},
+            COALESCE(#{isDeleted}, 0)
+        )
+    </insert>
+
+    <select id="selectByIdValue" resultMap="DataProviderResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_data_provider
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <select id="selectByProviderCode" resultMap="DataProviderResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_data_provider
+        WHERE provider_code = #{providerCode} AND is_deleted = 0
+    </select>
+
+    <select id="countByProviderCode" resultType="long">
+        SELECT COUNT(*)
+        FROM t_ui_data_provider
+        WHERE provider_code = #{providerCode} AND is_deleted = 0
+    </select>
+
+    <update id="updateDataProvider" parameterType="com.contract.infrastructure.persistence.entity.DataProviderEntity">
+        UPDATE t_ui_data_provider
+        SET provider_code = #{providerCode},
+            provider_name = #{providerName},
+            provider_type = #{providerType},
+            data_source_category = #{dataSourceCategory},
+            config_json = #{configJson},
+            cache_enabled = #{cacheEnabled},
+            cache_ttl_seconds = #{cacheTtlSeconds},
+            is_temporary = #{isTemporary},
+            status = #{status},
+            created_by = #{createdBy},
+            created_at = #{createdAt},
+            updated_by = #{updatedBy},
+            updated_at = #{updatedAt},
+            is_deleted = COALESCE(#{isDeleted}, is_deleted)
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <select id="selectAllDataProviders" resultMap="DataProviderResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_data_provider
+        WHERE is_deleted = 0
+    </select>
+
+    <select id="selectByIds" resultMap="DataProviderResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_data_provider
+        WHERE is_deleted = 0
+          AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="selectByType" resultMap="DataProviderResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_data_provider
+        WHERE provider_type = #{providerType} AND is_deleted = 0
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectByCategory" resultMap="DataProviderResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_data_provider
+        WHERE data_source_category = #{category} AND is_deleted = 0
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectDictByType" resultMap="DataProviderResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_data_provider
+        WHERE provider_type = 'DICT'
+          AND CAST(config_json AS VARCHAR) LIKE CONCAT('%"dictType":"', #{dictType}, '"%')
+          AND is_deleted = 0
+    </select>
+
+</mapper>
