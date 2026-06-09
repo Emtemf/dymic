@@ -1,13 +1,16 @@
 package com.contract.adapter.controller;
 
+import com.contract.adapter.controller.request.ActionConfigCreateReq;
+import com.contract.adapter.controller.request.ActionConfigUpdateReq;
 import com.contract.application.template.ActionConfigService;
-import com.contract.application.template.dto.ActionConfigDTO;
 import com.contract.application.template.dto.ActionConfigCreateRequest;
+import com.contract.application.template.dto.ActionConfigDTO;
 import com.contract.application.template.dto.ActionConfigUpdateRequest;
 import com.contract.common.result.Result;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 /**
@@ -27,8 +30,19 @@ public class ActionConfigController {
     public Result<ActionConfigDTO> create(
         @PathVariable Long templateId,
         @PathVariable Long versionId,
-        @Valid @RequestBody ActionConfigCreateRequest request
+        @Valid @RequestBody ActionConfigCreateReq req
     ) {
+        ActionConfigCreateRequest request = new ActionConfigCreateRequest();
+        request.setActionName(req.getActionName());
+        request.setActionType(req.getActionType());
+        request.setBindNodeId(req.getBindNodeId());
+        request.setBindQueryId(req.getBindQueryId());
+        request.setConfirmRequired(req.getConfirmRequired());
+        request.setConfirmText(req.getConfirmText());
+        request.setBeforeRule(req.getBeforeRule());
+        request.setAfterRule(req.getAfterRule());
+        request.setPropsJson(req.getPropsJson());
+        request.setSortNo(req.getSortNo());
         ActionConfigDTO result = service.create(templateId, versionId, request);
         return Result.ok(result);
     }
@@ -57,8 +71,17 @@ public class ActionConfigController {
     @PutMapping("/{configId}")
     public Result<ActionConfigDTO> update(
         @PathVariable Long configId,
-        @Valid @RequestBody ActionConfigUpdateRequest request
+        @Valid @RequestBody ActionConfigUpdateReq req
     ) {
+        ActionConfigUpdateRequest request = new ActionConfigUpdateRequest();
+        request.setActionName(req.getActionName());
+        request.setBindQueryId(req.getBindQueryId());
+        request.setConfirmRequired(req.getConfirmRequired());
+        request.setConfirmText(req.getConfirmText());
+        request.setBeforeRule(req.getBeforeRule());
+        request.setAfterRule(req.getAfterRule());
+        request.setPropsJson(req.getPropsJson());
+        request.setSortNo(req.getSortNo());
         ActionConfigDTO result = service.update(configId, request);
         return Result.ok(result);
     }

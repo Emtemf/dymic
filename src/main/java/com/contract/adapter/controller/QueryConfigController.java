@@ -1,10 +1,14 @@
 package com.contract.adapter.controller;
 
+import com.contract.adapter.controller.request.QueryConfigCreateReq;
+import com.contract.adapter.controller.request.QueryConfigUpdateReq;
 import com.contract.application.template.QueryConfigService;
 import com.contract.application.template.dto.*;
 import com.contract.common.result.Result;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -17,7 +21,19 @@ public class QueryConfigController {
     public Result<QueryConfigDTO> create(
             @PathVariable Long templateId,
             @PathVariable Long versionId,
-            @RequestBody QueryConfigCreateRequest request) {
+            @Valid @RequestBody QueryConfigCreateReq req) {
+        QueryConfigCreateRequest request = new QueryConfigCreateRequest();
+        request.setQueryCode(req.getQueryCode());
+        request.setQueryName(req.getQueryName());
+        request.setQueryType(req.getQueryType());
+        request.setDataProviderId(req.getDataProviderId());
+        request.setTriggerType(req.getTriggerType());
+        request.setResultMode(req.getResultMode());
+        request.setBindNodeId(req.getBindNodeId());
+        request.setPageSize(req.getPageSize());
+        request.setPropsJson(req.getPropsJson());
+        request.setParams(req.getParams());
+        request.setFillRules(req.getFillRules());
         return Result.ok(service.create(templateId, versionId, request));
     }
 
@@ -36,7 +52,18 @@ public class QueryConfigController {
     @PutMapping("/query-configs/{id}")
     public Result<QueryConfigDTO> update(
             @PathVariable Long id,
-            @RequestBody QueryConfigUpdateRequest request) {
+            @Valid @RequestBody QueryConfigUpdateReq req) {
+        QueryConfigUpdateRequest request = new QueryConfigUpdateRequest();
+        request.setQueryName(req.getQueryName());
+        request.setQueryType(req.getQueryType());
+        request.setDataProviderId(req.getDataProviderId());
+        request.setTriggerType(req.getTriggerType());
+        request.setResultMode(req.getResultMode());
+        request.setBindNodeId(req.getBindNodeId());
+        request.setPageSize(req.getPageSize());
+        request.setPropsJson(req.getPropsJson());
+        request.setParams(req.getParams());
+        request.setFillRules(req.getFillRules());
         return Result.ok(service.update(id, request));
     }
 

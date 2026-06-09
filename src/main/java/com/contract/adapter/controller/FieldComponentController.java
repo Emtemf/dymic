@@ -1,13 +1,15 @@
 package com.contract.adapter.controller;
 
+import com.contract.adapter.controller.request.FieldComponentCreateReq;
 import com.contract.application.template.FieldComponentService;
-import com.contract.application.template.dto.FieldComponentDTO;
 import com.contract.application.template.dto.FieldComponentCreateRequest;
+import com.contract.application.template.dto.FieldComponentDTO;
 import com.contract.application.template.dto.FieldComponentUpdateDTO;
 import com.contract.common.result.Result;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 /**
@@ -24,15 +26,30 @@ public class FieldComponentController {
      *
      * @param templateId 模板ID
      * @param versionId  版本ID
-     * @param request    创建请求
+     * @param req        创建请求
      * @return 创建的字段组件绑定
      */
     @PostMapping
     public Result<FieldComponentDTO> create(
         @PathVariable Long templateId,
         @PathVariable Long versionId,
-        @Valid @RequestBody FieldComponentCreateRequest request
+        @Valid @RequestBody FieldComponentCreateReq req
     ) {
+        FieldComponentCreateRequest request = new FieldComponentCreateRequest();
+        request.setLayoutNodeId(req.getLayoutNodeId());
+        request.setFieldDefId(req.getFieldDefId());
+        request.setComponentType(req.getComponentType());
+        request.setLabelName(req.getLabelName());
+        request.setPlaceholder(req.getPlaceholder());
+        request.setRequiredRule(req.getRequiredRule());
+        request.setReadonlyRule(req.getReadonlyRule());
+        request.setVisibleRule(req.getVisibleRule());
+        request.setComponentProps(req.getComponentProps());
+        request.setDataSourceType(req.getDataSourceType());
+        request.setStaticOptionsJson(req.getStaticOptionsJson());
+        request.setDictType(req.getDictType());
+        request.setDataProviderId(req.getDataProviderId());
+        request.setSortNo(req.getSortNo());
         FieldComponentDTO result = service.create(templateId, versionId, request);
         return Result.ok(result);
     }
