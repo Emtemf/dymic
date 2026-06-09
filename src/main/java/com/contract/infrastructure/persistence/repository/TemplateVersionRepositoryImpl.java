@@ -4,7 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.contract.infrastructure.persistence.entity.TemplateVersionEntity;
 import com.contract.infrastructure.persistence.mapper.TemplateVersionMapper;
 import com.contract.domain.template.TemplateVersion;
-import com.contract.domain.template.TemplateVersion.VersionStatus;
+import com.contract.domain.template.types.VersionStatus;
+import com.contract.domain.shared.types.AuditInfo;
 import com.contract.domain.template.repository.TemplateVersionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -31,8 +32,8 @@ public class TemplateVersionRepositoryImpl implements TemplateVersionRepository 
         entity.setCreatedAt(LocalDateTime.now());
         entity.setUpdatedAt(LocalDateTime.now());
         versionMapper.insert(entity);
-        version.setId(entity.getId());
-        return version;
+        // 返回重新构建的对象，而不是修改原对象（保持不可变性）
+        return toDomain(entity);
     }
 
     @Override
@@ -88,6 +89,14 @@ public class TemplateVersionRepositoryImpl implements TemplateVersionRepository 
     private TemplateVersion toDomain(TemplateVersionEntity entity) {
         VersionStatus status = entity.getVersionStatus() != null
             ? VersionStatus.valueOf(entity.getVersionStatus()) : null;
+        AuditInfo auditInfo = AuditInfo.of(
+            entity.getCreatedBy(),
+            entity.getCreatedName(),
+            toOffsetDateTime(entity.getCreatedAt()),
+            entity.getUpdatedBy(),
+            entity.getUpdatedName(),
+            toOffsetDateTime(entity.getUpdatedAt())
+        );
         return TemplateVersion.reconstitute(
             entity.getId(),
             entity.getTemplateId(),
@@ -98,12 +107,7 @@ public class TemplateVersionRepositoryImpl implements TemplateVersionRepository 
             entity.getPublishBy(),
             entity.getSchemaHash(),
             entity.getRemark(),
-            entity.getCreatedBy(),
-            entity.getCreatedName(),
-            toOffsetDateTime(entity.getCreatedAt()),
-            entity.getUpdatedBy(),
-            entity.getUpdatedName(),
-            toOffsetDateTime(entity.getUpdatedAt())
+            auditInfo
         );
     }
 

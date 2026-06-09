@@ -1,12 +1,32 @@
 package com.contract.domain.template;
 
 import com.contract.common.exception.BizException;
+import com.contract.domain.shared.types.AuditInfo;
+import com.contract.domain.template.types.VersionStatus;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
 /**
- * 模板版本领域模型
- * 充血模型，包含业务方法
+ * 模板版本聚合根
+ *
+ * ===== 领域统一业务语言 =====
+ *
+ * 【状态流转】
+ *   创建 → DRAFT → PUBLISHED → DISABLED
+ *                ↘ ARCHIVED
+ *
+ * 【状态转换规则】
+ * - DRAFT → PUBLISHED：发布版本（管理员操作）
+ * - PUBLISHED → DISABLED：停用版本（管理员操作）
+ * - DRAFT/PUBLISHED → ARCHIVED：归档版本（管理员操作）
+ *
+ * 【业务规则】
+ * 1. 只有DRAFT状态才能发布
+ * 2. 发布后记录发布时间和发布人
+ *
+ * 【聚合边界】
+ * - TemplateVersion是聚合根
+ * - 包含值对象：VersionStatus、AuditInfo
  */
 public class TemplateVersion {
     private Long id;
@@ -18,49 +38,74 @@ public class TemplateVersion {
     private Long publishBy;
     private String schemaHash;
     private String remark;
-    private Long createdBy;
-    private String createdName;
-    private OffsetDateTime createdAt;
-    private Long updatedBy;
-    private String updatedName;
-    private OffsetDateTime updatedAt;
-
-    public enum VersionStatus {
-        DRAFT, PUBLISHED, DISABLED, ARCHIVED
-    }
+    private AuditInfo auditInfo;
 
     private TemplateVersion() {}
 
     /**
      * 创建草稿版本（工厂方法）
+     *
+     * 【前置条件】
+     * - templateId != null
+     * - versionNo > 0
+     *
+     * 【后置条件】
+     * - versionStatus == DRAFT
      */
     public static TemplateVersion createDraft(Long templateId, Integer versionNo, String versionName) {
+        if (templateId == null) {
+            throw new BizException("模板ID不能为空");
+        }
+        if (versionNo == null || versionNo <= 0) {
+            throw new BizException("版本号必须大于0");
+        }
+
         TemplateVersion v = new TemplateVersion();
         v.templateId = templateId;
         v.versionNo = versionNo;
         v.versionName = versionName;
         v.versionStatus = VersionStatus.DRAFT;
+        v.auditInfo = AuditInfo.create();
         return v;
     }
 
     /**
      * 发布版本
-     * 只有草稿状态才能发布
+     *
+     * 【前置条件】
+     * - versionStatus == DRAFT
+     *
+     * 【后置条件】
+     * - versionStatus == PUBLISHED
+     * - publishTime != null
+     *
+     * @throws BizException 如果状态不是DRAFT
      */
     public void publish(Long publishBy) {
         if (versionStatus != VersionStatus.DRAFT) {
-            throw new BizException("只有草稿状态才能发布，当前状态：" + versionStatus);
+            throw new BizException("只有草稿状态才能发布，当前状态：" + versionStatus.getDisplayName());
         }
         this.versionStatus = VersionStatus.PUBLISHED;
         this.publishTime = OffsetDateTime.now();
         this.publishBy = publishBy;
+        this.auditInfo = auditInfo.update();
     }
 
     /**
      * 停用版本
+     *
+     * 【前置条件】
+     * - versionStatus == PUBLISHED
+     *
+     * 【后置条件】
+     * - versionStatus == DISABLED
      */
     public void disable() {
+        if (versionStatus != VersionStatus.PUBLISHED) {
+            throw new BizException("只有已发布状态才能停用");
+        }
         this.versionStatus = VersionStatus.DISABLED;
+        this.auditInfo = auditInfo.update();
     }
 
     /**
@@ -101,21 +146,24 @@ public class TemplateVersion {
     public Long getPublishBy() { return publishBy; }
     public String getSchemaHash() { return schemaHash; }
     public String getRemark() { return remark; }
-    public Long getCreatedBy() { return createdBy; }
-    public String getCreatedName() { return createdName; }
-    public OffsetDateTime getCreatedAt() { return createdAt; }
-    public Long getUpdatedBy() { return updatedBy; }
-    public String getUpdatedName() { return updatedName; }
-    public OffsetDateTime getUpdatedAt() { return updatedAt; }
+    public AuditInfo getAuditInfo() { return auditInfo; }
+
+    // 便捷方法（向后兼容）
+    public Long getCreatedBy() { return auditInfo != null ? auditInfo.getCreatedBy() : null; }
+    public String getCreatedName() { return auditInfo != null ? auditInfo.getCreatedName() : null; }
+    public OffsetDateTime getCreatedAt() { return auditInfo != null ? auditInfo.getCreatedAt() : null; }
+    public Long getUpdatedBy() { return auditInfo != null ? auditInfo.getUpdatedBy() : null; }
+    public String getUpdatedName() { return auditInfo != null ? auditInfo.getUpdatedName() : null; }
+    public OffsetDateTime getUpdatedAt() { return auditInfo != null ? auditInfo.getUpdatedAt() : null; }
 
     /**
-     * Reconstitute from persistence (used by Repository only)
+     * Reconstitute from persistence
      */
-    public static TemplateVersion reconstitute(Long id, Long templateId, Integer versionNo, String versionName,
-                                               VersionStatus versionStatus, OffsetDateTime publishTime, Long publishBy,
-                                               String schemaHash, String remark,
-                                               Long createdBy, String createdName, OffsetDateTime createdAt,
-                                               Long updatedBy, String updatedName, OffsetDateTime updatedAt) {
+    public static TemplateVersion reconstitute(
+        Long id, Long templateId, Integer versionNo, String versionName,
+        VersionStatus versionStatus, OffsetDateTime publishTime, Long publishBy,
+        String schemaHash, String remark, AuditInfo auditInfo
+    ) {
         TemplateVersion v = new TemplateVersion();
         v.id = id;
         v.templateId = templateId;
@@ -126,28 +174,9 @@ public class TemplateVersion {
         v.publishBy = publishBy;
         v.schemaHash = schemaHash;
         v.remark = remark;
-        v.createdBy = createdBy;
-        v.createdName = createdName;
-        v.createdAt = createdAt;
-        v.updatedBy = updatedBy;
-        v.updatedName = updatedName;
-        v.updatedAt = updatedAt;
+        v.auditInfo = auditInfo;
         return v;
     }
-
-    // Public setters (for MapStruct/Repository)
-    public void setId(Long id) { this.id = id; }
-    public void setTemplateId(Long templateId) { this.templateId = templateId; }
-    public void setVersionNo(Integer versionNo) { this.versionNo = versionNo; }
-    public void setVersionName(String versionName) { this.versionName = versionName; }
-    public void setSchemaHash(String schemaHash) { this.schemaHash = schemaHash; }
-    public void setRemark(String remark) { this.remark = remark; }
-    public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
-    public void setCreatedName(String createdName) { this.createdName = createdName; }
-    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
-    public void setUpdatedBy(Long updatedBy) { this.updatedBy = updatedBy; }
-    public void setUpdatedName(String updatedName) { this.updatedName = updatedName; }
-    public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     @Override
     public boolean equals(Object o) {
@@ -157,5 +186,7 @@ public class TemplateVersion {
     }
 
     @Override
-    public int hashCode() { return Objects.hash(id); }
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

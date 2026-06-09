@@ -1,7 +1,8 @@
 package com.contract.infrastructure.persistence.convert;
 
 import com.contract.domain.template.TemplateVersion;
-import com.contract.domain.template.TemplateVersion.VersionStatus;
+import com.contract.domain.template.types.VersionStatus;
+import com.contract.domain.shared.types.AuditInfo;
 import com.contract.infrastructure.persistence.entity.TemplateVersionEntity;
 import org.mapstruct.Mapper;
 
@@ -27,6 +28,14 @@ public interface EntityTemplateVersionConverter {
         }
         VersionStatus status = entity.getVersionStatus() != null
             ? VersionStatus.valueOf(entity.getVersionStatus()) : null;
+        AuditInfo auditInfo = AuditInfo.of(
+            entity.getCreatedBy(),
+            entity.getCreatedName(),
+            toOffsetDateTime(entity.getCreatedAt()),
+            entity.getUpdatedBy(),
+            entity.getUpdatedName(),
+            toOffsetDateTime(entity.getUpdatedAt())
+        );
         return TemplateVersion.reconstitute(
             entity.getId(),
             entity.getTemplateId(),
@@ -37,12 +46,7 @@ public interface EntityTemplateVersionConverter {
             entity.getPublishBy(),
             entity.getSchemaHash(),
             entity.getRemark(),
-            entity.getCreatedBy(),
-            entity.getCreatedName(),
-            toOffsetDateTime(entity.getCreatedAt()),
-            entity.getUpdatedBy(),
-            entity.getUpdatedName(),
-            toOffsetDateTime(entity.getUpdatedAt())
+            auditInfo
         );
     }
 
