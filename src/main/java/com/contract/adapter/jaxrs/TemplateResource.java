@@ -32,9 +32,9 @@ public class TemplateResource {
             req.getBizType()
         );
         TemplateCreateRsp rsp = TemplateCreateRsp.builder()
-            .id(template.getId())
-            .templateCode(template.getTemplateCode())
-            .templateName(template.getTemplateName())
+            .id(template.getIdValue())
+            .templateCode(template.getTemplateCodeValue())
+            .templateName(template.getTemplateNameValue())
             .status(template.getStatus().name())
             .build();
         return Response.status(Response.Status.CREATED).entity(rsp).build();
@@ -75,11 +75,11 @@ public class TemplateResource {
 
     private TemplateGetRsp toGetRsp(Template t) {
         return TemplateGetRsp.builder()
-            .id(t.getId())
-            .templateCode(t.getTemplateCode())
-            .templateName(t.getTemplateName())
-            .templateDesc(t.getTemplateDesc())
-            .bizType(t.getBizType())
+            .id(t.getIdValue())
+            .templateCode(t.getTemplateCodeValue())
+            .templateName(t.getTemplateNameValue())
+            .templateDesc(t.getTemplateDescValue())
+            .bizType(t.getBizTypeValue())
             .status(t.getStatus().name())
             .currentVersionId(t.getCurrentVersionId())
             .createdAt(t.getCreatedAt())

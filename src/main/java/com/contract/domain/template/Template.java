@@ -1,78 +1,123 @@
 package com.contract.domain.template;
 
 import com.contract.common.exception.BizException;
-import java.time.OffsetDateTime;
+import com.contract.domain.shared.types.AuditInfo;
+import com.contract.domain.template.types.*;
 import java.util.Objects;
 
 /**
- * 模板领域模型
- * 充血模型，包含业务方法
+ * 模板聚合根
+ *
+ * ===== 领域统一业务语言 =====
+ *
+ * 【状态流转】
+ *   创建 → ENABLED ⇄ DISABLED
+ *
+ * 【状态转换规则】
+ * - ENABLED → DISABLED：停用模板（管理员操作）
+ * - DISABLED → ENABLED：启用模板（管理员操作）
+ *
+ * 【业务规则】
+ * 1. 模板编码唯一
+ * 2. 模板名称不能为空
+ * 3. 只有ENABLED状态才能发布版本
+ *
+ * 【聚合边界】
+ * - Template是聚合根
+ * - 包含实体：无（TemplateVersion是独立聚合根）
+ * - 包含值对象：TemplateId、TemplateCode、TemplateName、TemplateStatus、AuditInfo
  */
 public class Template {
-    private Long id;
-    private String templateCode;
-    private String templateName;
-    private String templateDesc;
-    private String bizType;
+    private TemplateId id;
+    private TemplateCode templateCode;
+    private TemplateName templateName;
+    private TemplateDesc templateDesc;
+    private BizType bizType;
     private TemplateStatus status;
     private Long currentVersionId;
-    private Long createdBy;
-    private String createdName;
-    private OffsetDateTime createdAt;
-    private Long updatedBy;
-    private String updatedName;
-    private OffsetDateTime updatedAt;
+    private AuditInfo auditInfo;
 
-    public enum TemplateStatus {
-        ENABLED, DISABLED
-    }
-
-    private Template() {}
+    private Template() {}  // 私有构造器
 
     /**
      * 创建模板（工厂方法）
+     *
+     * 【前置条件】
+     * - templateCode不为空
+     * - templateName不为空
+     *
+     * 【后置条件】
+     * - status == ENABLED
+     *
+     * @return Template实例
+     * @throws BizException 如果参数无效
      */
-    public static Template create(String templateCode, String templateName, String templateDesc, String bizType) {
-        if (templateCode == null || templateCode.isBlank()) {
-            throw new BizException("模板编码不能为空");
-        }
-        if (templateName == null || templateName.isBlank()) {
-            throw new BizException("模板名称不能为空");
-        }
-        Template t = new Template();
-        t.templateCode = templateCode;
-        t.templateName = templateName;
-        t.templateDesc = templateDesc;
-        t.bizType = bizType;
-        t.status = TemplateStatus.ENABLED;
-        return t;
+    public static Template create(
+        TemplateCode templateCode,
+        TemplateName templateName,
+        TemplateDesc templateDesc,
+        BizType bizType
+    ) {
+        Template template = new Template();
+        template.templateCode = templateCode;
+        template.templateName = templateName;
+        template.templateDesc = templateDesc;
+        template.bizType = bizType;
+        template.status = TemplateStatus.ENABLED;
+        template.auditInfo = AuditInfo.create();
+        return template;
     }
 
     /**
      * 停用模板
+     *
+     * 【前置条件】
+     * - status == ENABLED
+     *
+     * 【后置条件】
+     * - status == DISABLED
+     *
+     * @throws BizException 如果状态不是ENABLED
      */
     public void disable() {
-        if (status == TemplateStatus.DISABLED) {
-            throw new BizException("模板已是停用状态");
+        if (status != TemplateStatus.ENABLED) {
+            throw new BizException("只有启用状态才能停用，当前状态：" + status.getDisplayName());
         }
         this.status = TemplateStatus.DISABLED;
+        this.auditInfo = auditInfo.update();
     }
 
     /**
      * 启用模板
+     *
+     * 【前置条件】
+     * - status == DISABLED
+     *
+     * 【后置条件】
+     * - status == ENABLED
+     *
+     * @throws BizException 如果状态不是DISABLED
      */
     public void enable() {
-        if (status == TemplateStatus.ENABLED) {
-            throw new BizException("模板已是启用状态");
+        if (status != TemplateStatus.DISABLED) {
+            throw new BizException("只有停用状态才能启用，当前状态：" + status.getDisplayName());
         }
         this.status = TemplateStatus.ENABLED;
+        this.auditInfo = auditInfo.update();
     }
 
     /**
      * 设置当前版本
+     *
+     * 【前置条件】
+     * - versionId != null
+     *
+     * 【后置条件】
+     * - currentVersionId == versionId
      */
     public void setCurrentVersion(Long versionId) {
         this.currentVersionId = versionId;
+        this.auditInfo = auditInfo.update();
     }
 
     /**
@@ -96,56 +141,125 @@ public class Template {
         return isEnabled();
     }
 
-    // Getters
-    public Long getId() { return id; }
-    public String getTemplateCode() { return templateCode; }
-    public String getTemplateName() { return templateName; }
-    public String getTemplateDesc() { return templateDesc; }
-    public String getBizType() { return bizType; }
+    // Getters（不暴露setter）
+    public TemplateId getId() { return id; }
+    public TemplateCode getTemplateCode() { return templateCode; }
+    public TemplateName getTemplateName() { return templateName; }
+    public TemplateDesc getTemplateDesc() { return templateDesc; }
+    public BizType getBizType() { return bizType; }
     public TemplateStatus getStatus() { return status; }
     public Long getCurrentVersionId() { return currentVersionId; }
-    public Long getCreatedBy() { return createdBy; }
-    public String getCreatedName() { return createdName; }
-    public OffsetDateTime getCreatedAt() { return createdAt; }
-    public Long getUpdatedBy() { return updatedBy; }
-    public String getUpdatedName() { return updatedName; }
-    public OffsetDateTime getUpdatedAt() { return updatedAt; }
+    public AuditInfo getAuditInfo() { return auditInfo; }
 
+    // ===== 便捷方法（向后兼容） =====
     /**
-     * Reconstitute from persistence (used by Repository only)
+     * 获取ID值（原始类型）
      */
-    public static Template reconstitute(Long id, String templateCode, String templateName, String templateDesc,
-                                        String bizType, TemplateStatus status, Long currentVersionId,
-                                        Long createdBy, String createdName, OffsetDateTime createdAt,
-                                        Long updatedBy, String updatedName, OffsetDateTime updatedAt) {
-        Template t = new Template();
-        t.id = id;
-        t.templateCode = templateCode;
-        t.templateName = templateName;
-        t.templateDesc = templateDesc;
-        t.bizType = bizType;
-        t.status = status;
-        t.currentVersionId = currentVersionId;
-        t.createdBy = createdBy;
-        t.createdName = createdName;
-        t.createdAt = createdAt;
-        t.updatedBy = updatedBy;
-        t.updatedName = updatedName;
-        t.updatedAt = updatedAt;
-        return t;
+    public Long getIdValue() {
+        return id != null ? id.getValue() : null;
     }
 
-    // Public setters (needed for MapStruct/Repository conversions)
-    public void setId(Long id) { this.id = id; }
-    public void setTemplateDesc(String templateDesc) { this.templateDesc = templateDesc; }
-    public void setBizType(String bizType) { this.bizType = bizType; }
-    public void setCurrentVersionId(Long currentVersionId) { this.currentVersionId = currentVersionId; }
-    public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
-    public void setCreatedName(String createdName) { this.createdName = createdName; }
-    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
-    public void setUpdatedBy(Long updatedBy) { this.updatedBy = updatedBy; }
-    public void setUpdatedName(String updatedName) { this.updatedName = updatedName; }
-    public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
+    /**
+     * 获取模板编码值（原始类型）
+     */
+    public String getTemplateCodeValue() {
+        return templateCode != null ? templateCode.getValue() : null;
+    }
+
+    /**
+     * 获取模板名称值（原始类型）
+     */
+    public String getTemplateNameValue() {
+        return templateName != null ? templateName.getValue() : null;
+    }
+
+    /**
+     * 获取模板描述值（原始类型）
+     */
+    public String getTemplateDescValue() {
+        return templateDesc != null ? templateDesc.getValue() : null;
+    }
+
+    /**
+     * 获取业务类型值（原始类型）
+     */
+    public String getBizTypeValue() {
+        return bizType != null ? bizType.getValue() : null;
+    }
+
+    /**
+     * 获取状态值（原始类型）
+     */
+    public String getStatusValue() {
+        return status != null ? status.name() : null;
+    }
+
+    /**
+     * 获取创建人ID（审计信息）
+     */
+    public Long getCreatedBy() {
+        return auditInfo != null ? auditInfo.getCreatedBy() : null;
+    }
+
+    /**
+     * 获取创建人名称（审计信息）
+     */
+    public String getCreatedName() {
+        return auditInfo != null ? auditInfo.getCreatedName() : null;
+    }
+
+    /**
+     * 获取创建时间（审计信息）
+     */
+    public java.time.OffsetDateTime getCreatedAt() {
+        return auditInfo != null ? auditInfo.getCreatedAt() : null;
+    }
+
+    /**
+     * 获取更新人ID（审计信息）
+     */
+    public Long getUpdatedBy() {
+        return auditInfo != null ? auditInfo.getUpdatedBy() : null;
+    }
+
+    /**
+     * 获取更新人名称（审计信息）
+     */
+    public String getUpdatedName() {
+        return auditInfo != null ? auditInfo.getUpdatedName() : null;
+    }
+
+    /**
+     * 获取更新时间（审计信息）
+     */
+    public java.time.OffsetDateTime getUpdatedAt() {
+        return auditInfo != null ? auditInfo.getUpdatedAt() : null;
+    }
+
+    /**
+     * Reconstitute from persistence (used by MapStruct only)
+     */
+    public static Template reconstitute(
+        TemplateId id,
+        TemplateCode templateCode,
+        TemplateName templateName,
+        TemplateDesc templateDesc,
+        BizType bizType,
+        TemplateStatus status,
+        Long currentVersionId,
+        AuditInfo auditInfo
+    ) {
+        Template template = new Template();
+        template.id = id;
+        template.templateCode = templateCode;
+        template.templateName = templateName;
+        template.templateDesc = templateDesc;
+        template.bizType = bizType;
+        template.status = status;
+        template.currentVersionId = currentVersionId;
+        template.auditInfo = auditInfo;
+        return template;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -155,5 +269,7 @@ public class Template {
     }
 
     @Override
-    public int hashCode() { return Objects.hash(id); }
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

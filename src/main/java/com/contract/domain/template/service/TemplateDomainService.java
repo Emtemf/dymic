@@ -5,6 +5,7 @@ import com.contract.domain.template.Template;
 import com.contract.domain.template.TemplateVersion;
 import com.contract.domain.template.repository.TemplateRepository;
 import com.contract.domain.template.repository.TemplateVersionRepository;
+import com.contract.domain.template.types.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +22,15 @@ public class TemplateDomainService {
         if (templateRepository.existsByTemplateCode(templateCode)) {
             throw new BizException("模板编码已存在：" + templateCode);
         }
-        Template template = Template.create(templateCode, templateName, templateDesc, bizType);
+        Template template = Template.create(
+            new TemplateCode(templateCode),
+            new TemplateName(templateName),
+            templateDesc != null ? new TemplateDesc(templateDesc) : null,
+            bizType != null ? new BizType(bizType) : null
+        );
         template = templateRepository.save(template);
 
-        TemplateVersion version = TemplateVersion.createDraft(template.getId(), 1, "初始版本");
+        TemplateVersion version = TemplateVersion.createDraft(template.getIdValue(), 1, "初始版本");
         versionRepository.save(version);
         return template;
     }

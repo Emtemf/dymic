@@ -1,11 +1,13 @@
 package com.contract.infrastructure.persistence.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.contract.domain.shared.types.AuditInfo;
+import com.contract.domain.template.Template;
+import com.contract.domain.template.types.TemplateStatus;
+import com.contract.domain.template.repository.TemplateRepository;
+import com.contract.domain.template.types.*;
 import com.contract.infrastructure.persistence.entity.TemplateEntity;
 import com.contract.infrastructure.persistence.mapper.TemplateMapper;
-import com.contract.domain.template.Template;
-import com.contract.domain.template.Template.TemplateStatus;
-import com.contract.domain.template.repository.TemplateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -31,8 +33,9 @@ public class TemplateRepositoryImpl implements TemplateRepository {
         entity.setCreatedAt(LocalDateTime.now());
         entity.setUpdatedAt(LocalDateTime.now());
         templateMapper.insert(entity);
-        template.setId(entity.getId());
-        return template;
+        // 更新Domain的ID（这里需要特殊处理，因为DDD不应该有setter）
+        // 实际项目中，应该使用reconstitute重新构建一个带ID的实例
+        return toDomain(entity);
     }
 
     @Override
@@ -75,22 +78,34 @@ public class TemplateRepositoryImpl implements TemplateRepository {
      * Entity 转 Domain
      */
     private Template toDomain(TemplateEntity entity) {
+        // 转换值对象
+        TemplateId id = entity.getId() != null ? new TemplateId(entity.getId()) : null;
+        TemplateCode templateCode = entity.getTemplateCode() != null ? new TemplateCode(entity.getTemplateCode()) : null;
+        TemplateName templateName = entity.getTemplateName() != null ? new TemplateName(entity.getTemplateName()) : null;
+        TemplateDesc templateDesc = entity.getTemplateDesc() != null ? new TemplateDesc(entity.getTemplateDesc()) : null;
+        BizType bizType = entity.getBizType() != null ? new BizType(entity.getBizType()) : null;
         TemplateStatus status = entity.getStatus() != null
             ? TemplateStatus.valueOf(entity.getStatus()) : null;
-        return Template.reconstitute(
-            entity.getId(),
-            entity.getTemplateCode(),
-            entity.getTemplateName(),
-            entity.getTemplateDesc(),
-            entity.getBizType(),
-            status,
-            entity.getCurrentVersionId(),
+
+        // 转换审计信息
+        AuditInfo auditInfo = AuditInfo.of(
             entity.getCreatedBy(),
             entity.getCreatedName(),
             toOffsetDateTime(entity.getCreatedAt()),
             entity.getUpdatedBy(),
             entity.getUpdatedName(),
             toOffsetDateTime(entity.getUpdatedAt())
+        );
+
+        return Template.reconstitute(
+            id,
+            templateCode,
+            templateName,
+            templateDesc,
+            bizType,
+            status,
+            entity.getCurrentVersionId(),
+            auditInfo
         );
     }
 
@@ -99,18 +114,37 @@ public class TemplateRepositoryImpl implements TemplateRepository {
      */
     private TemplateEntity toEntity(Template template) {
         TemplateEntity entity = new TemplateEntity();
-        entity.setId(template.getId());
-        entity.setTemplateCode(template.getTemplateCode());
-        entity.setTemplateName(template.getTemplateName());
-        entity.setTemplateDesc(template.getTemplateDesc());
-        entity.setBizType(template.getBizType());
+
+        // 处理值对象
+        if (template.getId() != null) {
+            entity.setId(template.getId().getValue());
+        }
+        if (template.getTemplateCode() != null) {
+            entity.setTemplateCode(template.getTemplateCode().getValue());
+        }
+        if (template.getTemplateName() != null) {
+            entity.setTemplateName(template.getTemplateName().getValue());
+        }
+        if (template.getTemplateDesc() != null) {
+            entity.setTemplateDesc(template.getTemplateDesc().getValue());
+        }
+        if (template.getBizType() != null) {
+            entity.setBizType(template.getBizType().getValue());
+        }
+
         entity.setCurrentVersionId(template.getCurrentVersionId());
-        entity.setCreatedBy(template.getCreatedBy());
-        entity.setCreatedName(template.getCreatedName());
-        entity.setCreatedAt(toLocalDateTime(template.getCreatedAt()));
-        entity.setUpdatedBy(template.getUpdatedBy());
-        entity.setUpdatedName(template.getUpdatedName());
-        entity.setUpdatedAt(toLocalDateTime(template.getUpdatedAt()));
+
+        // 处理审计信息
+        if (template.getAuditInfo() != null) {
+            AuditInfo auditInfo = template.getAuditInfo();
+            entity.setCreatedBy(auditInfo.getCreatedBy());
+            entity.setCreatedName(auditInfo.getCreatedName());
+            entity.setCreatedAt(toLocalDateTime(auditInfo.getCreatedAt()));
+            entity.setUpdatedBy(auditInfo.getUpdatedBy());
+            entity.setUpdatedName(auditInfo.getUpdatedName());
+            entity.setUpdatedAt(toLocalDateTime(auditInfo.getUpdatedAt()));
+        }
+
         // Status: Enum -> String
         if (template.getStatus() != null) {
             entity.setStatus(template.getStatus().name());

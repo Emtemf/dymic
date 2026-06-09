@@ -94,7 +94,7 @@ public class TemplateController {
     @PostMapping("/code/{code}/disable")
     public Result<Void> disableByCode(@PathVariable String code) {
         Template template = templateService.getByCode(code);
-        templateService.disable(template.getId());
+        templateService.disable(template.getIdValue());
         return Result.ok(null);
     }
 
@@ -119,7 +119,7 @@ public class TemplateController {
     @PostMapping("/code/{code}/enable")
     public Result<Void> enableByCode(@PathVariable String code) {
         Template template = templateService.getByCode(code);
-        templateService.enable(template.getId());
+        templateService.enable(template.getIdValue());
         return Result.ok(null);
     }
 

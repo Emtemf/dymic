@@ -109,7 +109,7 @@ public class TemplateVersionController {
     ) {
         Template template = templateService.getByCode(templateCode);
         TemplateVersion version = versionService.createDraft(
-            template.getId(),
+            template.getIdValue(),
             request.getVersionNo(),
             request.getVersionName()
         );
@@ -125,7 +125,7 @@ public class TemplateVersionController {
     @GetMapping("/code/{templateCode}/versions/current")
     public Result<TemplateVersion> getCurrentVersionByCode(@PathVariable String templateCode) {
         Template template = templateService.getByCode(templateCode);
-        TemplateVersion version = versionService.findCurrentVersion(template.getId());
+        TemplateVersion version = versionService.findCurrentVersion(template.getIdValue());
         return Result.ok(version);
     }
 

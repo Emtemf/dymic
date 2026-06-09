@@ -22,11 +22,11 @@ public interface TemplateConverter {
             return null;
         }
         return TemplateDTO.builder()
-            .id(template.getId())
-            .templateCode(template.getTemplateCode())
-            .templateName(template.getTemplateName())
-            .templateDesc(template.getTemplateDesc())
-            .bizType(template.getBizType())
+            .id(template.getIdValue())
+            .templateCode(template.getTemplateCodeValue())
+            .templateName(template.getTemplateNameValue())
+            .templateDesc(template.getTemplateDescValue())
+            .bizType(template.getBizTypeValue())
             .status(template.getStatus() != null ? template.getStatus().name() : null)
             .currentVersionId(template.getCurrentVersionId())
             .createdBy(template.getCreatedBy())
