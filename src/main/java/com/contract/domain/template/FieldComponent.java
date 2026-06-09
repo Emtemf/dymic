@@ -1,6 +1,7 @@
 package com.contract.domain.template;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -8,9 +9,19 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 /**
- * 字段组件绑定领域模型
+ * 字段组件实体
+ *
+ * ===== 领域统一业务语言 =====
+ *
+ * 【身份标识】
+ * - 由 id 唯一标识
+ *
+ * 【业务规则】
+ * 1. 组件类型必须有效
+ * 2. 绑定字段必须存在
  */
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

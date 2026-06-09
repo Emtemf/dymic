@@ -1,16 +1,28 @@
 package com.contract.domain.template;
 
 import com.contract.common.util.PinyinUtils;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 动作配置领域模型
+ * 动作配置实体
+ *
+ * ===== 领域统一业务语言 =====
+ *
+ * 【身份标识】
+ * - 由 id 唯一标识
+ *
+ * 【业务规则】
+ * 1. 动作类型必须有效
+ * 2. 绑定节点必须存在
+ * 3. actionCode自动生成（拼音驼峰）
  */
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

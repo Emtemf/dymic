@@ -1,16 +1,29 @@
 package com.contract.domain.template;
 
 import com.contract.common.util.PinyinUtils;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 字段定义领域模型
+ * 字段定义实体
+ *
+ * ===== 领域统一业务语言 =====
+ *
+ * 【身份标识】
+ * - 由 id 唯一标识
+ *
+ * 【业务规则】
+ * 1. 字段路径唯一
+ * 2. 字段类型必须有效
+ * 3. fieldCode自动生成（拼音驼峰）
+ * 4. fieldPath自动生成（父路径 + fieldCode）
  */
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

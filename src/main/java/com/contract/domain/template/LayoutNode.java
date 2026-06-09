@@ -1,16 +1,33 @@
 package com.contract.domain.template;
 
 import com.contract.common.util.PinyinUtils;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 布局节点领域模型
+ * 布局节点聚合根
+ *
+ * ===== 领域统一业务语言 =====
+ *
+ * 【状态流转】
+ *   创建 → 存在 → 删除
+ *
+ * 【业务规则】
+ * 1. nodeCode自动生成（拼音驼峰）
+ * 2. nodePath自动生成（父路径 + nodeCode）
+ * 3. 嵌套层级不超过10层
+ *
+ * 【聚合边界】
+ * - LayoutNode是聚合根
+ * - 包含实体：无
+ * - 包含值对象：NodeType、LayoutProps
  */
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
