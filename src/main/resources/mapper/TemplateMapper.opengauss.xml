@@ -1,4 +1,75 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.contract.adapter.persistence.mapper.TemplateMapper">
+<mapper namespace="com.contract.infrastructure.persistence.mapper.TemplateMapper">
+
+    <resultMap id="TemplateResultMap" type="com.contract.infrastructure.persistence.entity.TemplateEntity">
+        <id column="id" property="id"/>
+        <result column="template_code" property="templateCode"/>
+        <result column="template_name" property="templateName"/>
+        <result column="template_desc" property="templateDesc"/>
+        <result column="biz_type" property="bizType"/>
+        <result column="status" property="status"/>
+        <result column="current_version_id" property="currentVersionId"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, template_code, template_name, template_desc, biz_type, status,
+        current_version_id, created_by, created_at, updated_by, updated_at, is_deleted
+    </sql>
+
+    <insert id="insertTemplate" parameterType="com.contract.infrastructure.persistence.entity.TemplateEntity">
+        INSERT INTO t_ui_template (
+            id, template_code, template_name, template_desc, biz_type, status,
+            current_version_id, created_by, created_at, updated_by, updated_at, is_deleted
+        ) VALUES (
+            #{id}, #{templateCode}, #{templateName}, #{templateDesc}, #{bizType}, #{status},
+            #{currentVersionId}, #{createdBy}, #{createdAt}, #{updatedBy}, #{updatedAt}, COALESCE(#{isDeleted}, 0)
+        )
+    </insert>
+
+    <select id="selectByIdValue" resultMap="TemplateResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_template
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <select id="selectByTemplateCode" resultMap="TemplateResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_template
+        WHERE template_code = #{templateCode} AND is_deleted = 0
+    </select>
+
+    <select id="selectAllTemplates" resultMap="TemplateResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_template
+        WHERE is_deleted = 0
+    </select>
+
+    <update id="updateTemplate" parameterType="com.contract.infrastructure.persistence.entity.TemplateEntity">
+        UPDATE t_ui_template
+        SET template_code = #{templateCode},
+            template_name = #{templateName},
+            template_desc = #{templateDesc},
+            biz_type = #{bizType},
+            status = #{status},
+            current_version_id = #{currentVersionId},
+            created_by = #{createdBy},
+            created_at = #{createdAt},
+            updated_by = #{updatedBy},
+            updated_at = #{updatedAt},
+            is_deleted = COALESCE(#{isDeleted}, is_deleted)
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <select id="countByTemplateCode" resultType="long">
+        SELECT COUNT(*)
+        FROM t_ui_template
+        WHERE template_code = #{templateCode} AND is_deleted = 0
+    </select>
+
 </mapper>

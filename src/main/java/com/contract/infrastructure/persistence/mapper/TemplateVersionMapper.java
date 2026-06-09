@@ -1,20 +1,27 @@
 package com.contract.infrastructure.persistence.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.contract.infrastructure.persistence.entity.TemplateVersionEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * 模板版本Mapper
  */
 @Mapper
-public interface TemplateVersionMapper extends BaseMapper<TemplateVersionEntity> {
+public interface TemplateVersionMapper {
+    int insertTemplateVersion(TemplateVersionEntity entity);
 
-    /**
-     * 查找当前发布的版本（最新的已发布版本）
-     */
-    @Select("SELECT * FROM t_ui_template_version WHERE template_id = #{templateId} AND version_status = 'PUBLISHED' ORDER BY version_no DESC LIMIT 1")
+    TemplateVersionEntity selectByIdValue(@Param("id") Long id);
+
+    TemplateVersionEntity selectByTemplateIdAndVersionNo(@Param("templateId") Long templateId, @Param("versionNo") Integer versionNo);
+
     TemplateVersionEntity findCurrentVersion(@Param("templateId") Long templateId);
+
+    List<TemplateVersionEntity> selectByTemplateId(@Param("templateId") Long templateId);
+
+    int updateTemplateVersion(TemplateVersionEntity entity);
+
+    long countByTemplateIdAndVersionNo(@Param("templateId") Long templateId, @Param("versionNo") Integer versionNo);
 }

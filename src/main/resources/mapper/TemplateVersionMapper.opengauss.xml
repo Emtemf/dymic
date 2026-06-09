@@ -1,4 +1,92 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.contract.adapter.persistence.mapper.TemplateVersionMapper">
+<mapper namespace="com.contract.infrastructure.persistence.mapper.TemplateVersionMapper">
+
+    <resultMap id="TemplateVersionResultMap" type="com.contract.infrastructure.persistence.entity.TemplateVersionEntity">
+        <id column="id" property="id"/>
+        <result column="template_id" property="templateId"/>
+        <result column="version_no" property="versionNo"/>
+        <result column="version_name" property="versionName"/>
+        <result column="version_status" property="versionStatus"/>
+        <result column="publish_time" property="publishTime"/>
+        <result column="publish_by" property="publishBy"/>
+        <result column="schema_hash" property="schemaHash"/>
+        <result column="remark" property="remark"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_name" property="createdName"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="updated_name" property="updatedName"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, template_id, version_no, version_name, version_status, publish_time, publish_by,
+        schema_hash, remark, created_by, created_name, created_at, updated_by, updated_name, updated_at, is_deleted
+    </sql>
+
+    <insert id="insertTemplateVersion" parameterType="com.contract.infrastructure.persistence.entity.TemplateVersionEntity">
+        INSERT INTO t_ui_template_version (
+            id, template_id, version_no, version_name, version_status, publish_time, publish_by,
+            schema_hash, remark, created_by, created_name, created_at, updated_by, updated_name, updated_at, is_deleted
+        ) VALUES (
+            #{id}, #{templateId}, #{versionNo}, #{versionName}, #{versionStatus}, #{publishTime}, #{publishBy},
+            #{schemaHash}, #{remark}, #{createdBy}, #{createdName}, #{createdAt}, #{updatedBy}, #{updatedName}, #{updatedAt}, COALESCE(#{isDeleted}, 0)
+        )
+    </insert>
+
+    <select id="selectByIdValue" resultMap="TemplateVersionResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_template_version
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <select id="selectByTemplateIdAndVersionNo" resultMap="TemplateVersionResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_template_version
+        WHERE template_id = #{templateId} AND version_no = #{versionNo} AND is_deleted = 0
+    </select>
+
+    <select id="findCurrentVersion" resultMap="TemplateVersionResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_template_version
+        WHERE template_id = #{templateId} AND version_status = 'PUBLISHED' AND is_deleted = 0
+        ORDER BY version_no DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectByTemplateId" resultMap="TemplateVersionResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_template_version
+        WHERE template_id = #{templateId} AND is_deleted = 0
+        ORDER BY version_no DESC
+    </select>
+
+    <update id="updateTemplateVersion" parameterType="com.contract.infrastructure.persistence.entity.TemplateVersionEntity">
+        UPDATE t_ui_template_version
+        SET template_id = #{templateId},
+            version_no = #{versionNo},
+            version_name = #{versionName},
+            version_status = #{versionStatus},
+            publish_time = #{publishTime},
+            publish_by = #{publishBy},
+            schema_hash = #{schemaHash},
+            remark = #{remark},
+            created_by = #{createdBy},
+            created_name = #{createdName},
+            created_at = #{createdAt},
+            updated_by = #{updatedBy},
+            updated_name = #{updatedName},
+            updated_at = #{updatedAt},
+            is_deleted = COALESCE(#{isDeleted}, is_deleted)
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <select id="countByTemplateIdAndVersionNo" resultType="long">
+        SELECT COUNT(*)
+        FROM t_ui_template_version
+        WHERE template_id = #{templateId} AND version_no = #{versionNo} AND is_deleted = 0
+    </select>
+
 </mapper>

@@ -1,11 +1,15 @@
 package com.contract.infrastructure.persistence.repository;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.contract.domain.shared.types.AuditInfo;
 import com.contract.domain.template.Template;
-import com.contract.domain.template.types.TemplateStatus;
 import com.contract.domain.template.repository.TemplateRepository;
-import com.contract.domain.template.types.*;
+import com.contract.domain.template.types.BizType;
+import com.contract.domain.template.types.TemplateCode;
+import com.contract.domain.template.types.TemplateDesc;
+import com.contract.domain.template.types.TemplateId;
+import com.contract.domain.template.types.TemplateName;
+import com.contract.domain.template.types.TemplateStatus;
+import com.contract.infrastructure.id.SnowflakeIdGenerator;
 import com.contract.infrastructure.persistence.entity.TemplateEntity;
 import com.contract.infrastructure.persistence.mapper.TemplateMapper;
 import lombok.RequiredArgsConstructor;
@@ -26,68 +30,59 @@ import java.util.stream.Collectors;
 public class TemplateRepositoryImpl implements TemplateRepository {
 
     private final TemplateMapper templateMapper;
+    private final SnowflakeIdGenerator idGenerator;
 
     @Override
     public Template save(Template template) {
         TemplateEntity entity = toEntity(template);
+        if (entity.getId() == null) {
+            entity.setId(idGenerator.nextId());
+        }
         entity.setCreatedAt(LocalDateTime.now());
         entity.setUpdatedAt(LocalDateTime.now());
-        templateMapper.insert(entity);
-        // 更新Domain的ID（这里需要特殊处理，因为DDD不应该有setter）
-        // 实际项目中，应该使用reconstitute重新构建一个带ID的实例
+        entity.setIsDeleted(0);
+        templateMapper.insertTemplate(entity);
         return toDomain(entity);
     }
 
     @Override
     public Template findById(Long id) {
-        TemplateEntity entity = templateMapper.selectById(id);
+        TemplateEntity entity = templateMapper.selectByIdValue(id);
         return entity != null ? toDomain(entity) : null;
     }
 
     @Override
     public Template findByTemplateCode(String templateCode) {
-        LambdaQueryWrapper<TemplateEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(TemplateEntity::getTemplateCode, templateCode);
-        TemplateEntity entity = templateMapper.selectOne(wrapper);
+        TemplateEntity entity = templateMapper.selectByTemplateCode(templateCode);
         return entity != null ? toDomain(entity) : null;
     }
 
     @Override
     public List<Template> findAll() {
-        List<TemplateEntity> entities = templateMapper.selectList(null);
-        return entities.stream()
-                .map(this::toDomain)
-                .collect(Collectors.toList());
+        List<TemplateEntity> entities = templateMapper.selectAllTemplates();
+        return entities.stream().map(this::toDomain).collect(Collectors.toList());
     }
 
     @Override
     public void update(Template template) {
         TemplateEntity entity = toEntity(template);
         entity.setUpdatedAt(LocalDateTime.now());
-        templateMapper.updateById(entity);
+        templateMapper.updateTemplate(entity);
     }
 
     @Override
     public boolean existsByTemplateCode(String templateCode) {
-        LambdaQueryWrapper<TemplateEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(TemplateEntity::getTemplateCode, templateCode);
-        return templateMapper.selectCount(wrapper) > 0;
+        return templateMapper.countByTemplateCode(templateCode) > 0;
     }
 
-    /**
-     * Entity 转 Domain
-     */
     private Template toDomain(TemplateEntity entity) {
-        // 转换值对象
         TemplateId id = entity.getId() != null ? new TemplateId(entity.getId()) : null;
         TemplateCode templateCode = entity.getTemplateCode() != null ? new TemplateCode(entity.getTemplateCode()) : null;
         TemplateName templateName = entity.getTemplateName() != null ? new TemplateName(entity.getTemplateName()) : null;
         TemplateDesc templateDesc = entity.getTemplateDesc() != null ? new TemplateDesc(entity.getTemplateDesc()) : null;
         BizType bizType = entity.getBizType() != null ? new BizType(entity.getBizType()) : null;
-        TemplateStatus status = entity.getStatus() != null
-            ? TemplateStatus.valueOf(entity.getStatus()) : null;
+        TemplateStatus status = entity.getStatus() != null ? TemplateStatus.valueOf(entity.getStatus()) : null;
 
-        // 转换审计信息
         AuditInfo auditInfo = AuditInfo.of(
             entity.getCreatedBy(),
             entity.getCreatedName(),
@@ -109,13 +104,8 @@ public class TemplateRepositoryImpl implements TemplateRepository {
         );
     }
 
-    /**
-     * Domain 转 Entity
-     */
     private TemplateEntity toEntity(Template template) {
         TemplateEntity entity = new TemplateEntity();
-
-        // 处理值对象
         if (template.getId() != null) {
             entity.setId(template.getId().getValue());
         }
@@ -131,10 +121,7 @@ public class TemplateRepositoryImpl implements TemplateRepository {
         if (template.getBizType() != null) {
             entity.setBizType(template.getBizType().getValue());
         }
-
         entity.setCurrentVersionId(template.getCurrentVersionId());
-
-        // 处理审计信息
         if (template.getAuditInfo() != null) {
             AuditInfo auditInfo = template.getAuditInfo();
             entity.setCreatedBy(auditInfo.getCreatedBy());
@@ -144,8 +131,6 @@ public class TemplateRepositoryImpl implements TemplateRepository {
             entity.setUpdatedName(auditInfo.getUpdatedName());
             entity.setUpdatedAt(toLocalDateTime(auditInfo.getUpdatedAt()));
         }
-
-        // Status: Enum -> String
         if (template.getStatus() != null) {
             entity.setStatus(template.getStatus().name());
         }

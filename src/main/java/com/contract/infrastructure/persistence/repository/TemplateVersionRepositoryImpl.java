@@ -1,12 +1,12 @@
 package com.contract.infrastructure.persistence.repository;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.contract.domain.shared.types.AuditInfo;
+import com.contract.domain.template.TemplateVersion;
+import com.contract.domain.template.repository.TemplateVersionRepository;
+import com.contract.domain.template.types.VersionStatus;
+import com.contract.infrastructure.id.SnowflakeIdGenerator;
 import com.contract.infrastructure.persistence.entity.TemplateVersionEntity;
 import com.contract.infrastructure.persistence.mapper.TemplateVersionMapper;
-import com.contract.domain.template.TemplateVersion;
-import com.contract.domain.template.types.VersionStatus;
-import com.contract.domain.shared.types.AuditInfo;
-import com.contract.domain.template.repository.TemplateVersionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -25,29 +25,30 @@ import java.util.stream.Collectors;
 public class TemplateVersionRepositoryImpl implements TemplateVersionRepository {
 
     private final TemplateVersionMapper versionMapper;
+    private final SnowflakeIdGenerator idGenerator;
 
     @Override
     public TemplateVersion save(TemplateVersion version) {
         TemplateVersionEntity entity = toEntity(version);
+        if (entity.getId() == null) {
+            entity.setId(idGenerator.nextId());
+        }
         entity.setCreatedAt(LocalDateTime.now());
         entity.setUpdatedAt(LocalDateTime.now());
-        versionMapper.insert(entity);
-        // 返回重新构建的对象，而不是修改原对象（保持不可变性）
+        entity.setIsDeleted(0);
+        versionMapper.insertTemplateVersion(entity);
         return toDomain(entity);
     }
 
     @Override
     public TemplateVersion findById(Long id) {
-        TemplateVersionEntity entity = versionMapper.selectById(id);
+        TemplateVersionEntity entity = versionMapper.selectByIdValue(id);
         return entity != null ? toDomain(entity) : null;
     }
 
     @Override
     public TemplateVersion findByTemplateIdAndVersionNo(Long templateId, Integer versionNo) {
-        LambdaQueryWrapper<TemplateVersionEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(TemplateVersionEntity::getTemplateId, templateId)
-               .eq(TemplateVersionEntity::getVersionNo, versionNo);
-        TemplateVersionEntity entity = versionMapper.selectOne(wrapper);
+        TemplateVersionEntity entity = versionMapper.selectByTemplateIdAndVersionNo(templateId, versionNo);
         return entity != null ? toDomain(entity) : null;
     }
 
@@ -59,36 +60,24 @@ public class TemplateVersionRepositoryImpl implements TemplateVersionRepository 
 
     @Override
     public List<TemplateVersion> findByTemplateId(Long templateId) {
-        LambdaQueryWrapper<TemplateVersionEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(TemplateVersionEntity::getTemplateId, templateId)
-               .orderByDesc(TemplateVersionEntity::getVersionNo);
-        List<TemplateVersionEntity> entities = versionMapper.selectList(wrapper);
-        return entities.stream()
-                .map(this::toDomain)
-                .collect(Collectors.toList());
+        List<TemplateVersionEntity> entities = versionMapper.selectByTemplateId(templateId);
+        return entities.stream().map(this::toDomain).collect(Collectors.toList());
     }
 
     @Override
     public void update(TemplateVersion version) {
         TemplateVersionEntity entity = toEntity(version);
         entity.setUpdatedAt(LocalDateTime.now());
-        versionMapper.updateById(entity);
+        versionMapper.updateTemplateVersion(entity);
     }
 
     @Override
     public boolean existsByTemplateIdAndVersionNo(Long templateId, Integer versionNo) {
-        LambdaQueryWrapper<TemplateVersionEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(TemplateVersionEntity::getTemplateId, templateId)
-               .eq(TemplateVersionEntity::getVersionNo, versionNo);
-        return versionMapper.selectCount(wrapper) > 0;
+        return versionMapper.countByTemplateIdAndVersionNo(templateId, versionNo) > 0;
     }
 
-    /**
-     * Entity 转 Domain
-     */
     private TemplateVersion toDomain(TemplateVersionEntity entity) {
-        VersionStatus status = entity.getVersionStatus() != null
-            ? VersionStatus.valueOf(entity.getVersionStatus()) : null;
+        VersionStatus status = entity.getVersionStatus() != null ? VersionStatus.valueOf(entity.getVersionStatus()) : null;
         AuditInfo auditInfo = AuditInfo.of(
             entity.getCreatedBy(),
             entity.getCreatedName(),
@@ -111,9 +100,6 @@ public class TemplateVersionRepositoryImpl implements TemplateVersionRepository 
         );
     }
 
-    /**
-     * Domain 转 Entity
-     */
     private TemplateVersionEntity toEntity(TemplateVersion version) {
         TemplateVersionEntity entity = new TemplateVersionEntity();
         entity.setId(version.getId());
@@ -130,7 +116,6 @@ public class TemplateVersionRepositoryImpl implements TemplateVersionRepository 
         entity.setUpdatedBy(version.getUpdatedBy());
         entity.setUpdatedName(version.getUpdatedName());
         entity.setUpdatedAt(toLocalDateTime(version.getUpdatedAt()));
-        // VersionStatus: Enum -> String
         if (version.getVersionStatus() != null) {
             entity.setVersionStatus(version.getVersionStatus().name());
         }
