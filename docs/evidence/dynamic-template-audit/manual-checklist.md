@@ -1,11 +1,22 @@
 # Manual Double Check Checklist
 
-This file tells the project owner how to manually re-verify the delivered system.
+## How to use this checklist
+1. Start the app
+2. Follow the scenario links below in order
+3. Compare actual pages against the saved screenshots
+4. Mark any mismatch immediately
 
-Every scenario below must have:
-- exact page entry
-- exact click/type steps
-- expected result
-- screenshot file names to compare
+## Required scenarios
+- Template CRUD
+- Version CRUD and publish
+- Layout node CRUD
+- Field component CRUD
+- Data provider CRUD
+- Contract save/echo
+- 21 component render scenarios
+- Representative nested combinations
+- Query fill-back
+- Preview consistency
 
-Scenarios will be filled in after the browser E2E phase.
+## Evidence rule
+Every scenario above must have at least one screenshot. Complex scenarios must have multiple step screenshots. Screenshots are valid only after the scenario has been fixed to match the configured result; if the UI, save/reopen state, nested display, or preview result is wrong, fix it first, then recapture the screenshots.
