@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.contract.infrastructure.persistence.mapper.FieldComponentMapper">
+
+    <resultMap id="FieldComponentResultMap" type="com.contract.infrastructure.persistence.entity.FieldComponentEntity">
+        <id column="id" property="id"/>
+        <result column="template_id" property="templateId"/>
+        <result column="template_version_id" property="templateVersionId"/>
+        <result column="layout_node_id" property="layoutNodeId"/>
+        <result column="field_def_id" property="fieldDefId"/>
+        <result column="component_type" property="componentType"/>
+        <result column="label_name" property="labelName"/>
+        <result column="placeholder" property="placeholder"/>
+        <result column="required_rule" property="requiredRule"/>
+        <result column="readonly_rule" property="readonlyRule"/>
+        <result column="visible_rule" property="visibleRule"/>
+        <result column="component_props" property="componentProps"/>
+        <result column="data_provider_id" property="dataProviderId"/>
+        <result column="sort_no" property="sortNo"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, template_id, template_version_id, layout_node_id, field_def_id, component_type,
+        label_name, placeholder, required_rule, readonly_rule, visible_rule, component_props,
+        data_provider_id, sort_no, created_at, updated_at, is_deleted
+    </sql>
+
+    <insert id="insertFieldComponent" parameterType="com.contract.infrastructure.persistence.entity.FieldComponentEntity">
+        INSERT INTO t_ui_field_component (
+            id, template_id, template_version_id, layout_node_id, field_def_id, component_type,
+            label_name, placeholder, required_rule, readonly_rule, visible_rule, component_props,
+            data_provider_id, sort_no, created_at, updated_at, is_deleted
+        ) VALUES (
+            #{id}, #{templateId}, #{templateVersionId}, #{layoutNodeId}, #{fieldDefId}, #{componentType},
+            #{labelName}, #{placeholder}, #{requiredRule}, #{readonlyRule}, #{visibleRule}, #{componentProps},
+            #{dataProviderId}, #{sortNo}, #{createdAt}, #{updatedAt}, COALESCE(#{isDeleted}, 0)
+        )
+    </insert>
+
+    <select id="selectByIdValue" resultMap="FieldComponentResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_field_component
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <select id="selectByVersionId" resultMap="FieldComponentResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_field_component
+        WHERE template_version_id = #{versionId} AND is_deleted = 0
+    </select>
+
+    <select id="selectByFieldDefId" resultMap="FieldComponentResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_field_component
+        WHERE field_def_id = #{fieldDefId} AND is_deleted = 0
+    </select>
+
+    <select id="selectByLayoutNodeId" resultMap="FieldComponentResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_field_component
+        WHERE layout_node_id = #{layoutNodeId} AND is_deleted = 0
+    </select>
+
+    <update id="updateFieldComponent" parameterType="com.contract.infrastructure.persistence.entity.FieldComponentEntity">
+        UPDATE t_ui_field_component
+        SET template_id = #{templateId},
+            template_version_id = #{templateVersionId},
+            layout_node_id = #{layoutNodeId},
+            field_def_id = #{fieldDefId},
+            component_type = #{componentType},
+            label_name = #{labelName},
+            placeholder = #{placeholder},
+            required_rule = #{requiredRule},
+            readonly_rule = #{readonlyRule},
+            visible_rule = #{visibleRule},
+            component_props = #{componentProps},
+            data_provider_id = #{dataProviderId},
+            sort_no = #{sortNo},
+            created_at = #{createdAt},
+            updated_at = #{updatedAt},
+            is_deleted = COALESCE(#{isDeleted}, is_deleted)
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <update id="deleteByIdValue">
+        UPDATE t_ui_field_component SET is_deleted = 1 WHERE id = #{id}
+    </update>
+
+    <delete id="physicalDeleteByVersionId">
+        DELETE FROM t_ui_field_component WHERE template_version_id = #{versionId}
+    </delete>
+
+</mapper>

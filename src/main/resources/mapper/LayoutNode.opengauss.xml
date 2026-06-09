@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.contract.infrastructure.persistence.mapper.LayoutNodeMapper">
+
+    <resultMap id="LayoutNodeResultMap" type="com.contract.infrastructure.persistence.entity.LayoutNodeEntity">
+        <id column="id" property="id"/>
+        <result column="template_id" property="templateId"/>
+        <result column="template_version_id" property="templateVersionId"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="node_code" property="nodeCode"/>
+        <result column="node_name" property="nodeName"/>
+        <result column="node_type" property="nodeType"/>
+        <result column="sort_no" property="sortNo"/>
+        <result column="level_no" property="levelNo"/>
+        <result column="node_path" property="nodePath"/>
+        <result column="grid_x" property="gridX"/>
+        <result column="grid_y" property="gridY"/>
+        <result column="grid_w" property="gridW"/>
+        <result column="grid_h" property="gridH"/>
+        <result column="row_no" property="rowNo"/>
+        <result column="col_no" property="colNo"/>
+        <result column="col_span" property="colSpan"/>
+        <result column="row_span" property="rowSpan"/>
+        <result column="bind_type" property="bindType"/>
+        <result column="bind_ref_id" property="bindRefId"/>
+        <result column="visible_rule" property="visibleRule"/>
+        <result column="readonly_rule" property="readonlyRule"/>
+        <result column="props_json" property="propsJson"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, template_id, template_version_id, parent_id, node_code, node_name, node_type,
+        sort_no, level_no, node_path, grid_x, grid_y, grid_w, grid_h, row_no, col_no,
+        col_span, row_span, bind_type, bind_ref_id, visible_rule, readonly_rule, props_json,
+        created_at, updated_at, is_deleted
+    </sql>
+
+    <insert id="insertLayoutNode" parameterType="com.contract.infrastructure.persistence.entity.LayoutNodeEntity">
+        INSERT INTO t_ui_layout_node (
+            id, template_id, template_version_id, parent_id, node_code, node_name, node_type,
+            sort_no, level_no, node_path, grid_x, grid_y, grid_w, grid_h, row_no, col_no,
+            col_span, row_span, bind_type, bind_ref_id, visible_rule, readonly_rule, props_json,
+            created_at, updated_at, is_deleted
+        ) VALUES (
+            #{id}, #{templateId}, #{templateVersionId}, #{parentId}, #{nodeCode}, #{nodeName}, #{nodeType},
+            #{sortNo}, #{levelNo}, #{nodePath}, #{gridX}, #{gridY}, #{gridW}, #{gridH}, #{rowNo}, #{colNo},
+            #{colSpan}, #{rowSpan}, #{bindType}, #{bindRefId}, #{visibleRule}, #{readonlyRule}, #{propsJson},
+            #{createdAt}, #{updatedAt}, COALESCE(#{isDeleted}, 0)
+        )
+    </insert>
+
+    <select id="selectByIdValue" resultMap="LayoutNodeResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_layout_node
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <select id="selectByVersionId" resultMap="LayoutNodeResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_layout_node
+        WHERE template_version_id = #{versionId} AND is_deleted = 0
+        ORDER BY sort_no ASC
+    </select>
+
+    <select id="selectByParentId" resultMap="LayoutNodeResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_layout_node
+        WHERE parent_id = #{parentId} AND is_deleted = 0
+        ORDER BY sort_no ASC
+    </select>
+
+    <update id="updateLayoutNode" parameterType="com.contract.infrastructure.persistence.entity.LayoutNodeEntity">
+        UPDATE t_ui_layout_node
+        SET template_id = #{templateId},
+            template_version_id = #{templateVersionId},
+            parent_id = #{parentId},
+            node_code = #{nodeCode},
+            node_name = #{nodeName},
+            node_type = #{nodeType},
+            sort_no = #{sortNo},
+            level_no = #{levelNo},
+            node_path = #{nodePath},
+            grid_x = #{gridX},
+            grid_y = #{gridY},
+            grid_w = #{gridW},
+            grid_h = #{gridH},
+            row_no = #{rowNo},
+            col_no = #{colNo},
+            col_span = #{colSpan},
+            row_span = #{rowSpan},
+            bind_type = #{bindType},
+            bind_ref_id = #{bindRefId},
+            visible_rule = #{visibleRule},
+            readonly_rule = #{readonlyRule},
+            props_json = #{propsJson},
+            created_at = #{createdAt},
+            updated_at = #{updatedAt},
+            is_deleted = COALESCE(#{isDeleted}, is_deleted)
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <select id="selectByNodeCode" resultMap="LayoutNodeResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_layout_node
+        WHERE node_code = #{nodeCode} AND is_deleted = 0
+    </select>
+
+    <update id="deleteByIdValue">
+        UPDATE t_ui_layout_node SET is_deleted = 1 WHERE id = #{id}
+    </update>
+
+    <delete id="physicalDeleteByVersionId">
+        DELETE FROM t_ui_layout_node WHERE template_version_id = #{versionId}
+    </delete>
+
+</mapper>

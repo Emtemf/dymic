@@ -1,13 +1,14 @@
 package com.contract.infrastructure.persistence.repository;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.contract.infrastructure.persistence.entity.ActionConfigEntity;
-import com.contract.infrastructure.persistence.mapper.ActionConfigMapper;
 import com.contract.domain.template.ActionConfig;
 import com.contract.domain.template.repository.ActionConfigRepository;
+import com.contract.infrastructure.id.SnowflakeIdGenerator;
 import com.contract.infrastructure.persistence.convert.EntityActionConfigConverter;
+import com.contract.infrastructure.persistence.entity.ActionConfigEntity;
+import com.contract.infrastructure.persistence.mapper.ActionConfigMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
 /**
@@ -19,46 +20,46 @@ public class ActionConfigRepositoryImpl implements ActionConfigRepository {
 
     private final ActionConfigMapper mapper;
     private final EntityActionConfigConverter converter;
+    private final SnowflakeIdGenerator idGenerator;
 
     @Override
     public ActionConfig save(ActionConfig actionConfig) {
         ActionConfigEntity entity = converter.toEntity(actionConfig);
-        mapper.insert(entity);
+        if (entity.getId() == null) {
+            entity.setId(idGenerator.nextId());
+        }
+        mapper.insertActionConfig(entity);
         actionConfig.setId(entity.getId());
         return actionConfig;
     }
 
     @Override
     public ActionConfig findById(Long id) {
-        ActionConfigEntity entity = mapper.selectById(id);
+        ActionConfigEntity entity = mapper.selectByIdValue(id);
         return entity != null ? converter.toDomain(entity) : null;
     }
 
     @Override
     public List<ActionConfig> findByTemplateVersionId(Long templateVersionId) {
-        LambdaQueryWrapper<ActionConfigEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ActionConfigEntity::getTemplateVersionId, templateVersionId);
-        wrapper.orderByAsc(ActionConfigEntity::getSortNo);
-        List<ActionConfigEntity> entities = mapper.selectList(wrapper);
+        List<ActionConfigEntity> entities = mapper.selectByTemplateVersionId(templateVersionId);
         return converter.toDomainList(entities);
     }
 
     @Override
     public ActionConfig update(ActionConfig actionConfig) {
         ActionConfigEntity entity = converter.toEntity(actionConfig);
-        mapper.updateById(entity);
+        mapper.updateActionConfig(entity);
         return actionConfig;
     }
 
     @Override
     public void deleteById(Long id) {
-        mapper.deleteById(id);
+        mapper.deleteByIdValue(id);
     }
 
     @Override
     public List<ActionConfig> findAll() {
-        List<ActionConfigEntity> entities = mapper.selectList(null);
-        return converter.toDomainList(entities);
+        return converter.toDomainList(mapper.selectAllActionConfigs());
     }
 
     @Override

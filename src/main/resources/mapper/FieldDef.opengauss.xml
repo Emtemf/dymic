@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.contract.infrastructure.persistence.mapper.FieldDefMapper">
+
+    <resultMap id="FieldDefResultMap" type="com.contract.infrastructure.persistence.entity.FieldDefEntity">
+        <id column="id" property="id"/>
+        <result column="template_id" property="templateId"/>
+        <result column="template_version_id" property="templateVersionId"/>
+        <result column="detail_table_id" property="detailTableId"/>
+        <result column="field_code" property="fieldCode"/>
+        <result column="field_path" property="fieldPath"/>
+        <result column="field_name_cn" property="fieldNameCn"/>
+        <result column="field_name_en" property="fieldNameEn"/>
+        <result column="data_type" property="dataType"/>
+        <result column="value_type" property="valueType"/>
+        <result column="required_default" property="requiredDefault"/>
+        <result column="searchable" property="searchable"/>
+        <result column="indexable" property="indexable"/>
+        <result column="search_index_column" property="searchIndexColumn"/>
+        <result column="default_value" property="defaultValue"/>
+        <result column="validate_rule" property="validateRule"/>
+        <result column="props_json" property="propsJson"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, template_id, template_version_id, detail_table_id, field_code, field_path,
+        field_name_cn, field_name_en, data_type, value_type, required_default, searchable,
+        indexable, search_index_column, default_value, validate_rule, props_json,
+        created_at, updated_at, is_deleted
+    </sql>
+
+    <insert id="insertFieldDef" parameterType="com.contract.infrastructure.persistence.entity.FieldDefEntity">
+        INSERT INTO t_ui_field_def (
+            id, template_id, template_version_id, detail_table_id, field_code, field_path,
+            field_name_cn, field_name_en, data_type, value_type, required_default, searchable,
+            indexable, search_index_column, default_value, validate_rule, props_json,
+            created_at, updated_at, is_deleted
+        ) VALUES (
+            #{id}, #{templateId}, #{templateVersionId}, #{detailTableId}, #{fieldCode}, #{fieldPath},
+            #{fieldNameCn}, #{fieldNameEn}, #{dataType}, #{valueType}, #{requiredDefault}, #{searchable},
+            #{indexable}, #{searchIndexColumn}, #{defaultValue}, #{validateRule}, #{propsJson},
+            #{createdAt}, #{updatedAt}, COALESCE(#{isDeleted}, 0)
+        )
+    </insert>
+
+    <select id="selectByIdValue" resultMap="FieldDefResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_field_def
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <select id="selectByVersionId" resultMap="FieldDefResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_field_def
+        WHERE template_version_id = #{versionId} AND is_deleted = 0
+    </select>
+
+    <update id="updateFieldDef" parameterType="com.contract.infrastructure.persistence.entity.FieldDefEntity">
+        UPDATE t_ui_field_def
+        SET template_id = #{templateId},
+            template_version_id = #{templateVersionId},
+            detail_table_id = #{detailTableId},
+            field_code = #{fieldCode},
+            field_path = #{fieldPath},
+            field_name_cn = #{fieldNameCn},
+            field_name_en = #{fieldNameEn},
+            data_type = #{dataType},
+            value_type = #{valueType},
+            required_default = #{requiredDefault},
+            searchable = #{searchable},
+            indexable = #{indexable},
+            search_index_column = #{searchIndexColumn},
+            default_value = #{defaultValue},
+            validate_rule = #{validateRule},
+            props_json = #{propsJson},
+            created_at = #{createdAt},
+            updated_at = #{updatedAt},
+            is_deleted = COALESCE(#{isDeleted}, is_deleted)
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <select id="countByFieldCode" resultType="long">
+        SELECT COUNT(*) FROM t_ui_field_def WHERE field_code = #{fieldCode} AND is_deleted = 0
+    </select>
+
+    <select id="countByFieldPath" resultType="long">
+        SELECT COUNT(*) FROM t_ui_field_def WHERE field_path = #{fieldPath} AND is_deleted = 0
+    </select>
+
+    <delete id="physicalDeleteByVersionId">
+        DELETE FROM t_ui_field_def WHERE template_version_id = #{versionId}
+    </delete>
+
+</mapper>

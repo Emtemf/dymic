@@ -56,8 +56,11 @@ public class LayoutNodeService {
             node.setPropsJson(dto.getPropsJson());
         }
 
+        node.setSortNo(dto.getSortNo() != null ? dto.getSortNo() : 0);
+        node.setLevelNo(dto.getLevelNo() != null ? dto.getLevelNo() : 1);
         node.setCreatedAt(LocalDateTime.now());
         node.setUpdatedAt(LocalDateTime.now());
+        node.setIsDeleted(0);
 
         repository.save(node);
         return converter.toDTO(node);

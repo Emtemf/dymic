@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.contract.infrastructure.persistence.mapper.ActionConfigMapper">
+
+    <resultMap id="ActionConfigResultMap" type="com.contract.infrastructure.persistence.entity.ActionConfigEntity">
+        <id column="id" property="id"/>
+        <result column="template_id" property="templateId"/>
+        <result column="template_version_id" property="templateVersionId"/>
+        <result column="action_code" property="actionCode"/>
+        <result column="action_name" property="actionName"/>
+        <result column="action_type" property="actionType"/>
+        <result column="bind_node_id" property="bindNodeId"/>
+        <result column="bind_query_id" property="bindQueryId"/>
+        <result column="confirm_required" property="confirmRequired"/>
+        <result column="confirm_text" property="confirmText"/>
+        <result column="before_rule" property="beforeRule"/>
+        <result column="after_rule" property="afterRule"/>
+        <result column="props_json" property="propsJson"/>
+        <result column="sort_no" property="sortNo"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, template_id, template_version_id, action_code, action_name, action_type,
+        bind_node_id, bind_query_id, confirm_required, confirm_text, before_rule, after_rule,
+        props_json, sort_no, created_at, updated_at, is_deleted
+    </sql>
+
+    <insert id="insertActionConfig" parameterType="com.contract.infrastructure.persistence.entity.ActionConfigEntity">
+        INSERT INTO t_ui_action_config (
+            id, template_id, template_version_id, action_code, action_name, action_type,
+            bind_node_id, bind_query_id, confirm_required, confirm_text, before_rule, after_rule,
+            props_json, sort_no, created_at, updated_at, is_deleted
+        ) VALUES (
+            #{id}, #{templateId}, #{templateVersionId}, #{actionCode}, #{actionName}, #{actionType},
+            #{bindNodeId}, #{bindQueryId}, #{confirmRequired}, #{confirmText}, #{beforeRule}, #{afterRule},
+            #{propsJson}, #{sortNo}, #{createdAt}, #{updatedAt}, COALESCE(#{isDeleted}, 0)
+        )
+    </insert>
+
+    <select id="selectByIdValue" resultMap="ActionConfigResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_action_config
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <select id="selectByTemplateVersionId" resultMap="ActionConfigResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_action_config
+        WHERE template_version_id = #{templateVersionId} AND is_deleted = 0
+        ORDER BY sort_no ASC
+    </select>
+
+    <update id="updateActionConfig" parameterType="com.contract.infrastructure.persistence.entity.ActionConfigEntity">
+        UPDATE t_ui_action_config
+        SET template_id = #{templateId},
+            template_version_id = #{templateVersionId},
+            action_code = #{actionCode},
+            action_name = #{actionName},
+            action_type = #{actionType},
+            bind_node_id = #{bindNodeId},
+            bind_query_id = #{bindQueryId},
+            confirm_required = #{confirmRequired},
+            confirm_text = #{confirmText},
+            before_rule = #{beforeRule},
+            after_rule = #{afterRule},
+            props_json = #{propsJson},
+            sort_no = #{sortNo},
+            created_at = #{createdAt},
+            updated_at = #{updatedAt},
+            is_deleted = COALESCE(#{isDeleted}, is_deleted)
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <update id="deleteByIdValue">
+        UPDATE t_ui_action_config SET is_deleted = 1 WHERE id = #{id}
+    </update>
+
+    <delete id="physicalDeleteByVersionId">
+        DELETE FROM t_ui_action_config WHERE template_version_id = #{versionId}
+    </delete>
+
+    <select id="selectAllActionConfigs" resultMap="ActionConfigResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM t_ui_action_config
+        WHERE is_deleted = 0
+    </select>
+
+</mapper>

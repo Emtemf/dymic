@@ -1,14 +1,26 @@
 package com.contract.infrastructure.persistence.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.contract.infrastructure.persistence.entity.LayoutNodeEntity;
-import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-@Mapper
-public interface LayoutNodeMapper extends BaseMapper<LayoutNodeEntity> {
+import java.util.List;
 
-    @Delete("DELETE FROM t_ui_layout_node WHERE template_version_id = #{versionId}")
+@Mapper
+public interface LayoutNodeMapper {
+    int insertLayoutNode(LayoutNodeEntity entity);
+
+    LayoutNodeEntity selectByIdValue(@Param("id") Long id);
+
+    List<LayoutNodeEntity> selectByVersionId(@Param("versionId") Long versionId);
+
+    List<LayoutNodeEntity> selectByParentId(@Param("parentId") Long parentId);
+
+    int updateLayoutNode(LayoutNodeEntity entity);
+
+    LayoutNodeEntity selectByNodeCode(@Param("nodeCode") String nodeCode);
+
+    int deleteByIdValue(@Param("id") Long id);
+
     int physicalDeleteByVersionId(@Param("versionId") Long versionId);
 }

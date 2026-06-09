@@ -1,13 +1,14 @@
 package com.contract.infrastructure.persistence.repository;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.contract.infrastructure.persistence.entity.FieldDefEntity;
 import com.contract.domain.template.FieldDef;
 import com.contract.domain.template.repository.FieldDefRepository;
+import com.contract.infrastructure.id.SnowflakeIdGenerator;
 import com.contract.infrastructure.persistence.convert.EntityFieldDefConverter;
+import com.contract.infrastructure.persistence.entity.FieldDefEntity;
 import com.contract.infrastructure.persistence.mapper.FieldDefMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
 /**
@@ -18,47 +19,45 @@ import java.util.List;
 public class FieldDefRepositoryImpl implements FieldDefRepository {
     private final FieldDefMapper mapper;
     private final EntityFieldDefConverter converter;
+    private final SnowflakeIdGenerator idGenerator;
 
     @Override
     public FieldDef save(FieldDef fieldDef) {
         FieldDefEntity entity = converter.toEntity(fieldDef);
-        mapper.insert(entity);
+        if (entity.getId() == null) {
+            entity.setId(idGenerator.nextId());
+        }
+        mapper.insertFieldDef(entity);
         fieldDef.setId(entity.getId());
         return fieldDef;
     }
 
     @Override
     public FieldDef findById(Long id) {
-        FieldDefEntity entity = mapper.selectById(id);
+        FieldDefEntity entity = mapper.selectByIdValue(id);
         return entity != null ? converter.toDomain(entity) : null;
     }
 
     @Override
     public List<FieldDef> findByVersionId(Long versionId) {
-        LambdaQueryWrapper<FieldDefEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(FieldDefEntity::getTemplateVersionId, versionId);
-        List<FieldDefEntity> entities = mapper.selectList(wrapper);
+        List<FieldDefEntity> entities = mapper.selectByVersionId(versionId);
         return converter.toDomainList(entities);
     }
 
     @Override
     public void update(FieldDef fieldDef) {
         FieldDefEntity entity = converter.toEntity(fieldDef);
-        mapper.updateById(entity);
+        mapper.updateFieldDef(entity);
     }
 
     @Override
     public boolean existsByFieldCode(String fieldCode) {
-        LambdaQueryWrapper<FieldDefEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(FieldDefEntity::getFieldCode, fieldCode);
-        return mapper.selectCount(wrapper) > 0;
+        return mapper.countByFieldCode(fieldCode) > 0;
     }
 
     @Override
     public boolean existsByFieldPath(String fieldPath) {
-        LambdaQueryWrapper<FieldDefEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(FieldDefEntity::getFieldPath, fieldPath);
-        return mapper.selectCount(wrapper) > 0;
+        return mapper.countByFieldPath(fieldPath) > 0;
     }
 
     @Override

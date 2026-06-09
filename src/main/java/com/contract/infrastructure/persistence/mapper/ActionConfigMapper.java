@@ -1,14 +1,24 @@
 package com.contract.infrastructure.persistence.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.contract.infrastructure.persistence.entity.ActionConfigEntity;
-import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-@Mapper
-public interface ActionConfigMapper extends BaseMapper<ActionConfigEntity> {
+import java.util.List;
 
-    @Delete("DELETE FROM t_ui_action_config WHERE template_version_id = #{versionId}")
+@Mapper
+public interface ActionConfigMapper {
+    int insertActionConfig(ActionConfigEntity entity);
+
+    ActionConfigEntity selectByIdValue(@Param("id") Long id);
+
+    List<ActionConfigEntity> selectByTemplateVersionId(@Param("templateVersionId") Long templateVersionId);
+
+    int updateActionConfig(ActionConfigEntity entity);
+
+    int deleteByIdValue(@Param("id") Long id);
+
     int physicalDeleteByVersionId(@Param("versionId") Long versionId);
+
+    List<ActionConfigEntity> selectAllActionConfigs();
 }
