@@ -58,11 +58,19 @@ public class Template {
         TemplateDesc templateDesc,
         BizType bizType
     ) {
+        // 明确校验必填参数
+        if (templateCode == null) {
+            throw new BizException("模板编码不能为空");
+        }
+        if (templateName == null) {
+            throw new BizException("模板名称不能为空");
+        }
+
         Template template = new Template();
         template.templateCode = templateCode;
         template.templateName = templateName;
-        template.templateDesc = templateDesc;
-        template.bizType = bizType;
+        template.templateDesc = templateDesc;  // 可选参数，允许null
+        template.bizType = bizType;            // 可选参数，允许null
         template.status = TemplateStatus.ENABLED;
         template.auditInfo = AuditInfo.create();
         return template;
@@ -111,11 +119,20 @@ public class Template {
      *
      * 【前置条件】
      * - versionId != null
+     * - status == ENABLED
      *
      * 【后置条件】
      * - currentVersionId == versionId
+     *
+     * @throws BizException 如果状态不是ENABLED或versionId为null
      */
     public void setCurrentVersion(Long versionId) {
+        if (versionId == null) {
+            throw new BizException("版本ID不能为空");
+        }
+        if (!isEnabled()) {
+            throw new BizException("只有启用状态的模板才能设置当前版本，当前状态：" + status.getDisplayName());
+        }
         this.currentVersionId = versionId;
         this.auditInfo = auditInfo.update();
     }
