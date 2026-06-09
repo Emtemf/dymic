@@ -1,35 +1,68 @@
 package com.contract.domain.template;
 
-import lombok.Data;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import com.contract.domain.dataprovider.types.*;
+import com.contract.domain.shared.types.AuditInfo;
+import com.contract.domain.shared.types.ConfigJson;
+import lombok.Getter;
+
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 /**
- * 数据提供方领域模型
+ * 数据提供方聚合根
+ *
+ * 【聚合边界】
+ * - DataProvider是聚合根
+ * - 包含配置信息（configJson）
+ * - 包含缓存配置（cacheConfig）
+ *
+ * 【状态流转】
+ * ENABLED → DISABLED（停用）
+ * DISABLED → ENABLED（启用）
+ *
+ * 【业务规则】
+ * 1. 静态选项和字典数据源由业务人员配置
+ * 2. HTTP、平台、内部数据源由IT人员配置
+ * 3. 临时数据源不持久化
+ * 4. 缓存配置根据数据源类型有默认值
+ *
+ * 【不变性】
+ * - ID创建后不可修改
+ * - 编码创建后不可修改
+ * - 类型创建后不可修改
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
 public class DataProvider {
-    private Long id;
-    private String providerCode;
-    private String providerName;
-    private String providerType;
-    private String configJson;
-    private Integer cacheEnabled;
-    private Integer cacheTtlSeconds;
-    private Integer isTemporary;       // 是否临时数据源（0/1）
-    private String status;
-    private Long createdBy;
-    private String createdName;
-    private LocalDateTime createdAt;
-    private Long updatedBy;
-    private String updatedName;
-    private LocalDateTime updatedAt;
-    private Integer isDeleted;
+    private final ProviderId id;
+    private final ProviderCode providerCode;
+    private final ProviderName providerName;
+    private final ProviderType providerType;
+    private final ConfigJson configJson;
+    private final CacheConfig cacheConfig;
+    private final boolean isTemporary;
+    private ProviderStatus status;
+    private final AuditInfo auditInfo;
+
+    /**
+     * 私有构造器（通过工厂方法创建）
+     */
+    private DataProvider(
+        ProviderId id, ProviderCode providerCode, ProviderName providerName,
+        ProviderType providerType, ConfigJson configJson, CacheConfig cacheConfig,
+        boolean isTemporary, ProviderStatus status, AuditInfo auditInfo
+    ) {
+        this.id = id;
+        this.providerCode = providerCode;
+        this.providerName = providerName;
+        this.providerType = providerType;
+        this.configJson = configJson;
+        this.cacheConfig = cacheConfig;
+        this.isTemporary = isTemporary;
+        this.status = status;
+        this.auditInfo = auditInfo;
+    }
+
+    // ==================== 工厂方法 ====================
 
     /**
      * 创建静态选项DataProvider（业务自定义）
@@ -41,16 +74,21 @@ public class DataProvider {
      * @return DataProvider实例
      */
     public static DataProvider createStaticOptions(String displayName, String optionsJson) {
-        DataProvider provider = new DataProvider();
-        provider.setProviderName(displayName);
-        provider.setProviderType("STATIC");
-        provider.setConfigJson(optionsJson);
-        provider.setIsTemporary(1);         // 临时数据源
-        provider.setCacheEnabled(0);        // 不缓存
-        provider.setCacheTtlSeconds(0);
-        provider.setStatus("ENABLED");
-        provider.generateProviderCode();
-        return provider;
+        ProviderName name = new ProviderName(displayName);
+        ConfigJson config = new ConfigJson(optionsJson);
+        ProviderCode code = ProviderCode.generate(ProviderType.STATIC);
+
+        return new DataProvider(
+            null, // ID由持久化层生成
+            code,
+            name,
+            ProviderType.STATIC,
+            config,
+            CacheConfig.disabled(), // 静态选项不缓存
+            true, // 临时数据源
+            ProviderStatus.ENABLED,
+            AuditInfo.create()
+        );
     }
 
     /**
@@ -63,16 +101,21 @@ public class DataProvider {
      * @return DataProvider实例
      */
     public static DataProvider createDict(String dictType, String displayName) {
-        DataProvider provider = new DataProvider();
-        provider.setProviderName(displayName);
-        provider.setProviderType("DICT");
-        provider.setConfigJson("{\"dictType\":\"" + dictType + "\"}");
-        provider.setIsTemporary(0);         // 非临时，持久化
-        provider.setCacheEnabled(1);        // 启用缓存
-        provider.setCacheTtlSeconds(3600);  // 缓存1小时
-        provider.setStatus("ENABLED");
-        provider.generateProviderCode();
-        return provider;
+        ProviderName name = new ProviderName(displayName);
+        ConfigJson config = ConfigJson.fromDict(dictType);
+        ProviderCode code = ProviderCode.generate(ProviderType.DICT);
+
+        return new DataProvider(
+            null,
+            code,
+            name,
+            ProviderType.DICT,
+            config,
+            CacheConfig.enabled(3600), // 字典缓存1小时
+            false, // 非临时，持久化
+            ProviderStatus.ENABLED,
+            AuditInfo.create()
+        );
     }
 
     /**
@@ -83,16 +126,21 @@ public class DataProvider {
      * @return DataProvider实例
      */
     public static DataProvider createHttp(String displayName, String httpConfigJson) {
-        DataProvider provider = new DataProvider();
-        provider.setProviderName(displayName);
-        provider.setProviderType("HTTP");
-        provider.setConfigJson(httpConfigJson);
-        provider.setIsTemporary(0);
-        provider.setCacheEnabled(1);
-        provider.setCacheTtlSeconds(300);   // 缓存5分钟
-        provider.setStatus("ENABLED");
-        provider.generateProviderCode();
-        return provider;
+        ProviderName name = new ProviderName(displayName);
+        ConfigJson config = new ConfigJson(httpConfigJson);
+        ProviderCode code = ProviderCode.generate(ProviderType.HTTP);
+
+        return new DataProvider(
+            null,
+            code,
+            name,
+            ProviderType.HTTP,
+            config,
+            CacheConfig.enabled(300), // HTTP缓存5分钟
+            false,
+            ProviderStatus.ENABLED,
+            AuditInfo.create()
+        );
     }
 
     /**
@@ -103,16 +151,21 @@ public class DataProvider {
      * @return DataProvider实例
      */
     public static DataProvider createPlatform(String displayName, String platformConfigJson) {
-        DataProvider provider = new DataProvider();
-        provider.setProviderName(displayName);
-        provider.setProviderType("PLATFORM");
-        provider.setConfigJson(platformConfigJson);
-        provider.setIsTemporary(0);
-        provider.setCacheEnabled(1);
-        provider.setCacheTtlSeconds(600);   // 缓存10分钟
-        provider.setStatus("ENABLED");
-        provider.generateProviderCode();
-        return provider;
+        ProviderName name = new ProviderName(displayName);
+        ConfigJson config = new ConfigJson(platformConfigJson);
+        ProviderCode code = ProviderCode.generate(ProviderType.PLATFORM);
+
+        return new DataProvider(
+            null,
+            code,
+            name,
+            ProviderType.PLATFORM,
+            config,
+            CacheConfig.enabled(600), // 平台缓存10分钟
+            false,
+            ProviderStatus.ENABLED,
+            AuditInfo.create()
+        );
     }
 
     /**
@@ -123,56 +176,261 @@ public class DataProvider {
      * @return DataProvider实例
      */
     public static DataProvider createInternal(String displayName, String internalConfigJson) {
-        DataProvider provider = new DataProvider();
-        provider.setProviderName(displayName);
-        provider.setProviderType("INTERNAL");
-        provider.setConfigJson(internalConfigJson);
-        provider.setIsTemporary(0);
-        provider.setCacheEnabled(1);
-        provider.setCacheTtlSeconds(300);
-        provider.setStatus("ENABLED");
-        provider.generateProviderCode();
-        return provider;
+        ProviderName name = new ProviderName(displayName);
+        ConfigJson config = new ConfigJson(internalConfigJson);
+        ProviderCode code = ProviderCode.generate(ProviderType.INTERNAL);
+
+        return new DataProvider(
+            null,
+            code,
+            name,
+            ProviderType.INTERNAL,
+            config,
+            CacheConfig.enabled(300), // 内部查询缓存5分钟
+            false,
+            ProviderStatus.ENABLED,
+            AuditInfo.create()
+        );
     }
 
     /**
      * 基础创建方法（保留原有兼容性）
      */
     public static DataProvider create(String providerCode, String providerName, String providerType) {
-        DataProvider provider = new DataProvider();
-        provider.setProviderCode(providerCode);
-        provider.setProviderName(providerName);
-        provider.setProviderType(providerType);
-        provider.setIsTemporary(0);
-        provider.setCacheEnabled(0);
-        provider.setCacheTtlSeconds(0);
-        provider.setStatus("ENABLED");
-        return provider;
+        return new DataProvider(
+            null,
+            new ProviderCode(providerCode),
+            new ProviderName(providerName),
+            ProviderType.valueOf(providerType),
+            new ConfigJson("{}"),
+            CacheConfig.disabled(),
+            false,
+            ProviderStatus.ENABLED,
+            AuditInfo.create()
+        );
     }
 
     /**
-     * 自动生成providerCode（基于名称）
+     * 从持久化层重建
      */
-    public void generateProviderCode() {
-        if (this.providerName != null && this.providerCode == null) {
-            // 简单编码生成：时间戳 + 名称hash
-            String timestamp = String.valueOf(System.currentTimeMillis() % 100000);
-            String nameHash = Integer.toHexString(this.providerName.hashCode() % 1000);
-            this.providerCode = "PROV_" + this.providerType + "_" + timestamp + "_" + nameHash;
+    public static DataProvider rebuild(
+        Long id, String providerCode, String providerName, String providerType,
+        String configJson, Integer cacheEnabled, Integer cacheTtlSeconds,
+        Integer isTemporary, String status,
+        Long createdBy, String createdName, OffsetDateTime createdAt,
+        Long updatedBy, String updatedName, OffsetDateTime updatedAt
+    ) {
+        CacheConfig cacheConfig = cacheEnabled != null && cacheEnabled == 1
+            ? CacheConfig.enabled(cacheTtlSeconds != null ? cacheTtlSeconds : 300)
+            : CacheConfig.disabled();
+
+        AuditInfo auditInfo = AuditInfo.of(
+            createdBy, createdName, createdAt,
+            updatedBy, updatedName, updatedAt
+        );
+
+        return new DataProvider(
+            id != null ? new ProviderId(id) : null,
+            new ProviderCode(providerCode),
+            new ProviderName(providerName),
+            ProviderType.valueOf(providerType),
+            new ConfigJson(configJson),
+            cacheConfig,
+            isTemporary != null && isTemporary == 1,
+            ProviderStatus.valueOf(status),
+            auditInfo
+        );
+    }
+
+    // ==================== 业务方法 ====================
+
+    /**
+     * 停用数据源
+     *
+     * @return 新实例
+     */
+    public DataProvider disable() {
+        if (this.status == ProviderStatus.DISABLED) {
+            throw new IllegalStateException("数据源已处于停用状态");
         }
+        return new DataProvider(
+            this.id, this.providerCode, this.providerName,
+            this.providerType, this.configJson, this.cacheConfig,
+            this.isTemporary, ProviderStatus.DISABLED,
+            this.auditInfo.update()
+        );
+    }
+
+    /**
+     * 启用数据源
+     *
+     * @return 新实例
+     */
+    public DataProvider enable() {
+        if (this.status == ProviderStatus.ENABLED) {
+            throw new IllegalStateException("数据源已处于启用状态");
+        }
+        return new DataProvider(
+            this.id, this.providerCode, this.providerName,
+            this.providerType, this.configJson, this.cacheConfig,
+            this.isTemporary, ProviderStatus.ENABLED,
+            this.auditInfo.update()
+        );
     }
 
     /**
      * 判断是否为临时数据源
      */
     public boolean isTemporary() {
-        return this.isTemporary != null && this.isTemporary == 1;
+        return this.isTemporary;
     }
 
     /**
      * 判断是否需要缓存
      */
     public boolean needsCache() {
-        return this.cacheEnabled != null && this.cacheEnabled == 1;
+        return this.cacheConfig.isEnabled();
+    }
+
+    /**
+     * 判断是否为业务配置类型
+     */
+    public boolean isBusinessConfig() {
+        return this.providerType.isBusinessConfig();
+    }
+
+    /**
+     * 判断是否为IT配置类型
+     */
+    public boolean isITConfig() {
+        return this.providerType.isITConfig();
+    }
+
+    /**
+     * 获取数据源分类
+     */
+    public DataSourceCategory getCategory() {
+        return DataSourceCategory.fromProviderType(this.providerType);
+    }
+
+    // ==================== 向后兼容的便捷方法 ====================
+
+    /**
+     * 获取ID值（向后兼容）
+     */
+    public Long getId() {
+        return id != null ? id.getValue() : null;
+    }
+
+    /**
+     * 获取编码值（向后兼容）
+     */
+    public String getProviderCode() {
+        return providerCode.getValue();
+    }
+
+    /**
+     * 获取名称值（向后兼容）
+     */
+    public String getProviderName() {
+        return providerName.getValue();
+    }
+
+    /**
+     * 获取类型值（向后兼容）
+     */
+    public String getProviderType() {
+        return providerType.name();
+    }
+
+    /**
+     * 获取配置JSON值（向后兼容）
+     */
+    public String getConfigJson() {
+        return configJson.getValue();
+    }
+
+    /**
+     * 获取缓存启用标志（向后兼容）
+     */
+    public Integer getCacheEnabled() {
+        return cacheConfig.isEnabled() ? 1 : 0;
+    }
+
+    /**
+     * 获取缓存时间（向后兼容）
+     */
+    public Integer getCacheTtlSeconds() {
+        return cacheConfig.getTtlSeconds();
+    }
+
+    /**
+     * 获取临时标志（向后兼容）
+     */
+    public Integer getIsTemporary() {
+        return isTemporary ? 1 : 0;
+    }
+
+    /**
+     * 获取状态值（向后兼容）
+     */
+    public String getStatus() {
+        return status.name();
+    }
+
+    /**
+     * 获取创建人ID（向后兼容）
+     */
+    public Long getCreatedBy() {
+        return auditInfo != null ? auditInfo.getCreatedBy() : null;
+    }
+
+    /**
+     * 获取创建人名称（向后兼容）
+     */
+    public String getCreatedName() {
+        return auditInfo != null ? auditInfo.getCreatedName() : null;
+    }
+
+    /**
+     * 获取创建时间（向后兼容）
+     */
+    public LocalDateTime getCreatedAt() {
+        return auditInfo != null && auditInfo.getCreatedAt() != null
+            ? auditInfo.getCreatedAt().toLocalDateTime()
+            : null;
+    }
+
+    /**
+     * 获取更新人ID（向后兼容）
+     */
+    public Long getUpdatedBy() {
+        return auditInfo != null ? auditInfo.getUpdatedBy() : null;
+    }
+
+    /**
+     * 获取更新人名称（向后兼容）
+     */
+    public String getUpdatedName() {
+        return auditInfo != null ? auditInfo.getUpdatedName() : null;
+    }
+
+    /**
+     * 获取更新时间（向后兼容）
+     */
+    public LocalDateTime getUpdatedAt() {
+        return auditInfo != null && auditInfo.getUpdatedAt() != null
+            ? auditInfo.getUpdatedAt().toLocalDateTime()
+            : null;
+    }
+
+    /**
+     * 向后兼容：自动生成providerCode（基于名称）
+     * 注意：重构后此方法不再需要，编码在创建时自动生成
+     */
+    @Deprecated
+    public void generateProviderCode() {
+        // 空实现，保持向后兼容
+        // 编码在创建时已通过ProviderCode.generate()自动生成
     }
 }

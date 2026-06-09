@@ -23,8 +23,8 @@ public class DataProviderRepositoryImpl implements DataProviderRepository {
     public DataProvider save(DataProvider provider) {
         DataProviderEntity entity = converter.toEntity(provider);
         mapper.insert(entity);
-        provider.setId(entity.getId());
-        return provider;
+        // 重新加载以获取生成的ID和审计字段
+        return findById(entity.getId());
     }
 
     @Override

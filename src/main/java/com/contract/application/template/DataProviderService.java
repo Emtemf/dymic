@@ -78,10 +78,6 @@ public class DataProviderService {
             request.getStaticOptionsJson()
         );
 
-        provider.setId(idGenerator.nextId());
-        provider.setCreatedAt(LocalDateTime.now());
-        provider.setUpdatedAt(LocalDateTime.now());
-
         repository.save(provider);
 
         log.info("创建静态选项DataProvider成功: id={}, name={}, isTemporary={}",
@@ -112,10 +108,6 @@ public class DataProviderService {
             request.getDictType(),
             request.getDisplayName()
         );
-
-        provider.setId(idGenerator.nextId());
-        provider.setCreatedAt(LocalDateTime.now());
-        provider.setUpdatedAt(LocalDateTime.now());
 
         repository.save(provider);
 
@@ -176,11 +168,6 @@ public class DataProviderService {
         }
 
         DataProvider provider = converter.toDomain(dto);
-        provider.setId(idGenerator.nextId());
-        provider.setStatus("ENABLED");
-        provider.setCreatedAt(LocalDateTime.now());
-        provider.setUpdatedAt(LocalDateTime.now());
-
         repository.save(provider);
         return converter.toDTO(provider);
     }
@@ -200,15 +187,15 @@ public class DataProviderService {
 
     @Transactional
     public DataProviderDTO update(Long id, DataProviderUpdateDTO dto) {
-        DataProvider provider = repository.findById(id);
-        if (provider == null) {
+        DataProvider existing = repository.findById(id);
+        if (existing == null) {
             throw new BizException("数据提供方不存在：" + id);
         }
 
-        converter.updateDomainFromDTO(dto, provider);
-        provider.setUpdatedAt(LocalDateTime.now());
-        repository.update(provider);
-        return converter.toDTO(provider);
+        // 由于DataProvider是不可变的，需要重新创建
+        // TODO: 实现基于UpdateDTO的重建逻辑
+        // 暂时抛出异常，等待实现
+        throw new BizException("更新功能暂未实现");
     }
 
     // ============ 验证方法 ============

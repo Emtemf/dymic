@@ -3,26 +3,79 @@ package com.contract.infrastructure.persistence.convert;
 import com.contract.infrastructure.persistence.entity.DataProviderEntity;
 import com.contract.domain.template.DataProvider;
 import org.mapstruct.Mapper;
-import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.NullValuePropertyMappingStrategy;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 数据提供方 Entity <-> Domain 转换器
+ *
+ * 注意：DataProvider重构后使用值对象，不能直接用MapStruct映射
  */
 @Mapper(componentModel = "spring")
 public interface EntityDataProviderConverter {
-    // 直接映射所有字段，包括isTemporary
-    DataProvider toDomain(DataProviderEntity entity);
-    DataProviderEntity toEntity(DataProvider domain);
-    List<DataProvider> toDomainList(List<DataProviderEntity> entities);
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "isDeleted", ignore = true)
-    void updateEntityFromDomain(DataProvider domain, @MappingTarget DataProviderEntity entity);
+    /**
+     * Entity -> Domain（使用rebuild方法重建领域对象）
+     */
+    default DataProvider toDomain(DataProviderEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+        return DataProvider.rebuild(
+            entity.getId(),
+            entity.getProviderCode(),
+            entity.getProviderName(),
+            entity.getProviderType(),
+            entity.getConfigJson(),
+            entity.getCacheEnabled(),
+            entity.getCacheTtlSeconds(),
+            entity.getIsTemporary(),
+            entity.getStatus(),
+            entity.getCreatedBy(),
+            entity.getCreatedName(),
+            entity.getCreatedAt() != null ? entity.getCreatedAt().atOffset(java.time.ZoneOffset.ofHours(8)) : null,
+            entity.getUpdatedBy(),
+            entity.getUpdatedName(),
+            entity.getUpdatedAt() != null ? entity.getUpdatedAt().atOffset(java.time.ZoneOffset.ofHours(8)) : null
+        );
+    }
+
+    /**
+     * Domain -> Entity
+     */
+    default DataProviderEntity toEntity(DataProvider domain) {
+        if (domain == null) {
+            return null;
+        }
+        DataProviderEntity entity = new DataProviderEntity();
+        entity.setId(domain.getId());
+        entity.setProviderCode(domain.getProviderCode());
+        entity.setProviderName(domain.getProviderName());
+        entity.setProviderType(domain.getProviderType());
+        entity.setConfigJson(domain.getConfigJson());
+        entity.setCacheEnabled(domain.getCacheEnabled());
+        entity.setCacheTtlSeconds(domain.getCacheTtlSeconds());
+        entity.setIsTemporary(domain.getIsTemporary());
+        entity.setStatus(domain.getStatus());
+        entity.setCreatedBy(domain.getCreatedBy());
+        entity.setCreatedName(domain.getCreatedName());
+        entity.setCreatedAt(domain.getCreatedAt());
+        entity.setUpdatedBy(domain.getUpdatedBy());
+        entity.setUpdatedName(domain.getUpdatedName());
+        entity.setUpdatedAt(domain.getUpdatedAt());
+        return entity;
+    }
+
+    /**
+     * 批量转换
+     */
+    default List<DataProvider> toDomainList(List<DataProviderEntity> entities) {
+        if (entities == null) {
+            return null;
+        }
+        return entities.stream()
+            .map(this::toDomain)
+            .collect(Collectors.toList());
+    }
 }

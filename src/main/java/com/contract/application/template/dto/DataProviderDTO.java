@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import java.util.Map;
+import java.time.LocalDateTime;
 
 /**
  * 数据提供方 DTO
@@ -23,4 +23,12 @@ public class DataProviderDTO {
     private Integer cacheTtlSeconds;
     private Integer isTemporary;       // 是否临时数据源（0/1）
     private String status;
+
+    // 审计字段
+    private Long createdBy;
+    private String createdName;
+    private LocalDateTime createdAt;
+    private Long updatedBy;
+    private String updatedName;
+    private LocalDateTime updatedAt;
 }
