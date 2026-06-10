@@ -443,23 +443,15 @@
                 <!-- 类型选择 -->
                 <label style="font-weight: 600; color: #24292e; margin-bottom: 8px;">数据源类型</label>
                 <div class="type-selector" id="typeSelector">
-                    <div class="type-option" data-type="static" onclick="selectType('static')">
-                        <i class="fas fa-code"></i>
-                        <span>静态数据</span>
-                    </div>
-                    <div class="type-option" data-type="dict" onclick="selectType('dict')">
-                        <i class="fas fa-book"></i>
-                        <span>字典数据</span>
-                    </div>
-                    <div class="type-option" data-type="http" onclick="selectType('http')">
+                    <div class="type-option" data-type="HTTP" onclick="selectType('HTTP')">
                         <i class="fas fa-globe"></i>
                         <span>HTTP接口</span>
                     </div>
-                    <div class="type-option" data-type="platform" onclick="selectType('platform')">
+                    <div class="type-option" data-type="PLATFORM" onclick="selectType('PLATFORM')">
                         <i class="fas fa-server"></i>
                         <span>平台服务</span>
                     </div>
-                    <div class="type-option" data-type="internal" onclick="selectType('internal')">
+                    <div class="type-option" data-type="INTERNAL" onclick="selectType('INTERNAL')">
                         <i class="fas fa-cogs"></i>
                         <span>内部服务</span>
                     </div>
@@ -499,52 +491,64 @@
         }
 
         // 加载数据源列表
-        function loadDataSourceList() {
-            // 模拟数据
-            dataSources = [
-                {
-                    id: 'ds_001',
-                    name: '合同类型字典',
-                    code: 'contract_type',
-                    description: '合同类型字典数据',
-                    type: 'dict',
-                    status: 'active',
-                    updateTime: '2024-01-15 10:30:00',
-                    config: { dictType: 'CONTRACT_TYPE' }
-                },
-                {
-                    id: 'ds_002',
-                    name: '供应商列表',
-                    code: 'supplier_list',
-                    description: '供应商查询接口',
-                    type: 'http',
-                    status: 'active',
-                    updateTime: '2024-01-14 15:20:00',
-                    config: {
-                        url: '/api/suppliers/list',
-                        method: 'POST',
-                        mapping: { valueField: 'id', labelField: 'name' }
-                    }
-                },
-                {
-                    id: 'ds_003',
-                    name: '付款方式',
-                    code: 'payment_method',
-                    description: '付款方式静态数据',
-                    type: 'static',
-                    status: 'active',
-                    updateTime: '2024-01-13 09:10:00',
-                    config: {
-                        data: [
-                            { value: 'bank_transfer', label: '银行转账' },
-                            { value: 'cash', label: '现金支付' },
-                            { value: 'check', label: '支票' }
-                        ]
-                    }
-                }
-            ];
+        async function loadDataSourceList() {
+            try {
+                const response = await fetch('/api/v2/it/data-providers');
+                const result = await response.json();
+                const list = result.data || [];
+                dataSources = list.map(ds => ({
+                    id: ds.id,
+                    name: ds.providerName,
+                    code: ds.providerCode,
+                    description: ds.description || '',
+                    type: ds.providerType,
+                    status: ds.status === 'ENABLED' ? 'active' : 'inactive',
+                    updateTime: ds.updatedAt || ds.createdAt || '',
+                    config: parseDataSourceConfig(ds)
+                }));
+                renderDataSourceList();
+            } catch (error) {
+                console.error('加载数据源列表失败:', error);
+                dataSources = [];
+                renderDataSourceList();
+            }
+        }
 
-            renderDataSourceList();
+        // 解析后端数据源配置
+        function parseDataSourceConfig(ds) {
+            try {
+                const raw = ds.configJson || '{}';
+                const parsed = JSON.parse(raw);
+                if (ds.providerType === 'STATIC') {
+                    return { data: Array.isArray(parsed) ? parsed : (parsed.options || parsed.children || []) };
+                }
+                if (ds.providerType === 'DICT') {
+                    return { dictType: parsed.dictType || '' };
+                }
+                if (ds.providerType === 'HTTP') {
+                    return {
+                        url: parsed.url || '',
+                        method: parsed.method || 'GET',
+                        mapping: {
+                            valueField: parsed.valueField || 'value',
+                            labelField: parsed.labelField || 'label'
+                        }
+                    };
+                }
+                if (ds.providerType === 'PLATFORM') {
+                    return {
+                        service: parsed.service || parsed.platformService || '',
+                        interface: parsed.interface || parsed.platformInterface || ''
+                    };
+                }
+                if (ds.providerType === 'INTERNAL') {
+                    return { internalId: parsed.internalId || parsed.queryCode || '' };
+                }
+                return parsed;
+            } catch (error) {
+                console.warn('解析数据源配置失败:', error);
+                return {};
+            }
         }
 
         // 渲染数据源列表
@@ -612,11 +616,11 @@
         // 获取类型图标
         function getTypeIcon(type) {
             const icons = {
-                static: 'fa-code',
-                dict: 'fa-book',
-                http: 'fa-globe',
-                platform: 'fa-server',
-                internal: 'fa-cogs'
+                STATIC: 'fa-code',
+                DICT: 'fa-book',
+                HTTP: 'fa-globe',
+                PLATFORM: 'fa-server',
+                INTERNAL: 'fa-cogs'
             };
             return icons[type] || 'fa-database';
         }
@@ -624,11 +628,11 @@
         // 获取类型标签
         function getTypeLabel(type) {
             const labels = {
-                static: '静态数据',
-                dict: '字典',
-                http: 'HTTP接口',
-                platform: '平台服务',
-                internal: '内部服务'
+                STATIC: '静态数据',
+                DICT: '字典',
+                HTTP: 'HTTP接口',
+                PLATFORM: '平台服务',
+                INTERNAL: '内部服务'
             };
             return labels[type] || '未知';
         }
@@ -666,7 +670,7 @@
             let html = '';
 
             switch (type) {
-                case 'static':
+                case 'STATIC':
                     html = `
                         <div class="form-group">
                             <label>静态数据(JSON数组)</label>
@@ -677,7 +681,7 @@
                         </div>
                     `;
                     break;
-                case 'dict':
+                case 'DICT':
                     html = `
                         <div class="form-group">
                             <label>字典类型编码</label>
@@ -685,7 +689,7 @@
                         </div>
                     `;
                     break;
-                case 'http':
+                case 'HTTP':
                     html = `
                         <div class="form-group">
                             <label>接口URL</label>
@@ -707,7 +711,7 @@
                         </div>
                     `;
                     break;
-                case 'platform':
+                case 'PLATFORM':
                     html = `
                         <div class="form-group">
                             <label>服务名称</label>
@@ -719,7 +723,7 @@
                         </div>
                     `;
                     break;
-                case 'internal':
+                case 'INTERNAL':
                     html = `
                         <div class="form-group">
                             <label>内部服务ID</label>
@@ -747,22 +751,22 @@
 
             setTimeout(() => {
                 switch (ds.type) {
-                    case 'static':
+                    case 'STATIC':
                         document.getElementById('dsStaticData').value = JSON.stringify(ds.config.data, null, 2);
                         break;
-                    case 'dict':
+                    case 'DICT':
                         document.getElementById('dsDictType').value = ds.config.dictType;
                         break;
-                    case 'http':
+                    case 'HTTP':
                         document.getElementById('dsHttpUrl').value = ds.config.url;
                         document.getElementById('dsHttpMethod').value = ds.config.method;
                         document.getElementById('dsHttpMapping').value = JSON.stringify(ds.config.mapping, null, 2);
                         break;
-                    case 'platform':
+                    case 'PLATFORM':
                         document.getElementById('dsPlatformService').value = ds.config.service;
                         document.getElementById('dsPlatformInterface').value = ds.config.interface;
                         break;
-                    case 'internal':
+                    case 'INTERNAL':
                         document.getElementById('dsInternalId').value = ds.config.internalId;
                         break;
                 }
@@ -799,8 +803,7 @@
             alert(`测试数据源: ${id} - 连接成功`);
         }
 
-        // 保存数据源
-        function saveDataSource() {
+        async function saveDataSource() {
             const name = document.getElementById('dsName').value;
             const code = document.getElementById('dsCode').value;
 
@@ -809,51 +812,57 @@
                 return;
             }
 
-            const ds = {
-                id: editingId || 'ds_' + Date.now(),
-                name: name,
-                code: code,
-                description: document.getElementById('dsDescription').value,
-                type: selectedType,
-                status: 'active',
-                updateTime: new Date().toLocaleString('zh-CN'),
-                config: {}
+            const payload = {
+                providerCode: code,
+                providerName: name,
+                providerType: selectedType,
+                configJson: '{}'
             };
 
-            // 收集配置
             switch (selectedType) {
-                case 'static':
-                    ds.config.data = JSON.parse(document.getElementById('dsStaticData').value);
+                case 'HTTP':
+                    payload.configJson = JSON.stringify({
+                        url: document.getElementById('dsHttpUrl').value,
+                        method: document.getElementById('dsHttpMethod').value,
+                        ...JSON.parse(document.getElementById('dsHttpMapping').value || '{}')
+                    });
                     break;
-                case 'dict':
-                    ds.config.dictType = document.getElementById('dsDictType').value;
+                case 'PLATFORM':
+                    payload.configJson = JSON.stringify({
+                        service: document.getElementById('dsPlatformService').value,
+                        interface: document.getElementById('dsPlatformInterface').value
+                    });
                     break;
-                case 'http':
-                    ds.config.url = document.getElementById('dsHttpUrl').value;
-                    ds.config.method = document.getElementById('dsHttpMethod').value;
-                    ds.config.mapping = JSON.parse(document.getElementById('dsHttpMapping').value);
-                    break;
-                case 'platform':
-                    ds.config.service = document.getElementById('dsPlatformService').value;
-                    ds.config.interface = document.getElementById('dsPlatformInterface').value;
-                    break;
-                case 'internal':
-                    ds.config.internalId = document.getElementById('dsInternalId').value;
+                case 'INTERNAL':
+                    payload.configJson = JSON.stringify({
+                        internalId: document.getElementById('dsInternalId').value
+                    });
                     break;
             }
 
-            // 更新或添加
-            if (editingId) {
-                const index = dataSources.findIndex(d => d.id === editingId);
-                dataSources[index] = ds;
-            } else {
-                dataSources.push(ds);
-            }
+            const method = editingId ? 'PUT' : 'POST';
+            const url = editingId
+                ? `/api/v2/it/data-providers/${editingId}`
+                : '/api/v2/it/data-providers';
 
-            renderDataSourceList();
-            closeModal();
-
-            alert('数据源保存成功');
+            fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (!result.success) {
+                        throw new Error(result.message || '保存失败');
+                    }
+                    closeModal();
+                    loadDataSourceList();
+                    alert('数据源保存成功');
+                })
+                .catch(error => {
+                    console.error('保存数据源失败:', error);
+                    alert('数据源保存失败: ' + error.message);
+                });
         }
 
         // 切换状态

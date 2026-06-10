@@ -53,6 +53,7 @@ public interface EntityDataProviderConverter {
         entity.setProviderCode(domain.getProviderCode());
         entity.setProviderName(domain.getProviderName());
         entity.setProviderType(domain.getProviderType());
+        entity.setDataSourceCategory(domain.getDataSourceCategory());
         entity.setConfigJson(domain.getConfigJson());
         entity.setCacheEnabled(domain.getCacheEnabled());
         entity.setCacheTtlSeconds(domain.getCacheTtlSeconds());

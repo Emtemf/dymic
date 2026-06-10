@@ -1,11 +1,12 @@
 package com.contract.application.template;
 
-import com.contract.application.template.dto.FieldComponentDTO;
-import com.contract.application.template.dto.FieldComponentCreateRequest;
-import com.contract.application.template.dto.FieldComponentUpdateDTO;
+import com.contract.application.template.convert.FieldComponentConverter;
+import com.contract.application.template.dto.BusinessDataSourceRequest;
 import com.contract.application.template.dto.DataProviderCreateRequest;
 import com.contract.application.template.dto.DataProviderDTO;
-import com.contract.application.template.convert.FieldComponentConverter;
+import com.contract.application.template.dto.FieldComponentCreateRequest;
+import com.contract.application.template.dto.FieldComponentDTO;
+import com.contract.application.template.dto.FieldComponentUpdateDTO;
 import com.contract.common.exception.BizException;
 import com.contract.domain.template.FieldComponent;
 import com.contract.domain.template.FieldDef;
@@ -17,8 +18,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -34,17 +35,18 @@ public class FieldComponentService {
     private final LayoutNodeRepository layoutNodeRepository;
     private final FieldDefRepository fieldDefRepository;
     private final DataProviderService dataProviderService;
+    private final DataSourceConfigService dataSourceConfigService;
 
     /**
      * 需要数据源的组件类型
      */
     private static final Set<String> DATA_SOURCE_COMPONENT_TYPES = Set.of(
-        "SELECT",      // 下拉选择框
-        "RADIO",       // 单选框
-        "CHECKBOX",    // 复选框
-        "TREE",        // 树形选择器
-        "CASCADE",     // 级联选择器
-        "MULTI_SELECT" // 多选下拉框
+        "SELECT",
+        "RADIO",
+        "CHECKBOX",
+        "TREE",
+        "CASCADE",
+        "MULTI_SELECT"
     );
 
     /**
@@ -57,43 +59,36 @@ public class FieldComponentService {
      */
     @Transactional
     public FieldComponentDTO create(Long templateId, Long versionId, FieldComponentCreateRequest request) {
-        // 验证组件类型有效性
         if (!FieldComponent.isValidComponentType(request.getComponentType())) {
             throw new BizException("不支持的组件类型: " + request.getComponentType());
         }
 
-        // 验证布局节点存在
         LayoutNode node = layoutNodeRepository.findById(request.getLayoutNodeId());
         if (node == null) {
             throw new BizException("布局节点不存在: " + request.getLayoutNodeId());
         }
 
-        // 验证字段定义存在
         FieldDef fieldDef = fieldDefRepository.findById(request.getFieldDefId());
         if (fieldDef == null) {
             throw new BizException("字段定义不存在: " + request.getFieldDefId());
         }
 
-        // 创建字段组件绑定
         FieldComponent component = converter.toDomain(request);
         component.setTemplateId(templateId);
         component.setTemplateVersionId(versionId);
         component.setCreatedAt(LocalDateTime.now());
         component.setUpdatedAt(LocalDateTime.now());
 
-        // 默认labelName使用fieldNameCn
         if (component.getLabelName() == null) {
             component.setLabelName(fieldDef.getFieldNameCn());
         }
 
-        // 默认sortNo为0
         if (component.getSortNo() == null) {
             component.setSortNo(0);
         }
 
-        // 处理数据源绑定（业务友好的自动创建逻辑）
         if (needsDataProvider(request.getComponentType())) {
-            Long dataProviderId = handleDataProvider(request);
+            Long dataProviderId = handleDataProvider(request, fieldDef);
             component.setDataProviderId(dataProviderId);
         }
 
@@ -118,34 +113,53 @@ public class FieldComponentService {
      * 处理数据源绑定（核心逻辑）
      *
      * 根据业务选择的数据源类型自动创建或查找DataProvider：
-     * - STATIC: 业务自定义选项 → 自动创建临时DataProvider
-     * - DICT: 字典数据 → 查询或创建字典DataProvider
+     * - STATIC: 业务自定义选项 → 走业务配置服务
+     * - DICT: 字典数据 → 走业务配置服务
      * - HTTP/PLATFORM/INTERNAL: IT已配置 → 使用已存在的DataProvider
      *
      * @param request 字段组件创建请求
+     * @param fieldDef 字段定义
      * @return DataProvider ID
      */
-    private Long handleDataProvider(FieldComponentCreateRequest request) {
+    private Long handleDataProvider(FieldComponentCreateRequest request, FieldDef fieldDef) {
         String dataSourceType = request.getDataSourceType();
 
-        // 如果没有指定数据源类型，返回null（不绑定数据源）
         if (dataSourceType == null || dataSourceType.isEmpty()) {
             log.warn("组件类型 {} 需要数据源，但未指定dataSourceType", request.getComponentType());
             return null;
         }
 
-        // 构建DataProviderCreateRequest
+        String providerName = request.getLabelName() != null && !request.getLabelName().isBlank()
+            ? request.getLabelName() + "-数据源"
+            : fieldDef.getFieldNameCn() + "-数据源";
+
+        if ("STATIC".equals(dataSourceType)) {
+            BusinessDataSourceRequest businessRequest = BusinessDataSourceRequest.builder()
+                .providerName(providerName)
+                .providerType("STATIC")
+                .configJson(request.getStaticOptionsJson())
+                .build();
+            return dataSourceConfigService.create(businessRequest).getId();
+        }
+
+        if ("DICT".equals(dataSourceType)) {
+            BusinessDataSourceRequest businessRequest = BusinessDataSourceRequest.builder()
+                .providerName(providerName)
+                .providerType("DICT")
+                .configJson("{\"dictType\":\"" + request.getDictType() + "\"}")
+                .build();
+            return dataSourceConfigService.create(businessRequest).getId();
+        }
+
         DataProviderCreateRequest dpRequest = DataProviderCreateRequest.builder()
             .dataSourceType(dataSourceType)
-            .displayName(request.getLabelName() + "-数据源")
+            .displayName(providerName)
             .staticOptionsJson(request.getStaticOptionsJson())
             .dictType(request.getDictType())
             .dataProviderId(request.getDataProviderId())
             .build();
 
-        // 调用DataProviderService处理
         DataProviderDTO providerDTO = dataProviderService.createFromBusinessRequest(dpRequest);
-
         return providerDTO.getId();
     }
 

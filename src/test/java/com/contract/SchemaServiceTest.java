@@ -1,12 +1,14 @@
 package com.contract;
 
-import com.contract.application.template.SchemaService;
-import com.contract.application.template.LayoutNodeService;
-import com.contract.application.template.FieldDefService;
-import com.contract.application.template.FieldComponentService;
 import com.contract.application.template.ActionConfigService;
-import com.contract.application.template.TemplateVersionService;
+import com.contract.application.template.DataSourceQueryFacadeService;
+import com.contract.application.template.FieldComponentService;
+import com.contract.application.template.FieldDefService;
+import com.contract.application.template.LayoutNodeService;
+import com.contract.application.template.QueryConfigService;
+import com.contract.application.template.SchemaService;
 import com.contract.application.template.TemplateService;
+import com.contract.application.template.TemplateVersionService;
 import com.contract.application.template.dto.*;
 import com.contract.domain.template.Template;
 import com.contract.domain.template.TemplateVersion;
@@ -49,6 +51,12 @@ class SchemaServiceTest {
 
     @MockBean
     private ActionConfigService actionConfigService;
+
+    @MockBean
+    private QueryConfigService queryConfigService;
+
+    @MockBean
+    private DataSourceQueryFacadeService dataSourceQueryFacadeService;
 
     @MockBean
     private TemplateVersionService templateVersionService;
@@ -339,6 +347,43 @@ class SchemaServiceTest {
         assertEquals("节点2", nodes.get(0).getNodeName());  // sortNo=1
         assertEquals("节点3", nodes.get(1).getNodeName());  // sortNo=2
         assertEquals("节点1", nodes.get(2).getNodeName());  // sortNo=3
+    }
+
+    @Test
+    void testGetSchema_shouldIncludeQueryConfigsAndDataSources() {
+        QueryConfigDTO queryConfig = QueryConfigDTO.builder()
+            .id(11L)
+            .queryCode("supplierQuery")
+            .queryName("供应商查询")
+            .dataProviderId(5001L)
+            .build();
+
+        DataSourceQueryDTO dataSource = DataSourceQueryDTO.builder()
+            .id(5001L)
+            .providerCode("SUPPLIER_QUERY")
+            .providerName("供应商查询")
+            .providerType("HTTP")
+            .dataSourceCategory("IT")
+            .configSource("IT")
+            .build();
+
+        when(templateService.getById(1L)).thenReturn(template);
+        when(templateVersionService.getById(1L)).thenReturn(version);
+        when(layoutNodeService.listByVersionId(1L)).thenReturn(Arrays.asList(parentNode, childNode));
+        when(fieldDefService.listByVersionId(1L)).thenReturn(Collections.emptyList());
+        when(fieldComponentService.listByVersionId(1L)).thenReturn(Arrays.asList(component));
+        when(actionConfigService.listByVersionId(1L)).thenReturn(Collections.emptyList());
+        when(queryConfigService.listByVersionId(1L)).thenReturn(List.of(queryConfig));
+        when(dataSourceQueryFacadeService.queryAll()).thenReturn(List.of(dataSource));
+
+        SchemaDTO schema = schemaService.getSchema(1L, 1L);
+
+        assertNotNull(schema.getQueryConfigs());
+        assertEquals(1, schema.getQueryConfigs().size());
+        assertNotNull(schema.getDataSources());
+        assertEquals(1, schema.getDataSources().size());
+        assertEquals("supplierQuery", schema.getQueryConfigs().getFirst().getQueryCode());
+        assertEquals("SUPPLIER_QUERY", schema.getDataSources().getFirst().getProviderCode());
     }
 
     @Test

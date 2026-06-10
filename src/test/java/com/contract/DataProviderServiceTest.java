@@ -5,6 +5,8 @@ import com.contract.application.template.dto.DataProviderDTO;
 import com.contract.application.template.dto.DataProviderCreateDTO;
 import com.contract.application.template.dto.DataProviderUpdateDTO;
 import com.contract.common.exception.BizException;
+import com.contract.domain.template.DataProvider;
+import com.contract.domain.template.repository.DataProviderRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +21,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class DataProviderServiceTest {
     @Autowired
     private DataProviderService service;
+
+    @Autowired
+    private DataProviderRepository repository;
 
     @Test
     void testCreateDataProvider() {
@@ -110,19 +115,32 @@ class DataProviderServiceTest {
         assertThrows(BizException.class, () -> service.update(999999L, updateDto));
     }
 
-    @Test
-    void testListByType() {
-        // Create a STATIC type provider
-        DataProviderCreateDTO dto = new DataProviderCreateDTO();
-        dto.setProviderCode("STATIC_TYPE_TEST");
-        dto.setProviderName("静态类型测试");
-        dto.setProviderType("STATIC");
-        dto.setConfigJson("{\"options\":[]}");
-        service.create(dto);
 
-        // Query by type
-        List<DataProviderDTO> result = service.listByType("STATIC");
-        assertTrue(result.size() > 0);
-        result.forEach(p -> assertEquals("STATIC", p.getProviderType()));
+    @Test
+    void testFindByCategorySeparatesBusinessAndItConfigs() throws Exception {
+        DataProvider businessProvider = repository.save(
+            DataProvider.create("BUSINESS_CATEGORY_TEST", "业务分类测试", "STATIC")
+        );
+        DataProvider itProvider = repository.save(
+            DataProvider.create("IT_CATEGORY_TEST", "IT分类测试", "HTTP")
+        );
+
+        var method = repository.getClass().getMethod("findByCategory", String.class);
+
+        @SuppressWarnings("unchecked")
+        List<DataProvider> businessResults = (List<DataProvider>) method.invoke(repository, "BUSINESS");
+        @SuppressWarnings("unchecked")
+        List<DataProvider> itResults = (List<DataProvider>) method.invoke(repository, "IT");
+
+        assertTrue(businessResults.stream().anyMatch(p -> "BUSINESS_CATEGORY_TEST".equals(p.getProviderCode())));
+        assertTrue(businessResults.stream().allMatch(p -> "BUSINESS".equals(p.getDataSourceCategory())));
+        assertTrue(businessResults.stream().noneMatch(p -> "IT_CATEGORY_TEST".equals(p.getProviderCode())));
+
+        assertTrue(itResults.stream().anyMatch(p -> "IT_CATEGORY_TEST".equals(p.getProviderCode())));
+        assertTrue(itResults.stream().allMatch(p -> "IT".equals(p.getDataSourceCategory())));
+        assertTrue(itResults.stream().noneMatch(p -> "BUSINESS_CATEGORY_TEST".equals(p.getProviderCode())));
+
+        assertNotNull(businessProvider.getId());
+        assertNotNull(itProvider.getId());
     }
 }

@@ -185,15 +185,17 @@ function renderSelectSpecificConfig(container, component) {
         <div class="form-group">
             <label>数据源类型</label>
             <select id="configDataSourceType" onchange="updateProperty('dataSourceType', this.value)">
-                <option value="static" ${component.dataSourceType === 'static' ? 'selected' : ''}>静态数据</option>
-                <option value="dict" ${component.dataSourceType === 'dict' ? 'selected' : ''}>字典</option>
-                <option value="http" ${component.dataSourceType === 'http' ? 'selected' : ''}>HTTP接口</option>
+                <option value="STATIC" ${component.dataSourceType === 'STATIC' ? 'selected' : ''}>静态数据</option>
+                <option value="DICT" ${component.dataSourceType === 'DICT' ? 'selected' : ''}>字典</option>
+                <option value="HTTP" ${component.dataSourceType === 'HTTP' ? 'selected' : ''}>HTTP接口</option>
+                <option value="PLATFORM" ${component.dataSourceType === 'PLATFORM' ? 'selected' : ''}>平台接口</option>
+                <option value="INTERNAL" ${component.dataSourceType === 'INTERNAL' ? 'selected' : ''}>内部查询</option>
             </select>
         </div>
         <div class="form-group">
             <label>数据源ID</label>
-            <input type="text" id="configDataSourceId" value="${component.dataSourceId || ''}"
-                   onchange="updateProperty('dataSourceId', this.value)">
+            <input type="text" id="configDataSourceId" value="${component.dataProviderId || ''}"
+                   onchange="updateProperty('dataProviderId', this.value ? parseInt(this.value, 10) : null)">
         </div>
         <div class="form-group">
             <label>

@@ -263,7 +263,7 @@ async function loadConfigTree() {
  */
 async function loadDataProviders() {
     try {
-        const response = await axios.get('/api/data-providers');
+        const response = await axios.get('/api/v2/ui/data-sources/query');
         configManager.dataProviders = response.data.data || [];
     } catch (error) {
         console.error('加载数据源列表失败:', error);

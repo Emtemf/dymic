@@ -151,6 +151,7 @@ CREATE TABLE IF NOT EXISTS t_ui_data_provider (
     provider_code VARCHAR(100) NOT NULL,
     provider_name VARCHAR(200) NOT NULL,
     provider_type VARCHAR(50) NOT NULL,
+    data_source_category VARCHAR(20) NOT NULL DEFAULT 'IT',
     config_json JSON NOT NULL,
     cache_enabled SMALLINT NOT NULL DEFAULT 0,
     cache_ttl_seconds INTEGER,

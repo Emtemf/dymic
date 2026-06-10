@@ -143,8 +143,8 @@ const ComponentLibrary = {
                 fieldPath: '',
                 dataType: 'string',
                 placeholder: '请选择',
-                dataSourceType: 'static', // static, dict, http
-                dataSourceId: '',
+                dataSourceType: 'STATIC', // STATIC, DICT, HTTP, PLATFORM, INTERNAL
+                dataProviderId: '',
                 multiple: false,
                 required: false,
                 readonly: false

@@ -31,5 +31,7 @@ public class SchemaDTO {
     // 平铺列表（便于快速访问）
     private List<FieldDefDTO> fieldDefs;
     private List<FieldComponentDTO> fieldComponents;
+    private List<QueryConfigDTO> queryConfigs;
     private List<ActionConfigDTO> actionConfigs;
+    private List<DataSourceQueryDTO> dataSources;
 }

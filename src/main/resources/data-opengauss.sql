@@ -116,16 +116,16 @@ VALUES
 
 -- 7. 数据提供方配置表数据（2个）
 INSERT INTO t_ui_data_provider
-    (id, provider_code, provider_name, provider_type, owner_type, request_method, request_url, platform_api_code, request_mapping_json, response_mapping_json, timeout_ms, cacheable, cache_ttl_seconds, status, props_json, created_by, updated_by, created_at, updated_at, is_deleted)
+    (id, provider_code, provider_name, provider_type, data_source_category, owner_type, request_method, request_url, platform_api_code, request_mapping_json, response_mapping_json, timeout_ms, cacheable, cache_ttl_seconds, status, props_json, created_by, updated_by, created_at, updated_at, is_deleted)
 VALUES
     -- 5001: 供应商查询数据源
-    (5001, 'SUPPLIER_QUERY', '供应商查询', 'HTTP', 'IT', 'POST', 'http://api.example.com/supplier/query', NULL,
+    (5001, 'SUPPLIER_QUERY', '供应商查询', 'HTTP', 'IT', 'IT', 'POST', 'http://api.example.com/supplier/query', NULL,
      '{"pageNum": "$.pageNum", "pageSize": "$.pageSize", "supplierName": "$.supplierName"}'::jsonb,
      '{"list": "$.data.list", "total": "$.data.total"}'::jsonb,
      5000, 1, 300, 'ENABLED', '{"description": "供应商信息查询接口"}'::jsonb, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
 
     -- 5002: 合同类型数据源
-    (5002, 'CONTRACT_TYPE', '合同类型', 'STATIC', 'IT', NULL, NULL, NULL, NULL, NULL, 0, 1, 86400, 'ENABLED', '{"description": "合同类型静态数据"}'::jsonb, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
+    (5002, 'CONTRACT_TYPE', '合同类型', 'STATIC', 'BUSINESS', 'IT', NULL, NULL, NULL, NULL, NULL, 0, 1, 86400, 'ENABLED', '{"description": "合同类型静态数据"}'::jsonb, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
 
 -- 8. 静态选项表数据（为合同类型数据源提供选项）
 INSERT INTO t_ui_data_option

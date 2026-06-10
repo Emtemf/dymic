@@ -22,6 +22,7 @@ public interface DataProviderRepository {
      * @return 该类型的DataProvider列表
      */
     List<DataProvider> findByType(String providerType);
+    List<DataProvider> findByCategory(String category);
 
     /**
      * 查询或创建字典DataProvider

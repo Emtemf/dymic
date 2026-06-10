@@ -117,15 +117,15 @@ VALUES
 -- 7. 数据提供方配置表数据（2个）
 -- Note: H2 uses simplified schema for t_ui_data_provider (no separate request_mapping_json/response_mapping_json)
 INSERT INTO t_ui_data_provider
-    (id, provider_code, provider_name, provider_type, config_json, cache_enabled, cache_ttl_seconds, is_temporary, status, created_by, updated_by, created_at, updated_at, is_deleted)
+    (id, provider_code, provider_name, provider_type, data_source_category, config_json, cache_enabled, cache_ttl_seconds, is_temporary, status, created_by, updated_by, created_at, updated_at, is_deleted)
 VALUES
     -- 5001: 供应商查询数据源
-    (5001, 'SUPPLIER_QUERY', '供应商查询', 'HTTP',
+    (5001, 'SUPPLIER_QUERY', '供应商查询', 'HTTP', 'IT',
      JSON '{"url": "http://api.example.com/supplier/query", "method": "POST", "timeout": 5000, "requestMapping": {"pageNum": "$.pageNum", "pageSize": "$.pageSize", "supplierName": "$.supplierName"}, "responseMapping": {"list": "$.data.list", "total": "$.data.total"}}',
      1, 300, 0, 'ENABLED', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
 
     -- 5002: 合同类型数据源
-    (5002, 'CONTRACT_TYPE', '合同类型', 'STATIC',
+    (5002, 'CONTRACT_TYPE', '合同类型', 'STATIC', 'BUSINESS',
      JSON '{"options": [{"value": "PURCHASE", "label": "采购合同"}, {"value": "SALE", "label": "销售合同"}, {"value": "LEASE", "label": "租赁合同"}]}',
      1, 86400, 0, 'ENABLED', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
 

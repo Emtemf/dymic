@@ -152,6 +152,13 @@ public class DataProviderService {
     }
 
     /**
+     * 查询IT配置列表
+     */
+    public List<DataProviderDTO> listITConfigs() {
+        return converter.toDTOList(repository.findByCategory("IT"));
+    }
+
+    /**
      * 查询所有DataProvider（用于前端选择）
      */
     public List<DataProviderDTO> listAll() {

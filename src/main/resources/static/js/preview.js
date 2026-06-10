@@ -397,14 +397,14 @@ class PreviewRenderer {
         }
 
         // 查找数据源配置
-        const datasource = this.schema.datasources?.find(d => d.id === dataProviderId);
+        const datasource = this.schema.dataSources?.find(d => d.id === dataProviderId);
 
-        if (datasource && datasource.datasourceType === 'STATIC_DATA') {
-            // 静态数据源，解析JSON
+        if (datasource && datasource.providerType === 'STATIC') {
             try {
                 const data = JSON.parse(datasource.configJson || '{}');
-                if (data.options && Array.isArray(data.options)) {
-                    return data.options.map(opt =>
+                const options = Array.isArray(data) ? data : (data.options || data.children || []);
+                if (Array.isArray(options) && options.length > 0) {
+                    return options.map(opt =>
                         `<option value="${opt.value}">${opt.label}</option>`
                     ).join('');
                 }
@@ -467,13 +467,14 @@ class PreviewRenderer {
             ];
         }
 
-        const datasource = this.schema.datasources?.find(d => d.id === dataProviderId);
+        const datasource = this.schema.dataSources?.find(d => d.id === dataProviderId);
 
-        if (datasource && datasource.datasourceType === 'STATIC_DATA') {
+        if (datasource && datasource.providerType === 'STATIC') {
             try {
                 const data = JSON.parse(datasource.configJson || '{}');
-                if (data.options && Array.isArray(data.options)) {
-                    return data.options;
+                const options = Array.isArray(data) ? data : (data.options || data.children || []);
+                if (Array.isArray(options)) {
+                    return options;
                 }
             } catch (e) {
                 console.warn('解析数据源失败:', e);

@@ -334,7 +334,7 @@ function loadDataSourceOptions() {
 
     // 根据类型渲染配置
     switch (type) {
-        case 'static':
+        case 'STATIC':
             container.innerHTML = `
                 <div class="form-group">
                     <label>数据源名称</label>
@@ -349,7 +349,7 @@ function loadDataSourceOptions() {
                 </div>
             `;
             break;
-        case 'dict':
+        case 'DICT':
             container.innerHTML = `
                 <div class="form-group">
                     <label>数据源名称</label>
@@ -361,7 +361,7 @@ function loadDataSourceOptions() {
                 </div>
             `;
             break;
-        case 'http':
+        case 'HTTP':
             container.innerHTML = `
                 <div class="form-group">
                     <label>数据源名称</label>
@@ -389,7 +389,7 @@ function loadDataSourceOptions() {
                 </div>
             `;
             break;
-        case 'platform':
+        case 'PLATFORM':
             container.innerHTML = `
                 <div class="form-group">
                     <label>数据源名称</label>
@@ -405,7 +405,7 @@ function loadDataSourceOptions() {
                 </div>
             `;
             break;
-        case 'internal':
+        case 'INTERNAL':
             container.innerHTML = `
                 <div class="form-group">
                     <label>数据源名称</label>
@@ -447,22 +447,22 @@ function confirmDataSource() {
 
     // 根据类型收集配置
     switch (type) {
-        case 'static':
+        case 'STATIC':
             provider.config.data = JSON.parse(document.getElementById('dsData').value);
             break;
-        case 'dict':
+        case 'DICT':
             provider.config.dictType = document.getElementById('dsDictType').value;
             break;
-        case 'http':
+        case 'HTTP':
             provider.config.url = document.getElementById('dsUrl').value;
             provider.config.method = document.getElementById('dsMethod').value;
             provider.config.mapping = JSON.parse(document.getElementById('dsMapping').value);
             break;
-        case 'platform':
+        case 'PLATFORM':
             provider.config.service = document.getElementById('dsService').value;
             provider.config.interface = document.getElementById('dsInterface').value;
             break;
-        case 'internal':
+        case 'INTERNAL':
             provider.config.internalId = document.getElementById('dsInternalId').value;
             break;
     }
@@ -487,30 +487,30 @@ function editDataSource(index) {
     const modal = document.getElementById('dataSourceModal');
     modal.classList.add('active');
 
-    document.getElementById('dataSourceType').value = provider.type;
+    document.getElementById('dataSourceType').value = (provider.type || '').toUpperCase();
     loadDataSourceOptions();
 
     setTimeout(() => {
         document.getElementById('dsName').value = provider.name;
 
         // 根据类型填充配置
-        switch (provider.type) {
-            case 'static':
+        switch ((provider.type || '').toUpperCase()) {
+            case 'STATIC':
                 document.getElementById('dsData').value = JSON.stringify(provider.config.data, null, 2);
                 break;
-            case 'dict':
+            case 'DICT':
                 document.getElementById('dsDictType').value = provider.config.dictType;
                 break;
-            case 'http':
+            case 'HTTP':
                 document.getElementById('dsUrl').value = provider.config.url;
                 document.getElementById('dsMethod').value = provider.config.method;
                 document.getElementById('dsMapping').value = JSON.stringify(provider.config.mapping, null, 2);
                 break;
-            case 'platform':
+            case 'PLATFORM':
                 document.getElementById('dsService').value = provider.config.service;
                 document.getElementById('dsInterface').value = provider.config.interface;
                 break;
-            case 'internal':
+            case 'INTERNAL':
                 document.getElementById('dsInternalId').value = provider.config.internalId;
                 break;
         }

@@ -319,6 +319,7 @@ CREATE TABLE t_ui_data_provider (
     provider_code VARCHAR(100) NOT NULL,
     provider_name VARCHAR(200) NOT NULL,
     provider_type VARCHAR(50) NOT NULL,
+    data_source_category VARCHAR(20) NOT NULL DEFAULT 'IT',
     owner_type VARCHAR(50) NOT NULL DEFAULT 'IT',
     request_method VARCHAR(20),
     request_url VARCHAR(1000),

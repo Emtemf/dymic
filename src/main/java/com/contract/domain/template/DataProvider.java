@@ -313,6 +313,21 @@ public class DataProvider {
         return DataSourceCategory.fromProviderType(this.providerType);
     }
 
+    /**
+     * 获取数据源分类（向后兼容）
+     */
+    public String getDataSourceCategory() {
+        DataSourceCategory category = getCategory();
+        return category != null ? category.name() : null;
+    }
+
+    /**
+     * 获取数据源分类值对象
+     */
+    public DataSourceCategory getDataSourceCategoryValue() {
+        return getCategory();
+    }
+
     // ==================== 向后兼容的便捷方法 ====================
 
     /**

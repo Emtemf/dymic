@@ -27,6 +27,8 @@ public class SchemaService {
     private final FieldDefService fieldDefService;
     private final FieldComponentService fieldComponentService;
     private final ActionConfigService actionConfigService;
+    private final QueryConfigService queryConfigService;
+    private final DataSourceQueryFacadeService dataSourceQueryFacadeService;
     private final TemplateVersionService templateVersionService;
     private final TemplateService templateService;
 
@@ -49,7 +51,9 @@ public class SchemaService {
         List<LayoutNodeDTO> nodes = layoutNodeService.listByVersionId(versionId);
         List<FieldDefDTO> fieldDefs = fieldDefService.listByVersionId(versionId);
         List<FieldComponentDTO> components = fieldComponentService.listByVersionId(versionId);
+        List<QueryConfigDTO> queryConfigs = queryConfigService.listByVersionId(versionId);
         List<ActionConfigDTO> actions = actionConfigService.listByVersionId(versionId);
+        List<DataSourceQueryDTO> dataSources = dataSourceQueryFacadeService.queryAll();
 
         // 3. 构建嵌套树结构
         List<LayoutNodeTreeDTO> nodeTree = buildNodeTree(nodes, components, actions);
@@ -68,7 +72,9 @@ public class SchemaService {
             .layoutNodes(nodeTree)
             .fieldDefs(fieldDefs)
             .fieldComponents(components)
+            .queryConfigs(queryConfigs)
             .actionConfigs(actions)
+            .dataSources(dataSources)
             .build();
 
         log.info("Schema built successfully: templateId={}, nodes={}, fieldDefs={}, components={}, actions={}",

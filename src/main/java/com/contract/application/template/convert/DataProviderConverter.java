@@ -29,8 +29,8 @@ public interface DataProviderConverter {
         dto.setProviderCode(domain.getProviderCode());
         dto.setProviderName(domain.getProviderName());
         dto.setProviderType(domain.getProviderType());
+        dto.setDataSourceCategory(domain.getDataSourceCategory());
         dto.setConfigJson(domain.getConfigJson());
-        dto.setCacheEnabled(domain.getCacheEnabled());
         dto.setCacheTtlSeconds(domain.getCacheTtlSeconds());
         dto.setIsTemporary(domain.getIsTemporary());
         dto.setStatus(domain.getStatus());

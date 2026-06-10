@@ -624,3 +624,15 @@ function restoreState() {
         console.error('恢复状态失败:', error);
     }
 }
+
+/**
+ * 加载统一数据源列表
+ */
+async function loadUnifiedDataSources() {
+    const response = await fetch('/api/v2/ui/data-sources/query');
+    const result = await response.json();
+    if (!result.success) {
+        throw new Error(result.message || '加载统一数据源失败');
+    }
+    return result.data || [];
+}
