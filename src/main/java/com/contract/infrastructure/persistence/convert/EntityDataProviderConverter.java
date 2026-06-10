@@ -1,9 +1,10 @@
 package com.contract.infrastructure.persistence.convert;
 
-import com.contract.infrastructure.persistence.entity.DataProviderEntity;
 import com.contract.domain.template.DataProvider;
+import com.contract.infrastructure.persistence.entity.DataProviderEntity;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,10 +35,10 @@ public interface EntityDataProviderConverter {
             entity.getStatus(),
             entity.getCreatedBy(),
             entity.getCreatedName(),
-            entity.getCreatedAt() != null ? entity.getCreatedAt().atOffset(java.time.ZoneOffset.ofHours(8)) : null,
+            entity.getCreatedAt() != null ? entity.getCreatedAt().withOffsetSameInstant(ZoneOffset.UTC) : null,
             entity.getUpdatedBy(),
             entity.getUpdatedName(),
-            entity.getUpdatedAt() != null ? entity.getUpdatedAt().atOffset(java.time.ZoneOffset.ofHours(8)) : null
+            entity.getUpdatedAt() != null ? entity.getUpdatedAt().withOffsetSameInstant(ZoneOffset.UTC) : null
         );
     }
 
@@ -61,10 +62,10 @@ public interface EntityDataProviderConverter {
         entity.setStatus(domain.getStatus());
         entity.setCreatedBy(domain.getCreatedBy());
         entity.setCreatedName(domain.getCreatedName());
-        entity.setCreatedAt(domain.getCreatedAt());
+        entity.setCreatedAt(domain.getCreatedAt() != null ? domain.getCreatedAt().atOffset(ZoneOffset.UTC) : null);
         entity.setUpdatedBy(domain.getUpdatedBy());
         entity.setUpdatedName(domain.getUpdatedName());
-        entity.setUpdatedAt(domain.getUpdatedAt());
+        entity.setUpdatedAt(domain.getUpdatedAt() != null ? domain.getUpdatedAt().atOffset(ZoneOffset.UTC) : null);
         return entity;
     }
 

@@ -206,6 +206,25 @@ const API = {
    * @returns {Promise<number>} The working port number
    */
   async detectWorkingPort() {
+    const sameOriginUrl = `${window.location.origin}/api/templates`;
+
+    try {
+      const response = await fetch(sameOriginUrl, {
+        method: 'GET',
+        headers: this.defaultHeaders
+      });
+
+      if (response.ok || response.status === 404) {
+        const sameOrigin = new URL(window.location.origin);
+        this.currentPort = sameOrigin.port ? Number(sameOrigin.port) : null;
+        this.baseUrl = `${window.location.origin}/api`;
+        console.log(`✓ Backend detected on current origin ${window.location.origin}`);
+        return this.currentPort;
+      }
+    } catch (error) {
+      console.log(`✗ Current origin ${window.location.origin} not available`);
+    }
+
     for (const port of this.candidatePorts) {
       try {
         const testUrl = `http://localhost:${port}/api/templates`;

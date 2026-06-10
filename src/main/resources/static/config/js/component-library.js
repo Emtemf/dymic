@@ -428,7 +428,38 @@ const ComponentLibrary = {
             ...JSON.parse(JSON.stringify(def.defaultConfig))
         };
 
+        if (!instance.code || instance.code.endsWith('_1')) {
+            instance.code = this.createComponentCode(type, instance.id);
+        }
+        if (this.requiresFieldPath(type) && !instance.fieldPath) {
+            instance.fieldPath = this.createFieldPath(instance.code);
+        }
+
         return instance;
+    },
+
+    requiresFieldPath(type) {
+        const def = this.getComponentDef(type);
+        return !!def && def.category !== 'layout' && def.category !== 'action';
+    },
+
+    createComponentCode(type, id) {
+        const token = String(id || '').replace(/^comp_/, '').split('_')[0] || Date.now();
+        return `${(type || 'comp').toLowerCase()}_${token}`;
+    },
+
+    createFieldPath(code) {
+        const parts = String(code || '')
+            .replace(/[^a-zA-Z0-9]+/g, ' ')
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean);
+        if (parts.length === 0) {
+            return 'field';
+        }
+        return parts[0].toLowerCase() + parts.slice(1)
+            .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+            .join('');
     },
 
     // 生成唯一ID

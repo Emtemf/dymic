@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZoneOffset;
 import java.util.List;
 
 /**
@@ -58,8 +60,8 @@ public class LayoutNodeService {
 
         node.setSortNo(dto.getSortNo() != null ? dto.getSortNo() : 0);
         node.setLevelNo(dto.getLevelNo() != null ? dto.getLevelNo() : 1);
-        node.setCreatedAt(LocalDateTime.now());
-        node.setUpdatedAt(LocalDateTime.now());
+        node.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+        node.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
         node.setIsDeleted(0);
 
         repository.save(node);
@@ -96,7 +98,7 @@ public class LayoutNodeService {
         }
 
         converter.updateDomainFromDTO(dto, node);
-        node.setUpdatedAt(LocalDateTime.now());
+        node.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
         // 处理 JSONB 字段
         if (dto.getVisibleRule() != null) {

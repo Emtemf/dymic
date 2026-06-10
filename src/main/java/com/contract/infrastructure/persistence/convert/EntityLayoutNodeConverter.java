@@ -1,13 +1,16 @@
 package com.contract.infrastructure.persistence.convert;
 
-import com.contract.infrastructure.persistence.entity.LayoutNodeEntity;
 import com.contract.domain.template.LayoutNode;
-import org.mapstruct.Mapper;
+import com.contract.infrastructure.persistence.entity.LayoutNodeEntity;
 import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.BeanMapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 /**
@@ -15,26 +18,20 @@ import java.util.List;
  */
 @Mapper(componentModel = "spring")
 public interface EntityLayoutNodeConverter {
-    /**
-     * Entity → Domain
-     */
     LayoutNode toDomain(LayoutNodeEntity entity);
-
-    /**
-     * Domain → Entity
-     */
     LayoutNodeEntity toEntity(LayoutNode domain);
-
-    /**
-     * Entity List → Domain List
-     */
     List<LayoutNode> toDomainList(List<LayoutNodeEntity> entities);
 
-    /**
-     * 更新 Entity（部分更新）
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDomain(LayoutNode domain, @MappingTarget LayoutNodeEntity entity);
+
+    default LocalDateTime map(OffsetDateTime value) {
+        return value != null ? value.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime() : null;
+    }
+
+    default OffsetDateTime map(LocalDateTime value) {
+        return value != null ? value.atOffset(ZoneOffset.UTC) : null;
+    }
 }

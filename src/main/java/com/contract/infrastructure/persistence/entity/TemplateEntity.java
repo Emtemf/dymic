@@ -2,7 +2,7 @@ package com.contract.infrastructure.persistence.entity;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 /**
  * 模板实体
@@ -20,9 +20,9 @@ public class TemplateEntity {
     private Long currentVersionId;
     private Long createdBy;
     private String createdName;
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
     private Long updatedBy;
     private String updatedName;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime updatedAt;
     private Integer isDeleted;
 }

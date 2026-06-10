@@ -4,6 +4,7 @@ import com.contract.common.exception.BizException;
 import com.contract.domain.shared.types.AuditInfo;
 import com.contract.domain.template.types.VersionStatus;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Objects;
 
 /**
@@ -86,7 +87,7 @@ public class TemplateVersion {
             throw new BizException("只有草稿状态才能发布，当前状态：" + versionStatus.getDisplayName());
         }
         this.versionStatus = VersionStatus.PUBLISHED;
-        this.publishTime = OffsetDateTime.now();
+        this.publishTime = OffsetDateTime.now(ZoneOffset.UTC);
         this.publishBy = publishBy;
         this.auditInfo = auditInfo.update();
     }

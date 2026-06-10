@@ -2,7 +2,7 @@ package com.contract.infrastructure.persistence.entity;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 /**
  * 数据提供方实体
@@ -23,9 +23,9 @@ public class DataProviderEntity {
     private String status;
     private Long createdBy;
     private String createdName;
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
     private Long updatedBy;
     private String updatedName;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime updatedAt;
     private Integer isDeleted;
 }

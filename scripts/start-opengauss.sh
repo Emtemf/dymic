@@ -3,12 +3,12 @@
 # openGauss Docker容器启动脚本
 
 # 容器名称
-CONTAINER_NAME="opengauss-dev"
+CONTAINER_NAME="opengauss-contract"
 
 # 数据库配置
 DB_PORT="5432"
 DB_USER="gaussdb"
-DB_PASSWORD="Gaussdb@123"
+DB_PASSWORD="OpenGauss@123"
 DB_NAME="postgres"
 
 # 数据持久化目录
@@ -54,11 +54,11 @@ echo "  主机: localhost"
 echo "  端口: $DB_PORT"
 echo "  用户: $DB_USER"
 echo "  密码: $DB_PASSWORD"
-echo "  数据库: $DB_NAME"
+echo "  数据库: contract_template（初始化后） / postgres（初始）"
 echo ""
 echo "连接命令："
 echo "  docker exec -it $CONTAINER_NAME gsql -d $DB_NAME -U $DB_USER -W $DB_PASSWORD"
 echo ""
 echo "JDBC URL："
-echo "  jdbc:postgresql://localhost:$DB_PORT/$DB_NAME"
+echo "  jdbc:postgresql://localhost:$DB_PORT/contract_template"
 echo ""

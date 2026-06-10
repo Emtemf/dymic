@@ -15,9 +15,8 @@ import com.contract.infrastructure.persistence.mapper.TemplateMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,8 +37,8 @@ public class TemplateRepositoryImpl implements TemplateRepository {
         if (entity.getId() == null) {
             entity.setId(idGenerator.nextId());
         }
-        entity.setCreatedAt(LocalDateTime.now());
-        entity.setUpdatedAt(LocalDateTime.now());
+        entity.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
+        entity.setUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
         entity.setIsDeleted(0);
         templateMapper.insertTemplate(entity);
         return toDomain(entity);
@@ -66,7 +65,7 @@ public class TemplateRepositoryImpl implements TemplateRepository {
     @Override
     public void update(Template template) {
         TemplateEntity entity = toEntity(template);
-        entity.setUpdatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
         templateMapper.updateTemplate(entity);
     }
 
@@ -86,10 +85,10 @@ public class TemplateRepositoryImpl implements TemplateRepository {
         AuditInfo auditInfo = AuditInfo.of(
             entity.getCreatedBy(),
             entity.getCreatedName(),
-            toOffsetDateTime(entity.getCreatedAt()),
+            entity.getCreatedAt(),
             entity.getUpdatedBy(),
             entity.getUpdatedName(),
-            toOffsetDateTime(entity.getUpdatedAt())
+            entity.getUpdatedAt()
         );
 
         return Template.reconstitute(
@@ -126,22 +125,14 @@ public class TemplateRepositoryImpl implements TemplateRepository {
             AuditInfo auditInfo = template.getAuditInfo();
             entity.setCreatedBy(auditInfo.getCreatedBy());
             entity.setCreatedName(auditInfo.getCreatedName());
-            entity.setCreatedAt(toLocalDateTime(auditInfo.getCreatedAt()));
+            entity.setCreatedAt(auditInfo.getCreatedAt());
             entity.setUpdatedBy(auditInfo.getUpdatedBy());
             entity.setUpdatedName(auditInfo.getUpdatedName());
-            entity.setUpdatedAt(toLocalDateTime(auditInfo.getUpdatedAt()));
+            entity.setUpdatedAt(auditInfo.getUpdatedAt());
         }
         if (template.getStatus() != null) {
             entity.setStatus(template.getStatus().name());
         }
         return entity;
-    }
-
-    private static OffsetDateTime toOffsetDateTime(LocalDateTime ldt) {
-        return ldt != null ? ldt.atZone(ZoneId.systemDefault()).toOffsetDateTime() : null;
-    }
-
-    private static LocalDateTime toLocalDateTime(OffsetDateTime odt) {
-        return odt != null ? odt.toLocalDateTime() : null;
     }
 }

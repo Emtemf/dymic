@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
 
@@ -76,8 +78,8 @@ public class FieldComponentService {
         FieldComponent component = converter.toDomain(request);
         component.setTemplateId(templateId);
         component.setTemplateVersionId(versionId);
-        component.setCreatedAt(LocalDateTime.now());
-        component.setUpdatedAt(LocalDateTime.now());
+        component.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+        component.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
         if (component.getLabelName() == null) {
             component.setLabelName(fieldDef.getFieldNameCn());
@@ -196,8 +198,8 @@ public class FieldComponentService {
         component.setLabelName(labelName);
         component.setPlaceholder(placeholder);
         component.setSortNo(sortNo != null ? sortNo : 0);
-        component.setCreatedAt(LocalDateTime.now());
-        component.setUpdatedAt(LocalDateTime.now());
+        component.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+        component.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
         FieldComponent saved = repository.save(component);
         return converter.toDTO(saved);
@@ -254,7 +256,7 @@ public class FieldComponentService {
         }
 
         converter.updateFromDTO(request, component);
-        component.setUpdatedAt(LocalDateTime.now());
+        component.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
         repository.update(component);
         log.info("更新字段组件绑定成功: id={}", id);

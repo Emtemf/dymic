@@ -1,6 +1,7 @@
 package com.contract.domain.shared.types;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Objects;
 
 /**
@@ -33,7 +34,7 @@ public final class AuditInfo {
      * 创建审计信息（新建时）
      */
     public static AuditInfo create() {
-        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         Long currentUserId = getCurrentUserId();
         String currentUserName = getCurrentUserName();
         return new AuditInfo(currentUserId, currentUserName, now, currentUserId, currentUserName, now);
@@ -55,7 +56,7 @@ public final class AuditInfo {
      * @return 新实例
      */
     public AuditInfo update() {
-        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         Long currentUserId = getCurrentUserId();
         String currentUserName = getCurrentUserName();
         return new AuditInfo(

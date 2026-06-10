@@ -1,102 +1,196 @@
 # 合同模板动态渲染系统
 
-## 当前状态
+## 项目定位
 
-该项目当前已经完成一轮以“完整项目交付 + 公司内迁移约束”为目标的重构与验证，重点包括：
+这是一个**配置驱动、动态渲染、数据比对**的一体化平台。
 
-- Controller / Application / Domain / Infrastructure 垂直分层收口
-- Controller Request 模型迁移到 adapter 层
-- 持久化从 MyBatis-Plus 迁移到原生 MyBatis
-- Mapper XML 统一为 `xxx.opengauss.xml`
-- 基础设施数据实体保留 `Entity` 后缀，XML 文件名不带 `Entity`
-- 统一数据源查询、树形数据源执行、Schema 聚合链路打通
-- E2E 证据骨架、人工 double-check 清单、JSONB/性能说明已落地
+系统目标：
+- 业务人员通过模板配置定义合同结构
+- 系统根据配置动态渲染合同录入界面
+- IT 配置数据源与查询回填能力
+- 支持外部数据映射、对比与结果应用
 
-## 启动方式
+明确边界：
+- 不是低代码平台
+- 不是给业务人员直接交付的拖拽设计器产品
+- 可视化配置界面仅用于**开发验证 / E2E 验证**
 
-### 本地开发
+当前前端入口与 `req` / `CLAUDE.md` 一致：
+- 真实入口：`/index.html`
+- 设计器页：`/config/template-designer.html`
+- 数据源页：`/config/data-source.html`
+- 动态展示页：`/display/dynamic-display.html`
 
-推荐直接使用 Maven：
+---
+
+## 当前默认运行方式
+
+默认数据库已经切换为 **openGauss**。
+
+- 默认运行配置：`src/main/resources/application.yml`
+- 测试配置：`src/main/resources/application-test.yml`
+- H2 现在只用于单元测试 / 测试 profile
+
+默认应用启动端口：`8888`
+
+默认 API 基础地址：
+
+```text
+http://localhost:8888/api
+```
+
+---
+
+## 本地启动
+
+### 1. 启动 openGauss
+
+```bash
+bash scripts/start-opengauss.sh
+```
+
+### 2. 初始化数据库
+
+```bash
+bash scripts/init-opengauss.sh
+```
+
+### 3. 启动应用
 
 ```bash
 mvn spring-boot:run
 ```
 
-默认端口见 `src/main/resources/application.yml`。
+启动成功后访问：
 
-### 指定端口启动
+- 首页：`http://localhost:8888/index.html`
+- 设计器：`http://localhost:8888/config/template-designer.html`
 
-```bash
-mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8890
+---
+
+## 数据库说明
+
+### 默认运行库
+
+默认运行使用：
+
+```text
+jdbc:postgresql://localhost:5432/contract_template?options=-c%20TimeZone=UTC
 ```
 
-## 真实用户入口
+连接信息：
+- Host: `localhost`
+- Port: `5432`
+- Database: `contract_template`
+- Username: `gaussdb`
+- Password: `OpenGauss@123`
 
-- 主入口页：`/index.html`
-- 设计器页：`/config/template-designer.html`
-- 数据源管理页：`/config/data-source.html`
-- 统一数据源查询：`/api/v2/ui/data-sources/query`
-- 统一数据源执行：`/api/v2/ui/data-sources/{id}/execute`
+### 测试库
 
-> 注意：`/config/template-designer.html` 不是完整业务入口。真实用户路径应先从 `/index.html` 开始，依次完成“创建模板 → 创建版本 → 发布版本”，然后再进入设计器页面选择模板和版本，最后才进入可拖拽、可配置、可预览的设计器操作区。
+`application-test.yml` 仍使用 H2：
 
-### 1. 自动化测试
-
-全量测试：
-
-```bash
-mvn test -q
+```text
+jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
 ```
 
-### 2. 人工复核
+---
 
-人工 double-check 清单在：
+## UTC 时间策略
 
-- `docs/evidence/dynamic-template-audit/manual-checklist.md`
+为兼容 openGauss `TIMESTAMPTZ`，当前项目默认按 **UTC** 处理数据库审计时间：
 
-### 3. E2E / 证据包
+- 数据库连接已显式指定 `TimeZone=UTC`
+- openGauss 持久化实体使用 `OffsetDateTime`
+- 业务写入时间统一按 UTC 生成
+- 接口返回中当前已可看到 `...Z` 结尾的 UTC 时间字符串
 
-证据包目录：
+---
 
-- `docs/evidence/dynamic-template-audit/`
+## 与需求文档一致的验证路径
 
-重点内容：
+根据 `req/req.md` 与 `CLAUDE.md`，最小闭环应按下面顺序验证：
 
-- 浏览器场景：`browser-flows/`
-- 截图证据：`screenshots/`
-- JSONB / SQL 说明：`sql-and-xml/`
-- 性能说明：`performance/`
-- 迁移检查表：`file-notes/migration-checklist.md`
+1. 创建模板
+2. 创建版本
+3. 发布版本
+4. 进入设计器配置
+5. 保存 schema
+6. 新增 / 编辑合同
+7. 回显合同数据
 
-### 4. E2E 基线
+说明：
+- `template-designer.html` 不是独立业务主入口
+- 应优先从 `index.html` 开始
+- 可视化设计器用于开发验证，不是业务交付界面
 
-E2E 覆盖基线文档在：
+---
 
-- `docs/superpowers/e2e/README.md`
+## 已完成的关键修复
 
-## 架构约束
+### 设计器 schema 链路
 
-当前实现遵循以下硬约束：
+已修复：
+- schema 加载 / 归一化 / 保存链路不一致
+- 新增组件时 `fieldPath` 为空
+- URL 带 `templateId/versionId` 时初始化顺序错误
+- 设计器恢复本地状态时 `rules/dataProviders` 缺省导致异常
+- 首页 API 端口探测不跟随当前实例
 
-- 禁止使用 MyBatis-Plus
-- 只能使用原生 MyBatis + XML
-- XML 命名采用 `xxx.opengauss.xml`
-- adapter 层仅持有 `Req/Rsp`
-- application 层仅持有 DTO 和薄层编排
-- domain 层承载聚合根、值对象、仓储接口和领域语义
-- infrastructure 层承载数据实体、仓储实现、外部实现
-- 转换统一优先使用 MapStruct
+### openGauss 默认运行
 
-## 迁移说明
+已修复：
+- 默认配置切到 openGauss
+- openGauss 启动 / 初始化脚本与默认配置对齐
+- 默认模板列表 / 版本列表接口在高斯下恢复正常
+- 版本表 mapper 与 openGauss schema 字段不一致问题
+- UTC / `TIMESTAMPTZ` 基础兼容链路已打通
 
-若需要迁移到公司内环境，请优先检查：
+---
 
-- `docs/evidence/dynamic-template-audit/file-notes/migration-checklist.md`
-- `docs/evidence/dynamic-template-audit/file-notes/global-conformance.md`
+## 验证命令
+
+### 配置 / 契约测试
+
+```bash
+mvn -q -Dtest=ApiAutoDetectContractTest,ComponentLibraryContractTest,ConfigApiContractTest,DefaultDatabaseProfileContractTest,OpenGaussTimeMappingContractTest test
+```
+
+### 编译
+
+```bash
+mvn -q -DskipTests compile
+```
+
+### 默认高斯接口烟雾验证
+
+```bash
+curl http://localhost:8888/api/templates
+curl http://localhost:8888/api/templates/1001/versions
+```
+
+---
 
 ## 注意事项
 
-- 浏览器截图只能作为**修复后的通过证据**，不能替代修复
-- 如果配置、保存回显、嵌套展示、预览结果不一致，必须先修复再补截图
-- 如果模板列表为空或没有版本，设计器主链路 E2E 不能算完成；必须先补齐“模板 → 版本 → 设计器”这段前置链路
-- 工作区中的 `.omc/`、`.claude/worktrees/` 等内容不属于交付物
+- `.omc/`、`.claude/worktrees/`、`.idea/` 不属于交付物
+- 若重启电脑后接口报数据库连接错误，优先确认 openGauss 容器是否启动
+- 若再次执行初始化脚本，注意测试数据脚本中的脏数据或重复数据问题
+- 设计器与首页静态资源已做缓存规避版本号，但浏览器强缓存时仍建议刷新页面
+
+---
+
+## 当前建议使用方式
+
+开发 / 验证统一使用：
+
+```bash
+bash scripts/start-opengauss.sh
+bash scripts/init-opengauss.sh
+mvn spring-boot:run
+```
+
+测试仍然使用：
+
+```bash
+mvn test
+```

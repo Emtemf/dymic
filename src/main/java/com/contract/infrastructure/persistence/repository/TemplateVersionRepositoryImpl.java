@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,8 +33,8 @@ public class TemplateVersionRepositoryImpl implements TemplateVersionRepository 
         if (entity.getId() == null) {
             entity.setId(idGenerator.nextId());
         }
-        entity.setCreatedAt(LocalDateTime.now());
-        entity.setUpdatedAt(LocalDateTime.now());
+        entity.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
+        entity.setUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
         entity.setIsDeleted(0);
         versionMapper.insertTemplateVersion(entity);
         return toDomain(entity);
@@ -67,7 +67,7 @@ public class TemplateVersionRepositoryImpl implements TemplateVersionRepository 
     @Override
     public void update(TemplateVersion version) {
         TemplateVersionEntity entity = toEntity(version);
-        entity.setUpdatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
         versionMapper.updateTemplateVersion(entity);
     }
 
@@ -81,10 +81,10 @@ public class TemplateVersionRepositoryImpl implements TemplateVersionRepository 
         AuditInfo auditInfo = AuditInfo.of(
             entity.getCreatedBy(),
             entity.getCreatedName(),
-            toOffsetDateTime(entity.getCreatedAt()),
+            entity.getCreatedAt(),
             entity.getUpdatedBy(),
             entity.getUpdatedName(),
-            toOffsetDateTime(entity.getUpdatedAt())
+            entity.getUpdatedAt()
         );
         return TemplateVersion.reconstitute(
             entity.getId(),
@@ -92,7 +92,7 @@ public class TemplateVersionRepositoryImpl implements TemplateVersionRepository 
             entity.getVersionNo(),
             entity.getVersionName(),
             status,
-            toOffsetDateTime(entity.getPublishTime()),
+            entity.getPublishTime(),
             entity.getPublishBy(),
             entity.getSchemaHash(),
             entity.getRemark(),
@@ -106,27 +106,23 @@ public class TemplateVersionRepositoryImpl implements TemplateVersionRepository 
         entity.setTemplateId(version.getTemplateId());
         entity.setVersionNo(version.getVersionNo());
         entity.setVersionName(version.getVersionName());
-        entity.setPublishTime(toLocalDateTime(version.getPublishTime()));
+        entity.setPublishTime(version.getPublishTime());
         entity.setPublishBy(version.getPublishBy());
         entity.setSchemaHash(version.getSchemaHash());
         entity.setRemark(version.getRemark());
         entity.setCreatedBy(version.getCreatedBy());
         entity.setCreatedName(version.getCreatedName());
-        entity.setCreatedAt(toLocalDateTime(version.getCreatedAt()));
+        entity.setCreatedAt(version.getCreatedAt());
         entity.setUpdatedBy(version.getUpdatedBy());
         entity.setUpdatedName(version.getUpdatedName());
-        entity.setUpdatedAt(toLocalDateTime(version.getUpdatedAt()));
+        entity.setUpdatedAt(version.getUpdatedAt());
         if (version.getVersionStatus() != null) {
             entity.setVersionStatus(version.getVersionStatus().name());
         }
         return entity;
     }
 
-    private static OffsetDateTime toOffsetDateTime(LocalDateTime ldt) {
-        return ldt != null ? ldt.atZone(ZoneId.systemDefault()).toOffsetDateTime() : null;
-    }
-
-    private static LocalDateTime toLocalDateTime(OffsetDateTime odt) {
-        return odt != null ? odt.toLocalDateTime() : null;
+    private static LocalDateTime toUtcLocalDateTime(OffsetDateTime odt) {
+        return odt != null ? odt.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime() : null;
     }
 }

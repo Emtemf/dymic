@@ -7,9 +7,7 @@ import com.contract.domain.template.types.*;
 import com.contract.infrastructure.persistence.entity.TemplateEntity;
 import org.mapstruct.Mapper;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,7 +26,6 @@ public interface EntityTemplateConverter {
             return null;
         }
 
-        // 转换值对象
         TemplateId id = entity.getId() != null ? new TemplateId(entity.getId()) : null;
         TemplateCode templateCode = entity.getTemplateCode() != null ? new TemplateCode(entity.getTemplateCode()) : null;
         TemplateName templateName = entity.getTemplateName() != null ? new TemplateName(entity.getTemplateName()) : null;
@@ -37,14 +34,13 @@ public interface EntityTemplateConverter {
         TemplateStatus status = entity.getStatus() != null
             ? TemplateStatus.valueOf(entity.getStatus()) : null;
 
-        // 转换审计信息
         AuditInfo auditInfo = AuditInfo.of(
             entity.getCreatedBy(),
             entity.getCreatedName(),
-            toOffsetDateTime(entity.getCreatedAt()),
+            entity.getCreatedAt(),
             entity.getUpdatedBy(),
             entity.getUpdatedName(),
-            toOffsetDateTime(entity.getUpdatedAt())
+            entity.getUpdatedAt()
         );
 
         return Template.reconstitute(
@@ -68,7 +64,6 @@ public interface EntityTemplateConverter {
         }
         TemplateEntity entity = new TemplateEntity();
 
-        // 处理值对象
         if (template.getId() != null) {
             entity.setId(template.getId().getValue());
         }
@@ -87,18 +82,16 @@ public interface EntityTemplateConverter {
 
         entity.setCurrentVersionId(template.getCurrentVersionId());
 
-        // 处理审计信息
         if (template.getAuditInfo() != null) {
             AuditInfo auditInfo = template.getAuditInfo();
             entity.setCreatedBy(auditInfo.getCreatedBy());
             entity.setCreatedName(auditInfo.getCreatedName());
-            entity.setCreatedAt(toLocalDateTime(auditInfo.getCreatedAt()));
+            entity.setCreatedAt(auditInfo.getCreatedAt());
             entity.setUpdatedBy(auditInfo.getUpdatedBy());
             entity.setUpdatedName(auditInfo.getUpdatedName());
-            entity.setUpdatedAt(toLocalDateTime(auditInfo.getUpdatedAt()));
+            entity.setUpdatedAt(auditInfo.getUpdatedAt());
         }
 
-        // Status: Enum -> String
         if (template.getStatus() != null) {
             entity.setStatus(template.getStatus().name());
         }
@@ -115,19 +108,5 @@ public interface EntityTemplateConverter {
         return entities.stream()
             .map(this::toDomain)
             .collect(Collectors.toList());
-    }
-
-    /**
-     * LocalDateTime -> OffsetDateTime
-     */
-    default OffsetDateTime toOffsetDateTime(LocalDateTime ldt) {
-        return ldt != null ? ldt.atZone(ZoneId.systemDefault()).toOffsetDateTime() : null;
-    }
-
-    /**
-     * OffsetDateTime -> LocalDateTime
-     */
-    default LocalDateTime toLocalDateTime(OffsetDateTime odt) {
-        return odt != null ? odt.toLocalDateTime() : null;
     }
 }

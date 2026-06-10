@@ -2,7 +2,7 @@ package com.contract.infrastructure.persistence.entity;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 /**
  * 字段定义实体
@@ -28,7 +28,7 @@ public class FieldDefEntity {
     private String defaultValue;
     private String validateRule;
     private String propsJson;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
     private Integer isDeleted;
 }

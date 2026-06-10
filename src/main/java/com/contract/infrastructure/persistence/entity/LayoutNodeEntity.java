@@ -2,7 +2,7 @@ package com.contract.infrastructure.persistence.entity;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 /**
  * 布局节点实体
@@ -34,7 +34,7 @@ public class LayoutNodeEntity {
     private String visibleRule;
     private String readonlyRule;
     private String propsJson;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
     private Integer isDeleted;
 }

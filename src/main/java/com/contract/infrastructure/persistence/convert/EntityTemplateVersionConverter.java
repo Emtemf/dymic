@@ -1,14 +1,14 @@
 package com.contract.infrastructure.persistence.convert;
 
+import com.contract.domain.shared.types.AuditInfo;
 import com.contract.domain.template.TemplateVersion;
 import com.contract.domain.template.types.VersionStatus;
-import com.contract.domain.shared.types.AuditInfo;
 import com.contract.infrastructure.persistence.entity.TemplateVersionEntity;
 import org.mapstruct.Mapper;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,10 +18,6 @@ import java.util.stream.Collectors;
  */
 @Mapper(componentModel = "spring")
 public interface EntityTemplateVersionConverter {
-
-    /**
-     * Entity -> Domain
-     */
     default TemplateVersion toDomain(TemplateVersionEntity entity) {
         if (entity == null) {
             return null;
@@ -31,10 +27,10 @@ public interface EntityTemplateVersionConverter {
         AuditInfo auditInfo = AuditInfo.of(
             entity.getCreatedBy(),
             entity.getCreatedName(),
-            toOffsetDateTime(entity.getCreatedAt()),
+            entity.getCreatedAt(),
             entity.getUpdatedBy(),
             entity.getUpdatedName(),
-            toOffsetDateTime(entity.getUpdatedAt())
+            entity.getUpdatedAt()
         );
         return TemplateVersion.reconstitute(
             entity.getId(),
@@ -42,7 +38,7 @@ public interface EntityTemplateVersionConverter {
             entity.getVersionNo(),
             entity.getVersionName(),
             status,
-            toOffsetDateTime(entity.getPublishTime()),
+            entity.getPublishTime(),
             entity.getPublishBy(),
             entity.getSchemaHash(),
             entity.getRemark(),
@@ -50,9 +46,6 @@ public interface EntityTemplateVersionConverter {
         );
     }
 
-    /**
-     * Domain -> Entity
-     */
     default TemplateVersionEntity toEntity(TemplateVersion version) {
         if (version == null) {
             return null;
@@ -62,25 +55,22 @@ public interface EntityTemplateVersionConverter {
         entity.setTemplateId(version.getTemplateId());
         entity.setVersionNo(version.getVersionNo());
         entity.setVersionName(version.getVersionName());
-        entity.setPublishTime(toLocalDateTime(version.getPublishTime()));
+        entity.setPublishTime(version.getPublishTime());
         entity.setPublishBy(version.getPublishBy());
         entity.setSchemaHash(version.getSchemaHash());
         entity.setRemark(version.getRemark());
         entity.setCreatedBy(version.getCreatedBy());
         entity.setCreatedName(version.getCreatedName());
-        entity.setCreatedAt(toLocalDateTime(version.getCreatedAt()));
+        entity.setCreatedAt(version.getCreatedAt());
         entity.setUpdatedBy(version.getUpdatedBy());
         entity.setUpdatedName(version.getUpdatedName());
-        entity.setUpdatedAt(toLocalDateTime(version.getUpdatedAt()));
+        entity.setUpdatedAt(version.getUpdatedAt());
         if (version.getVersionStatus() != null) {
             entity.setVersionStatus(version.getVersionStatus().name());
         }
         return entity;
     }
 
-    /**
-     * Entity List -> Domain List
-     */
     default List<TemplateVersion> toDomainList(List<TemplateVersionEntity> entities) {
         if (entities == null) {
             return null;
@@ -90,17 +80,11 @@ public interface EntityTemplateVersionConverter {
             .collect(Collectors.toList());
     }
 
-    /**
-     * LocalDateTime -> OffsetDateTime
-     */
-    default OffsetDateTime toOffsetDateTime(LocalDateTime ldt) {
-        return ldt != null ? ldt.atZone(ZoneId.systemDefault()).toOffsetDateTime() : null;
+    default LocalDateTime map(OffsetDateTime value) {
+        return value != null ? value.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime() : null;
     }
 
-    /**
-     * OffsetDateTime -> LocalDateTime
-     */
-    default LocalDateTime toLocalDateTime(OffsetDateTime odt) {
-        return odt != null ? odt.toLocalDateTime() : null;
+    default OffsetDateTime map(LocalDateTime value) {
+        return value != null ? value.atOffset(ZoneOffset.UTC) : null;
     }
 }

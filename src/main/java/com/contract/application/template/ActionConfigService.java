@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 /**
@@ -65,8 +66,8 @@ public class ActionConfigService {
             config.setSortNo(0);
         }
 
-        config.setCreatedAt(LocalDateTime.now());
-        config.setUpdatedAt(LocalDateTime.now());
+        config.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+        config.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
         ActionConfig saved = repository.save(config);
         log.info("创建动作配置成功: id={}, templateId={}, versionId={}, actionCode={}, actionType={}",
@@ -137,7 +138,7 @@ public class ActionConfigService {
             config.generateActionCode();
         }
 
-        config.setUpdatedAt(LocalDateTime.now());
+        config.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
         repository.update(config);
         log.info("更新动作配置成功: id={}, actionCode={}", id, config.getActionCode());

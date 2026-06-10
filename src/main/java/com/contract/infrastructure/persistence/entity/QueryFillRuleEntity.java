@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 /**
  * 查询回填规则实体
@@ -22,7 +22,7 @@ public class QueryFillRuleEntity {
     private String fillMode;
     private String transformJson;
     private Integer sortNo;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
     private Integer isDeleted;
 }

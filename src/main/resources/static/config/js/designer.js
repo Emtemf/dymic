@@ -25,20 +25,22 @@ const DesignerState = window.DesignerState = {
  * 初始化设计器
  */
 function initDesigner() {
+    // 绑定事件
+    bindEvents();
+
+    // URL 模式优先加载远端配置，避免先渲染本地草稿
+    if (DesignerState.templateId) {
+        loadConfig(DesignerState.templateId, DesignerState.versionId);
+        return;
+    }
+
     // 恢复状态
     restoreState();
 
     // 渲染预览
     renderPreview();
-
-    // 绑定事件
-    bindEvents();
-
-    // 加载模板（如果有）
-    if (DesignerState.templateId) {
-        loadConfig(DesignerState.templateId);
-    }
 }
+
 
 /**
  * 绑定事件

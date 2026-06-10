@@ -2,7 +2,7 @@ package com.contract.infrastructure.persistence.entity;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 /**
  * 模板版本实体
@@ -16,15 +16,15 @@ public class TemplateVersionEntity {
     private Integer versionNo;
     private String versionName;
     private String versionStatus;
-    private LocalDateTime publishTime;
+    private OffsetDateTime publishTime;
     private Long publishBy;
     private String schemaHash;
     private String remark;
     private Long createdBy;
     private String createdName;
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
     private Long updatedBy;
     private String updatedName;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime updatedAt;
     private Integer isDeleted;
 }

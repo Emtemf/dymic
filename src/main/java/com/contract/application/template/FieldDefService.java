@@ -19,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,8 +77,8 @@ public class FieldDefService {
         fieldDef.setIndexable(0);
         fieldDef.setIsDeleted(0);
 
-        fieldDef.setCreatedAt(LocalDateTime.now());
-        fieldDef.setUpdatedAt(LocalDateTime.now());
+        fieldDef.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+        fieldDef.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
         repository.save(fieldDef);
 
@@ -150,7 +152,7 @@ public class FieldDefService {
             fieldDef.setRequiredDefault(dto.getRequiredDefault());
         }
 
-        fieldDef.setUpdatedAt(LocalDateTime.now());
+        fieldDef.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
         repository.update(fieldDef);
         return converter.toDTO(fieldDef);
     }

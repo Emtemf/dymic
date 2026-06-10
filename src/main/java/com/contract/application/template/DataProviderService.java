@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 
@@ -206,7 +207,7 @@ public class DataProviderService {
         }
 
         OffsetDateTime createdAt = existing.getAuditInfo() != null ? existing.getAuditInfo().getCreatedAt() : null;
-        OffsetDateTime updatedAt = OffsetDateTime.now();
+        OffsetDateTime updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
 
         DataProvider updated = DataProvider.rebuild(
             existing.getId(),

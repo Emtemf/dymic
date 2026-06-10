@@ -3,20 +3,21 @@ spring:
     name: contract-template
 
   datasource:
-    url: jdbc:h2:mem:testdb;MODE=PostgreSQL
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+    url: jdbc:postgresql://localhost:5432/contract_template?options=-c%20TimeZone=UTC
+    driver-class-name: org.postgresql.Driver
+    username: gaussdb
+    password: OpenGauss@123
 
   sql:
     init:
-      mode: always
-      schema-locations: classpath:schema-h2.sql
+      mode: never  # openGauss 手动初始化
+
+  web:
+    resources:
+      cache:
+        period: 0
+      chain:
+        cache: false
 
 mybatis:
   mapper-locations: classpath:mapper/*.opengauss.xml

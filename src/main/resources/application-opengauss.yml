@@ -3,7 +3,7 @@ spring:
     name: contract-template
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/contract_template
+    url: jdbc:postgresql://localhost:5432/contract_template?options=-c%20TimeZone=UTC
     driver-class-name: org.postgresql.Driver
     username: gaussdb
     password: OpenGauss@123

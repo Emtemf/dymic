@@ -10,19 +10,18 @@ async function saveConfig() {
     try {
         const config = DesignerState.templateConfig;
 
-        // 验证配置
+        normalizeTemplateConfig(config);
+
         const validation = validateConfig(config);
         if (!validation.valid) {
             showNotification(validation.message, 'error');
             return;
         }
 
-        // 获取模板ID和版本ID（从URL参数或状态中）
         const urlParams = new URLSearchParams(window.location.search);
         const templateId = urlParams.get('templateId') || DesignerState.templateId || '1001';
         const versionId = urlParams.get('versionId') || DesignerState.versionId || '2001';
 
-        // 构建保存数据
         const saveData = {
             layoutNodes: extractLayoutNodes(config.rootComponent),
             fieldDefs: extractFieldDefs(config),
@@ -57,8 +56,16 @@ async function saveConfig() {
 /**
  * 从组件树提取布局节点
  */
-function extractLayoutNodes(component, parentId = null, result = [], usedCodes = {}) {
+function extractLayoutNodes(component, parentId = null, result = [], usedCodes = {}, visitedNodeIds = new Set()) {
     if (!component) return result;
+
+    const componentKey = String(component.id || component.code || '');
+    if (componentKey && visitedNodeIds.has(componentKey)) {
+        return result;
+    }
+    if (componentKey) {
+        visitedNodeIds.add(componentKey);
+    }
 
     let code = component.code || component.type.toLowerCase();
     if (usedCodes[code] !== undefined) {
@@ -68,8 +75,9 @@ function extractLayoutNodes(component, parentId = null, result = [], usedCodes =
         usedCodes[code] = 0;
     }
 
-    // Build props object with only defined values
     const propsObj = {};
+    if (component.width !== undefined) propsObj.width = component.width;
+    if (component.height !== undefined) propsObj.height = component.height;
     if (component.span !== undefined) propsObj.span = component.span;
     if (component.offset !== undefined) propsObj.offset = component.offset;
     if (component.gutter !== undefined) propsObj.gutter = component.gutter;
@@ -95,38 +103,246 @@ function extractLayoutNodes(component, parentId = null, result = [], usedCodes =
     };
     result.push(node);
 
-    // 递归处理子组件
-    if (component.children && component.children.length > 0) {
-        component.children.forEach(child => {
-            extractLayoutNodes(child, component.id, result, usedCodes);
-        });
-    }
+    (component.children || []).forEach(child => {
+        extractLayoutNodes(child, component.id, result, usedCodes, visitedNodeIds);
+    });
 
-    // 递归处理 panels 子组件（COLLAPSE）
-    if (component.panels && component.panels.length > 0) {
-        component.panels.forEach(panel => {
-            if (panel.children && panel.children.length > 0) {
-                panel.children.forEach(child => {
-                    const c = typeof child === 'string' ? null : child;
-                    if (c) extractLayoutNodes(c, component.id, result, usedCodes);
-                });
+    (component.panels || []).forEach(panel => {
+        (panel.children || []).forEach(child => {
+            const nestedComponent = typeof child === 'string' ? null : child;
+            if (nestedComponent) {
+                extractLayoutNodes(nestedComponent, component.id, result, usedCodes, visitedNodeIds);
             }
         });
-    }
+    });
 
-    // 递归处理 tabs 子组件（TAB）
-    if (component.tabs && component.tabs.length > 0) {
-        component.tabs.forEach(tab => {
-            if (tab.children && tab.children.length > 0) {
-                tab.children.forEach(child => {
-                    const c = typeof child === 'string' ? null : child;
-                    if (c) extractLayoutNodes(c, component.id, result, usedCodes);
-                });
+    (component.tabs || []).forEach(tab => {
+        (tab.children || []).forEach(child => {
+            const nestedComponent = typeof child === 'string' ? null : child;
+            if (nestedComponent) {
+                extractLayoutNodes(nestedComponent, component.id, result, usedCodes, visitedNodeIds);
             }
         });
-    }
+    });
 
     return result;
+}
+
+/**
+ * 递归遍历组件树
+ */
+function traverseComponents(component, visitor) {
+    const visitedNodeIds = new Set();
+
+    function walk(node) {
+        if (!node) {
+            return;
+        }
+        const componentKey = String(node.id || node.code || '');
+        if (componentKey && visitedNodeIds.has(componentKey)) {
+            return;
+        }
+        if (componentKey) {
+            visitedNodeIds.add(componentKey);
+        }
+
+        visitor(node);
+        (node.children || []).forEach(walk);
+        (node.tabs || []).forEach(tab => (tab.children || []).forEach(walk));
+        (node.panels || []).forEach(panel => (panel.children || []).forEach(walk));
+    }
+
+    walk(component);
+}
+
+function createUniqueGeneratedFieldPath(basePath, usedFieldPaths) {
+    const normalizedBasePath = basePath || 'field';
+    let candidate = normalizedBasePath;
+    let index = 1;
+    while (usedFieldPaths.has(candidate)) {
+        index += 1;
+        candidate = `${normalizedBasePath}${index}`;
+    }
+    usedFieldPaths.add(candidate);
+    return candidate;
+}
+
+function normalizeFieldDataType(dataType) {
+    if (!dataType) {
+        return null;
+    }
+
+    switch (String(dataType).toUpperCase()) {
+        case 'TEXT':
+        case 'STRING':
+            return 'string';
+        case 'NUMBER':
+        case 'DECIMAL':
+            return 'number';
+        case 'DATE':
+        case 'DATETIME':
+            return 'date';
+        case 'ARRAY':
+            return 'array';
+        default:
+            return String(dataType).toLowerCase();
+    }
+}
+
+function parseJsonObject(raw) {
+    if (!raw) {
+        return null;
+    }
+    try {
+        const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        return parsed && typeof parsed === 'object' ? parsed : null;
+    } catch (error) {
+        return null;
+    }
+}
+
+function applySchemaFieldBindings(rootComponent, schemaData) {
+    if (!rootComponent || !schemaData) {
+        return;
+    }
+
+    const fieldDefByLayoutNodeId = new Map(
+        (schemaData.fieldDefs || [])
+            .filter(fieldDef => fieldDef.layoutNodeId != null)
+            .map(fieldDef => [String(fieldDef.layoutNodeId), fieldDef])
+    );
+    const fieldDefById = new Map(
+        (schemaData.fieldDefs || [])
+            .filter(fieldDef => fieldDef.id != null)
+            .map(fieldDef => [String(fieldDef.id), fieldDef])
+    );
+
+    traverseComponents(rootComponent, component => {
+        const fieldComponent = Array.isArray(component.components) ? component.components[0] : null;
+        const fieldDef = fieldDefByLayoutNodeId.get(String(component.id))
+            || (fieldComponent?.fieldDefId != null ? fieldDefById.get(String(fieldComponent.fieldDefId)) : null);
+
+        if (fieldDef) {
+            component.fieldPath = fieldDef.fieldPath || component.fieldPath;
+            component.dataType = normalizeFieldDataType(fieldDef.dataType) || component.dataType;
+        }
+
+        if (!fieldComponent) {
+            return;
+        }
+
+        if (fieldComponent.labelName) {
+            component.name = fieldComponent.labelName;
+        }
+        if (fieldComponent.placeholder) {
+            component.placeholder = fieldComponent.placeholder;
+        }
+        if (fieldComponent.requiredRule) {
+            component.required = true;
+            component.requiredRule = fieldComponent.requiredRule;
+        }
+        if (fieldComponent.readonlyRule) {
+            component.readonly = true;
+            component.readonlyRule = fieldComponent.readonlyRule;
+        }
+        if (fieldComponent.visibleRule) {
+            component.visibleRule = fieldComponent.visibleRule;
+        }
+        if (fieldComponent.dataProviderId != null) {
+            component.dataProviderId = fieldComponent.dataProviderId;
+        }
+
+        const componentProps = parseJsonObject(fieldComponent.componentProps);
+        if (componentProps) {
+            Object.assign(component, componentProps);
+        }
+    });
+}
+
+function extractFieldComponentProps(component) {
+    const excludedKeys = new Set([
+        'id', 'type', 'name', 'code', 'description', 'children', 'tabs', 'panels',
+        'width', 'height', 'span', 'offset', 'gutter', 'gridColumn', 'gridRow',
+        'fieldPath', 'dataType', 'placeholder', 'required', 'readonly',
+        'requiredRule', 'readonlyRule', 'visibleRule', 'dataProviderId', 'components', 'actions', 'parentId'
+    ]);
+
+    return Object.fromEntries(
+        Object.entries(component)
+            .filter(([key, value]) => !excludedKeys.has(key) && value !== undefined && value !== null && value !== '')
+    );
+}
+
+function normalizeRequiredRule(required) {
+    return required ? '{"required":true}' : null;
+}
+
+function normalizeReadonlyRule(readonly) {
+    return readonly ? '{"readonly":true}' : null;
+}
+
+function normalizeVisibleRule(visibleRule) {
+    return visibleRule || null;
+}
+
+function normalizeRequiredDefault(required) {
+    return required ? 1 : 0;
+}
+
+function normalizeFieldSortNo(component, fallbackSortNo) {
+    return component.sortNo != null ? component.sortNo : fallbackSortNo;
+}
+
+function normalizeFieldLabel(component) {
+    return component.name || component.code || component.type;
+}
+
+function normalizeFieldPlaceholder(component) {
+    return component.placeholder || null;
+}
+
+function normalizeFieldDataTypeForSave(component) {
+    return component.dataType || 'string';
+}
+
+function normalizeFieldComponentTypeForSave(component) {
+    return component.type;
+}
+
+function normalizeTemplateConfig(config) {
+    if (!config || !config.rootComponent) {
+        return;
+    }
+
+    const usedFieldPaths = new Set();
+    traverseComponents(config.rootComponent, component => {
+        if (component.fieldPath && String(component.fieldPath).trim()) {
+            usedFieldPaths.add(String(component.fieldPath).trim());
+        }
+    });
+
+    traverseComponents(config.rootComponent, component => {
+        if (!component.type) {
+            return;
+        }
+        if (!component.code || !String(component.code).trim()) {
+            component.code = ComponentLibrary.createComponentCode(component.type, component.id);
+        }
+        if (!ComponentLibrary.requiresFieldPath(component.type)) {
+            return;
+        }
+        if (!component.fieldPath || !String(component.fieldPath).trim()) {
+            component.fieldPath = createUniqueGeneratedFieldPath(
+                ComponentLibrary.createFieldPath(component.code),
+                usedFieldPaths
+            );
+        } else {
+            component.fieldPath = String(component.fieldPath).trim();
+        }
+        if (!component.dataType) {
+            component.dataType = ComponentLibrary.getComponentDef(component.type)?.defaultConfig?.dataType || 'string';
+        }
+    });
 }
 
 /**
@@ -136,9 +352,7 @@ function extractFieldDefs(config) {
     const fieldDefs = [];
     const processedPaths = new Set();
 
-    function collectFields(component) {
-        if (!component) return;
-
+    traverseComponents(config.rootComponent, component => {
         if (component.fieldPath && !processedPaths.has(component.fieldPath)) {
             processedPaths.add(component.fieldPath);
             fieldDefs.push({
@@ -146,17 +360,15 @@ function extractFieldDefs(config) {
                 layoutNodeId: component.id,
                 fieldCode: component.code,
                 fieldPath: component.fieldPath,
-                fieldNameCn: component.name,
-                dataType: component.dataType || 'string'
+                fieldNameCn: normalizeFieldLabel(component),
+                dataType: normalizeFieldDataTypeForSave(component),
+                placeholder: normalizeFieldPlaceholder(component),
+                requiredDefault: normalizeRequiredDefault(component.required),
+                sortNo: normalizeFieldSortNo(component, fieldDefs.length)
             });
         }
+    });
 
-        if (component.children) {
-            component.children.forEach(collectFields);
-        }
-    }
-
-    collectFields(config.rootComponent);
     return fieldDefs;
 }
 
@@ -166,29 +378,25 @@ function extractFieldDefs(config) {
 function extractFieldComponents(config) {
     const components = [];
 
-    function collectComponents(component) {
-        if (!component) return;
-
+    traverseComponents(config.rootComponent, component => {
         if (component.fieldPath) {
             components.push({
                 id: component.id + '_comp',
                 fieldDefId: component.id + '_field',
                 layoutNodeId: component.id,
-                componentType: component.type,
-                propsJson: JSON.stringify({
-                    placeholder: component.placeholder,
-                    required: component.required,
-                    readonly: component.readonly
-                })
+                componentType: normalizeFieldComponentTypeForSave(component),
+                labelName: normalizeFieldLabel(component),
+                placeholder: normalizeFieldPlaceholder(component),
+                requiredRule: normalizeRequiredRule(component.required),
+                readonlyRule: normalizeReadonlyRule(component.readonly),
+                visibleRule: normalizeVisibleRule(component.visibleRule),
+                componentProps: JSON.stringify(extractFieldComponentProps(component)),
+                dataProviderId: component.dataProviderId ? Number(component.dataProviderId) : null,
+                sortNo: normalizeFieldSortNo(component, components.length)
             });
         }
+    });
 
-        if (component.children) {
-            component.children.forEach(collectComponents);
-        }
-    }
-
-    collectComponents(config.rootComponent);
     return components;
 }
 
@@ -219,18 +427,23 @@ async function loadConfig(templateId, versionId) {
             DesignerState.templateId = templateId;
             DesignerState.versionId = versionId;
 
-            // 从后端数据重建组件树
+            const schemaData = result.data || result;
+            const rootComponent = buildComponentTree(schemaData);
+            applySchemaFieldBindings(rootComponent, schemaData);
+
             DesignerState.templateConfig = {
-                rootComponent: buildComponentTree(result.data || result),
-                fieldDefs: result.data?.fieldDefs || [],
-                queryConfigs: result.data?.queryConfigs || [],
-                actionConfigs: result.data?.actionConfigs || []
+                rootComponent: rootComponent,
+                fieldDefs: schemaData.fieldDefs || [],
+                fieldComponents: schemaData.fieldComponents || [],
+                queryConfigs: schemaData.queryConfigs || [],
+                actionConfigs: schemaData.actionConfigs || [],
+                rules: schemaData.rules || [],
+                dataProviders: schemaData.dataProviders || []
             };
+            normalizeTemplateConfig(DesignerState.templateConfig);
 
-            // 更新模板名称显示
-            document.getElementById('templateName').textContent = result.data?.templateName || '已加载模板';
+            document.getElementById('templateName').textContent = schemaData.templateName || '已加载模板';
 
-            // 渲染预览
             renderPreview();
             saveState();
 
@@ -265,6 +478,10 @@ function buildComponentTree(schemaData) {
             name: node.nodeName,
             code: node.nodeCode,
             parentId: node.parentId,
+            visibleRule: node.visibleRule,
+            readonlyRule: node.readonlyRule,
+            components: node.components || [],
+            actions: node.actions || [],
             ...props,
             children: (node.children || []).map(c => convertNode(c))
         };
@@ -407,14 +624,14 @@ function importConfig() {
             const text = await file.text();
             const config = JSON.parse(text);
 
-            // 验证配置
+            normalizeTemplateConfig(config);
+
             const validation = validateConfig(config);
             if (!validation.valid) {
                 showNotification(validation.message, 'error');
                 return;
             }
 
-            // 加载配置
             DesignerState.templateConfig = config;
             renderPreview();
             saveState();
@@ -436,6 +653,8 @@ function validateConfig(config) {
     if (!config) {
         return { valid: false, message: '配置不能为空' };
     }
+
+    normalizeTemplateConfig(config);
 
     // 验证根组件
     if (config.rootComponent) {
@@ -613,7 +832,13 @@ function restoreState() {
         const stateStr = localStorage.getItem('designer_state');
         if (stateStr) {
             const state = JSON.parse(stateStr);
-            DesignerState.templateConfig = state.templateConfig || { rootComponent: null };
+            const restoredConfig = state.templateConfig || { rootComponent: null };
+            DesignerState.templateConfig = {
+                ...restoredConfig,
+                rules: restoredConfig.rules || [],
+                dataProviders: restoredConfig.dataProviders || []
+            };
+            normalizeTemplateConfig(DesignerState.templateConfig);
             // Only restore templateId from localStorage if not already set from URL params
             if (!DesignerState.templateId && state.templateId) {
                 DesignerState.templateId = state.templateId;

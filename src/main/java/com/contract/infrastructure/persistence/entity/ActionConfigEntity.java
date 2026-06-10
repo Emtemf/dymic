@@ -2,7 +2,7 @@ package com.contract.infrastructure.persistence.entity;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 /**
  * 动作配置实体
@@ -25,7 +25,7 @@ public class ActionConfigEntity {
     private String afterRule;
     private String propsJson;
     private Integer sortNo;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
     private Integer isDeleted;
 }

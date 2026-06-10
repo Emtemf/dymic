@@ -13,26 +13,24 @@
         <result column="schema_hash" property="schemaHash"/>
         <result column="remark" property="remark"/>
         <result column="created_by" property="createdBy"/>
-        <result column="created_name" property="createdName"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_by" property="updatedBy"/>
-        <result column="updated_name" property="updatedName"/>
         <result column="updated_at" property="updatedAt"/>
         <result column="is_deleted" property="isDeleted"/>
     </resultMap>
 
     <sql id="BaseColumns">
         id, template_id, version_no, version_name, version_status, publish_time, publish_by,
-        schema_hash, remark, created_by, created_name, created_at, updated_by, updated_name, updated_at, is_deleted
+        schema_hash, remark, created_by, created_at, updated_by, updated_at, is_deleted
     </sql>
 
     <insert id="insertTemplateVersion" parameterType="com.contract.infrastructure.persistence.entity.TemplateVersionEntity">
         INSERT INTO t_ui_template_version (
             id, template_id, version_no, version_name, version_status, publish_time, publish_by,
-            schema_hash, remark, created_by, created_name, created_at, updated_by, updated_name, updated_at, is_deleted
+            schema_hash, remark, created_by, created_at, updated_by, updated_at, is_deleted
         ) VALUES (
             #{id}, #{templateId}, #{versionNo}, #{versionName}, #{versionStatus}, #{publishTime}, #{publishBy},
-            #{schemaHash}, #{remark}, #{createdBy}, #{createdName}, #{createdAt}, #{updatedBy}, #{updatedName}, #{updatedAt}, COALESCE(#{isDeleted}, 0)
+            #{schemaHash}, #{remark}, #{createdBy}, #{createdAt}, #{updatedBy}, #{updatedAt}, COALESCE(#{isDeleted}, 0)
         )
     </insert>
 
@@ -74,10 +72,8 @@
             schema_hash = #{schemaHash},
             remark = #{remark},
             created_by = #{createdBy},
-            created_name = #{createdName},
             created_at = #{createdAt},
             updated_by = #{updatedBy},
-            updated_name = #{updatedName},
             updated_at = #{updatedAt},
             is_deleted = COALESCE(#{isDeleted}, is_deleted)
         WHERE id = #{id} AND is_deleted = 0

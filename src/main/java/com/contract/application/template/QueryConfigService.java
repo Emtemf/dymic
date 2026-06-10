@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Slf4j
@@ -41,8 +42,8 @@ public class QueryConfigService {
             config.setQueryCode("query_" + System.currentTimeMillis());
         }
 
-        config.setCreatedAt(LocalDateTime.now());
-        config.setUpdatedAt(LocalDateTime.now());
+        config.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+        config.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
         QueryConfig saved = repository.save(config);
 
@@ -51,8 +52,8 @@ public class QueryConfigService {
             for (QueryParamDTO paramDTO : request.getParams()) {
                 QueryParam param = paramConverter.toDomain(paramDTO);
                 param.setQueryConfigId(saved.getId());
-                param.setCreatedAt(LocalDateTime.now());
-                param.setUpdatedAt(LocalDateTime.now());
+                param.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+                param.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
                 paramRepository.save(param);
             }
         }
@@ -62,8 +63,8 @@ public class QueryConfigService {
             for (QueryFillRuleDTO ruleDTO : request.getFillRules()) {
                 QueryFillRule rule = fillRuleConverter.toDomain(ruleDTO);
                 rule.setQueryConfigId(saved.getId());
-                rule.setCreatedAt(LocalDateTime.now());
-                rule.setUpdatedAt(LocalDateTime.now());
+                rule.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+                rule.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
                 fillRuleRepository.save(rule);
             }
         }
@@ -105,7 +106,7 @@ public class QueryConfigService {
         }
 
         converter.updateFromDTO(request, config);
-        config.setUpdatedAt(LocalDateTime.now());
+        config.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
         repository.update(config);
 
         // 更新查询参数（先删除后新增）
@@ -114,8 +115,8 @@ public class QueryConfigService {
             for (QueryParamDTO paramDTO : request.getParams()) {
                 QueryParam param = paramConverter.toDomain(paramDTO);
                 param.setQueryConfigId(id);
-                param.setCreatedAt(LocalDateTime.now());
-                param.setUpdatedAt(LocalDateTime.now());
+                param.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+                param.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
                 paramRepository.save(param);
             }
         }
@@ -126,8 +127,8 @@ public class QueryConfigService {
             for (QueryFillRuleDTO ruleDTO : request.getFillRules()) {
                 QueryFillRule rule = fillRuleConverter.toDomain(ruleDTO);
                 rule.setQueryConfigId(id);
-                rule.setCreatedAt(LocalDateTime.now());
-                rule.setUpdatedAt(LocalDateTime.now());
+                rule.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+                rule.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
                 fillRuleRepository.save(rule);
             }
         }
