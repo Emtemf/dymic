@@ -69,7 +69,11 @@ public class FieldDefService {
             fieldDef.setDataType("TEXT");
         }
         fieldDef.setFieldNameCn(dto.getFieldNameCn());
+        fieldDef.setValueType("SINGLE");
         fieldDef.setRequiredDefault(dto.getRequired() != null && dto.getRequired() ? 1 : 0);
+        fieldDef.setSearchable(0);
+        fieldDef.setIndexable(0);
+        fieldDef.setIsDeleted(0);
 
         fieldDef.setCreatedAt(LocalDateTime.now());
         fieldDef.setUpdatedAt(LocalDateTime.now());
