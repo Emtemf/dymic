@@ -21,9 +21,60 @@
 - 用途：验证后端API功能是否正确
 - 不交付：不作为业务人员的配置工具
 
+
+## 默认运行约定（当前）
+
+### 默认数据库
+- 默认运行数据库：**openGauss**
+- 单元测试数据库：**H2**
+- `application.yml`：默认连接 openGauss
+- `application-test.yml`：仅测试使用 H2
+
+### openGauss Docker 启动方式
+当前项目使用自己的 Docker 容器启动高斯。
+
+```bash
+bash scripts/start-opengauss.sh
+bash scripts/init-opengauss.sh
+mvn spring-boot:run
+```
+
+当前约定：
+- 容器名：`opengauss-contract`
+- 镜像：`enmotech/opengauss:5.0.0`
+- 数据目录：`/home/wula/.local/opengauss-data`
+- 端口：`5432`
+- 用户：`gaussdb`
+- 密码：`OpenGauss@123`
+- 默认应用端口：`8888`
+
+默认 JDBC：
+```text
+jdbc:postgresql://localhost:5432/contract_template?options=-c%20TimeZone=UTC
+```
+
+### 前端界面与真实入口
+当前前端界面：
+- 首页：`/index.html`
+- 设计器：`/config/template-designer.html`
+- 数据源配置：`/config/data-source.html`
+- 动态展示：`/display/dynamic-display.html`
+- 简单验证界面：`/simple.html`
+- 复杂验证界面：`/complex.html`
+
+真实验证路径必须从首页开始：
+1. 打开 `/index.html`
+2. 创建模板
+3. 创建版本
+4. 发布版本
+5. 进入设计器或展示页继续验证
+
+说明：
+- `template-designer.html` 不是完整业务主入口
+- 可视化设计器仅用于开发验证，不是业务交付界面
+
 ---
 
-## V1.0 边界（要做/不做）
 
 ### ✅ V1.0 必须包含
 

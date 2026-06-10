@@ -41,13 +41,21 @@ http://localhost:8888/api
 
 ---
 
-## 本地启动
+## 快速启动（默认高斯）
 
-### 1. 启动 openGauss
+### 1. 启动 openGauss Docker
 
 ```bash
 bash scripts/start-opengauss.sh
 ```
+
+当前脚本使用：
+- 容器名：`opengauss-contract`
+- 镜像：`enmotech/opengauss:5.0.0`
+- 数据目录：`/home/wula/.local/opengauss-data`
+- 端口：`5432`
+- 用户：`gaussdb`
+- 密码：`OpenGauss@123`
 
 ### 2. 初始化数据库
 
@@ -55,16 +63,22 @@ bash scripts/start-opengauss.sh
 bash scripts/init-opengauss.sh
 ```
 
+初始化会执行：
+- `src/main/resources/schema-opengauss.sql`
+- `src/main/resources/data-opengauss.sql`
+
 ### 3. 启动应用
 
 ```bash
 mvn spring-boot:run
 ```
 
-启动成功后访问：
+### 4. 打开界面
 
-- 首页：`http://localhost:8888/index.html`
+- 首页（真实入口）：`http://localhost:8888/index.html`
 - 设计器：`http://localhost:8888/config/template-designer.html`
+- 数据源配置：`http://localhost:8888/config/data-source.html`
+- 动态展示：`http://localhost:8888/display/dynamic-display.html`
 
 ---
 
@@ -101,27 +115,48 @@ jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
 
 - 数据库连接已显式指定 `TimeZone=UTC`
 - openGauss 持久化实体使用 `OffsetDateTime`
-- 业务写入时间统一按 UTC 生成
-- 接口返回中当前已可看到 `...Z` 结尾的 UTC 时间字符串
+- 服务端时间写入统一按 UTC 生成
+- 接口返回中已可看到 `...Z` 结尾的 UTC 时间字符串
 
 ---
 
-## 与需求文档一致的验证路径
+## 前端界面与连接方式
+
+### 真实入口顺序
 
 根据 `req/req.md` 与 `CLAUDE.md`，最小闭环应按下面顺序验证：
 
-1. 创建模板
-2. 创建版本
-3. 发布版本
-4. 进入设计器配置
-5. 保存 schema
+1. 首页创建模板
+2. 首页创建版本
+3. 首页发布版本
+4. 进入设计器配置 schema
+5. 保存配置
 6. 新增 / 编辑合同
 7. 回显合同数据
 
 说明：
 - `template-designer.html` 不是独立业务主入口
 - 应优先从 `index.html` 开始
-- 可视化设计器用于开发验证，不是业务交付界面
+- 可视化设计器仅用于开发验证，不是业务交付界面
+
+### 当前界面列表
+
+- `/index.html`：模板与版本主入口
+- `/config/template-designer.html`：设计器验证页
+- `/config/data-source.html`：数据源配置页
+- `/display/dynamic-display.html`：动态展示验证页
+- `/simple.html`：简单验证界面
+- `/complex.html`：复杂验证界面
+
+### 前端如何连接后端
+
+默认通过同源 API 访问：
+
+```text
+http://localhost:8888/api
+```
+
+首页和设计器都已经按当前实例端口工作，不再依赖旧的 8080 / 8888 探测混乱逻辑。
 
 ---
 
@@ -173,7 +208,18 @@ curl http://localhost:8888/api/templates/1001/versions
 ## 注意事项
 
 - `.omc/`、`.claude/worktrees/`、`.idea/` 不属于交付物
-- 若重启电脑后接口报数据库连接错误，优先确认 openGauss 容器是否启动
+- 若重启电脑后接口报数据库连接错误，优先确认 openGauss 容器是否启动：
+
+```bash
+docker ps | grep opengauss-contract
+```
+
+- 若容器未运行，重新执行：
+
+```bash
+bash scripts/start-opengauss.sh
+```
+
 - 若再次执行初始化脚本，注意测试数据脚本中的脏数据或重复数据问题
 - 设计器与首页静态资源已做缓存规避版本号，但浏览器强缓存时仍建议刷新页面
 
