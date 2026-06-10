@@ -184,7 +184,7 @@
               type="text"
               id="apiBaseUrl"
               class="form-input"
-              value="http://localhost:8080/api"
+              value="http://localhost:8888/api"
             >
           </div>
           <div class="form-group">
@@ -209,8 +209,8 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/api.js"></script>
-  <script src="js/contract-api.js"></script>
+  <script src="js/api.js?v=20260610-2"></script>
+  <script src="js/contract-api.js?v=20260610-2"></script>
   <script>
     // State Management
     let templateData = null;
@@ -265,7 +265,7 @@
       html += '<label class="form-label">版本状态</label>';
       if (versionData) {
         html += `<span class="badge badge-success">已创建</span>`;
-        html += `<p style="margin-top: 8px; font-size: 14px;">版本: ${versionData.versionNumber}</p>`;
+        html += `<p style="margin-top: 8px; font-size: 14px;">版本: ${versionData.versionNo}</p>`;
       } else if (templateData) {
         html += `<span class="badge badge-warning">未创建</span>`;
       } else {
@@ -275,9 +275,9 @@
 
       html += '<div class="form-group">';
       html += '<label class="form-label">发布状态</label>';
-      if (versionData && versionData.status === 'PUBLISHED') {
+      if (versionData && versionData.versionStatus === 'PUBLISHED') {
         html += `<span class="badge badge-success">已发布</span>`;
-        html += `<p style="margin-top: 8px; font-size: 14px;">可以创建合同</p>`;
+        html += `<p style="margin-top: 8px; font-size: 14px;">可以进入设计器</p>`;
       } else if (versionData) {
         html += `<span class="badge badge-warning">未发布</span>`;
       } else {
@@ -286,11 +286,39 @@
       html += '</div>';
 
       html += '</div>';
-
       statusContent.innerHTML = html;
     }
 
-    // Event Handlers
+    async function syncExistingState() {
+      try {
+        const listResult = await ContractAPI.template.list();
+        if (!listResult.success) {
+          return;
+        }
+
+        const templates = listResult.data?.data || listResult.data || [];
+        if (!Array.isArray(templates) || templates.length === 0) {
+          return;
+        }
+
+        templateData = templates[templates.length - 1];
+        createVersionBtn.disabled = false;
+
+        const versionResult = await ContractAPI.version.list(templateData.id);
+        if (versionResult.success) {
+          const versions = versionResult.data?.data || versionResult.data || [];
+          if (Array.isArray(versions) && versions.length > 0) {
+            versionData = versions[0];
+            publishVersionBtn.disabled = false;
+          }
+        }
+
+        updateStatus();
+      } catch (error) {
+        console.error('同步模板状态失败:', error);
+      }
+    }
+
     testApiBtn.addEventListener('click', async () => {
       showLoading();
       try {
@@ -325,10 +353,10 @@
     createTemplateBtn.addEventListener('click', async () => {
       const templateCode = document.getElementById('templateCode').value.trim();
       const templateName = document.getElementById('templateName').value.trim();
-      const templateType = document.getElementById('templateType').value;
-      const description = document.getElementById('description').value.trim();
+      const bizType = document.getElementById('templateType').value;
+      const templateDesc = document.getElementById('description').value.trim();
 
-      if (!templateCode || !templateName || !templateType) {
+      if (!templateCode || !templateName || !bizType) {
         showAlert('请填写所有必填字段', 'warning');
         return;
       }
@@ -340,55 +368,15 @@
         const data = {
           templateCode,
           templateName,
-          templateType,
-          description,
-          schema: {
-            type: 'object',
-            properties: {
-              contractNumber: {
-                type: 'string',
-                title: '合同编号',
-                required: true
-              },
-              contractName: {
-                type: 'string',
-                title: '合同名称',
-                required: true
-              },
-              contractType: {
-                type: 'string',
-                title: '合同类型',
-                enum: ['采购合同', '销售合同', '服务合同'],
-                required: true
-              },
-              supplier: {
-                type: 'object',
-                title: '供应商',
-                properties: {
-                  id: { type: 'string' },
-                  name: { type: 'string', title: '供应商名称' }
-                }
-              },
-              currency: {
-                type: 'string',
-                title: '币种',
-                enum: ['CNY', 'USD', 'EUR'],
-                default: 'CNY'
-              },
-              amount: {
-                type: 'number',
-                title: '合同金额',
-                minimum: 0
-              }
-            }
-          }
+          templateDesc,
+          bizType
         };
 
         const result = await ContractAPI.template.create(data);
         hideLoading();
 
         if (result.success) {
-          templateData = result.data;
+          templateData = result.data.data || result.data;
           createVersionBtn.disabled = false;
           showAlert('模板创建成功！', 'success');
           updateStatus();
@@ -411,22 +399,33 @@
 
       try {
         const data = {
-          versionNumber: '1.0',
-          description: '初始版本',
-          schema: templateData.schema
+          versionNo: 1,
+          versionName: 'V1.0'
         };
 
         const result = await ContractAPI.version.create(
-          templateData.id,
+          String(templateData.id),
           data
         );
+
         hideLoading();
 
         if (result.success) {
-          versionData = result.data;
+          versionData = result.data.data || result.data;
           publishVersionBtn.disabled = false;
           showAlert('版本创建成功！', 'success');
           updateStatus();
+        } else if ((result.error || '').includes('版本号已存在')) {
+          const versionListResult = await ContractAPI.version.list(String(templateData.id));
+          const versions = versionListResult.data?.data || versionListResult.data || [];
+          if (Array.isArray(versions) && versions.length > 0) {
+            versionData = versions[0];
+            publishVersionBtn.disabled = false;
+            showAlert('检测到已存在草稿版本，已自动加载。', 'success');
+            updateStatus();
+          } else {
+            showAlert(`版本创建失败: ${result.error}`, 'error');
+          }
         } else {
           showAlert(`版本创建失败: ${result.error}`, 'error');
         }
@@ -442,30 +441,40 @@
         return;
       }
 
+      publishVersionBtn.disabled = true;
       showLoading();
 
       try {
         const result = await ContractAPI.version.publish(
-          templateData.id,
-          versionData.id
+          String(versionData.id)
         );
         hideLoading();
 
         if (result.success) {
-          versionData.status = 'PUBLISHED';
+          versionData.versionStatus = 'PUBLISHED';
+          publishVersionBtn.disabled = true;
           showAlert('版本发布成功！现在可以创建合同了。', 'success');
           updateStatus();
         } else {
+          publishVersionBtn.disabled = false;
           showAlert(`版本发布失败: ${result.error}`, 'error');
         }
       } catch (error) {
         hideLoading();
+        publishVersionBtn.disabled = false;
         showAlert(`发布错误: ${error.message}`, 'error');
       }
     });
 
     // Initialize
-    updateStatus();
+    (async () => {
+      const port = await API.initialize();
+      apiBaseUrlInput.value = API.baseUrl;
+      apiStatus.textContent = `API 状态: 已连接 (${port})`;
+      apiStatus.style.color = 'var(--success-color)';
+      await syncExistingState();
+      updateStatus();
+    })();
   </script>
 </body>
 </html>

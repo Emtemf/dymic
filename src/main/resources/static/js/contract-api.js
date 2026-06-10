@@ -72,9 +72,8 @@ const ContractAPI = {
      * Creates a new version for a template
      * @param {string} templateId - Template ID
      * @param {Object} data - Version data
-     * @param {string} data.versionNumber - Version number (e.g., "1.0")
-     * @param {Object} data.schema - JSON schema for this version
-     * @param {string} data.description - Version description
+     * @param {number} data.versionNo - Version number (e.g., 1)
+     * @param {string} data.versionName - Version display name
      * @returns {Promise<Object>} Created version data
      */
     async create(templateId, data) {
@@ -102,13 +101,12 @@ const ContractAPI = {
 
     /**
      * Publishes a version
-     * @param {string} templateId - Template ID
      * @param {string} versionId - Version ID
      * @returns {Promise<Object>} Publication result
      */
-    async publish(templateId, versionId) {
+    async publish(versionId) {
       return await API.post(
-        `/templates/${templateId}/versions/${versionId}/publish`
+        `/templates/versions/${versionId}/publish`
       );
     },
 
