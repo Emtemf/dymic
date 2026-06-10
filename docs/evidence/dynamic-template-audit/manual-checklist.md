@@ -2,14 +2,19 @@
 
 ## How to use this checklist
 1. Start the app on the target port
-2. Confirm there is at least one template and one version available before entering the designer
-3. Open the pages listed below in order
-4. Compare actual pages against the saved screenshots in `docs/evidence/dynamic-template-audit/screenshots/`
-5. Mark any mismatch immediately
-6. If preview, save/reopen, nested display, or configured properties diverge, treat it as a defect and fix before accepting the build
+2. Open `/index.html`
+3. Confirm you can complete the precondition chain: 创建模板 → 创建版本 → 发布版本
+4. Enter the designer only after the template/version chain is complete
+5. Compare actual pages against the saved screenshots in `docs/evidence/dynamic-template-audit/screenshots/`
+6. Mark any mismatch immediately
+7. If preview, save/reopen, nested display, or configured properties diverge, treat it as a defect and fix before accepting the build
 
 ## Required preconditions
-- The template list in `/config/template-designer.html` is not empty
+- `/index.html` is reachable
+- Template creation works
+- Version creation works
+- Version publish works
+- `/config/template-designer.html` can load a non-empty template list
 - The selected template has at least one version
 - The designer panel is reachable after choosing template and version
 

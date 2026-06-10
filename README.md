@@ -30,16 +30,15 @@ mvn spring-boot:run
 mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8890
 ```
 
-## 关键入口
+## 真实用户入口
 
-- 模板设计器入口页：`/config/template-designer.html`
+- 主入口页：`/index.html`
+- 设计器页：`/config/template-designer.html`
 - 数据源管理页：`/config/data-source.html`
 - 统一数据源查询：`/api/v2/ui/data-sources/query`
 - 统一数据源执行：`/api/v2/ui/data-sources/{id}/execute`
 
-> 注意：`/config/template-designer.html` 不是直接可拖拽配置的页面。它会先展示模板/版本选择面板，只有在**已有模板且已有版本**的前提下，选中模板和版本后才会进入真正的设计器操作区。
-
-## 验证方式
+> 注意：`/config/template-designer.html` 不是完整业务入口。真实用户路径应先从 `/index.html` 开始，依次完成“创建模板 → 创建版本 → 发布版本”，然后再进入设计器页面选择模板和版本，最后才进入可拖拽、可配置、可预览的设计器操作区。
 
 ### 1. 自动化测试
 
