@@ -63,15 +63,20 @@ const API = {
    * @param {Object} data - Request body data
    * @returns {Promise<Object>} Response data
    */
-  async post(url, data = {}) {
+  async post(url, data = undefined) {
     const fullUrl = `${this.baseUrl}${url}`;
 
     try {
-      const response = await fetch(fullUrl, {
+      const requestInit = {
         method: 'POST',
-        headers: this.defaultHeaders,
-        body: JSON.stringify(data)
-      });
+        headers: this.defaultHeaders
+      };
+
+      if (data !== undefined && data !== null) {
+        requestInit.body = JSON.stringify(data);
+      }
+
+      const response = await fetch(fullUrl, requestInit);
 
       return await this.handleResponse(response);
     } catch (error) {

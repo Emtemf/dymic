@@ -29,7 +29,7 @@ const TemplateSelector = {
             const resp = await fetch('/api/templates');
             const result = await resp.json();
             if (result.success) {
-                this.state.templates = result.data || [];
+                this.state.templates = result.data?.data || result.data || [];
                 this.render();
             }
         } catch (e) {
@@ -42,7 +42,7 @@ const TemplateSelector = {
             const resp = await fetch('/api/templates/' + templateId + '/versions');
             const result = await resp.json();
             if (result.success) {
-                this.state.versions = result.data || [];
+                this.state.versions = result.data?.data || result.data || [];
                 this.render();
             }
         } catch (e) {
