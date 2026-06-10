@@ -32,10 +32,12 @@ mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8890
 
 ## 关键入口
 
-- 设计器页面：`/config/template-designer.html`
+- 模板设计器入口页：`/config/template-designer.html`
 - 数据源管理页：`/config/data-source.html`
 - 统一数据源查询：`/api/v2/ui/data-sources/query`
 - 统一数据源执行：`/api/v2/ui/data-sources/{id}/execute`
+
+> 注意：`/config/template-designer.html` 不是直接可拖拽配置的页面。它会先展示模板/版本选择面板，只有在**已有模板且已有版本**的前提下，选中模板和版本后才会进入真正的设计器操作区。
 
 ## 验证方式
 
@@ -97,4 +99,5 @@ E2E 覆盖基线文档在：
 
 - 浏览器截图只能作为**修复后的通过证据**，不能替代修复
 - 如果配置、保存回显、嵌套展示、预览结果不一致，必须先修复再补截图
+- 如果模板列表为空或没有版本，设计器主链路 E2E 不能算完成；必须先补齐“模板 → 版本 → 设计器”这段前置链路
 - 工作区中的 `.omc/`、`.claude/worktrees/` 等内容不属于交付物

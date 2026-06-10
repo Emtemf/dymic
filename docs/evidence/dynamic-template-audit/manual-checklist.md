@@ -2,10 +2,16 @@
 
 ## How to use this checklist
 1. Start the app on the target port
-2. Open the pages listed below in order
-3. Compare actual pages against the saved screenshots in `docs/evidence/dynamic-template-audit/screenshots/`
-4. Mark any mismatch immediately
-5. If preview, save/reopen, nested display, or configured properties diverge, treat it as a defect and fix before accepting the build
+2. Confirm there is at least one template and one version available before entering the designer
+3. Open the pages listed below in order
+4. Compare actual pages against the saved screenshots in `docs/evidence/dynamic-template-audit/screenshots/`
+5. Mark any mismatch immediately
+6. If preview, save/reopen, nested display, or configured properties diverge, treat it as a defect and fix before accepting the build
+
+## Required preconditions
+- The template list in `/config/template-designer.html` is not empty
+- The selected template has at least one version
+- The designer panel is reachable after choosing template and version
 
 ## Required scenarios
 - Template CRUD
